@@ -1,0 +1,21 @@
+digraph "callgraph" {
+subgraph "cluster0" { label="bit-rustc-sim";
+  F56469e649e40 [label="std::sys_common::backtrace::__...\n2 459 750 809"];
+  F56469e742e00 [label="bit_rustc_sim::main\n2 459 750 809"];
+  F56469e7f00f0 [label="core::ops::function::FnOnce::c...\n2 459 750 809"];
+  F56469ec97390 [label="bit_rustc_sim::initialization:...\n240 285 547"];
+  F56469ec996e0 [label="nalgebra::geometry::rotation_s...\n237 462 200"];
+  F56469ecec5b0 [label="bit_one_step\n2 119 729 517"];
+  F56469ecec9d0 [label="bit_one_step_anonFcn1\n2 116 844 317"];
+  F56469ecef220 [label="mldivide\n339 306 400"];
+  F56469f0f1910 [label="nalgebra::geometry::rotation_s...\n236 910 400"];
+}
+  F56469e649e40 -> F56469e7f00f0 [weight=3,label="2 459 750 809 (1x)"];
+  F56469e742e00 -> F56469ec97390 [weight=2,label="240 285 547 (100x)"];
+  F56469e742e00 -> F56469ecec5b0 [weight=3,label="2 119 729 517 (100x)"];
+  F56469e7f00f0 -> F56469e742e00 [weight=3,label="2 459 750 809 (1x)"];
+  F56469ec97390 -> F56469ec996e0 [weight=2,label="237 462 200 (100x)"];
+  F56469ec996e0 -> F56469f0f1910 [weight=2,label="236 910 400 (100x)"];
+  F56469ecec5b0 -> F56469ecec9d0 [weight=3,label="2 116 844 317 (4 000x)"];
+  F56469ecec9d0 -> F56469ecef220 [weight=2,label="339 306 400 (27 200x)"];
+}

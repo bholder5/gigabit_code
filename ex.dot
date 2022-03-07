@@ -1,0 +1,25 @@
+digraph {
+	graph [bb="0,0,267.93,324"];
+	node [label="\N"];
+	bit_one_step	[height=0.5,
+		pos="199.04,306",
+		width=1.9137];
+	update_state	[height=0.5,
+		pos="150.04,234",
+		width=1.9679];
+	bit_one_step -> update_state	[pos="e,161.79,251.79 187.18,288.05 181.34,279.71 174.18,269.49 167.72,260.25"];
+	get_omega_meas	[height=0.5,
+		pos="128.04,162",
+		width=2.4914];
+	update_state -> get_omega_meas	[pos="e,133.42,180.1 144.6,215.7 142.15,207.9 139.2,198.51 136.47,189.83"];
+	get_orientation_vector	[height=0.5,
+		pos="115.04,90",
+		width=3.1955];
+	get_omega_meas -> get_orientation_vector	[pos="e,118.22,108.1 124.83,143.7 123.39,135.98 121.67,126.71 120.07,118.11"];
+	get_rw_speed	[height=0.5,
+		pos="186.04,18",
+		width=2.0582];
+	get_orientation_vector -> get_rw_speed	[pos="e,169.01,35.789 132.23,72.055 141.12,63.285 152.13,52.432 161.87,42.831"];
+	get_rw_speed -> bit_one_step	[pos="e,211.56,288.29 209.41,35.306 220.64,44.608 232.96,57.333 239.04,72 269.69,146 253.39,175.38 230.04,252 227.12,261.58 222.16,271.28 \
+217.06,279.7"];
+}
