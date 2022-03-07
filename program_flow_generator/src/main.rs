@@ -68,7 +68,7 @@ fn main() {
 
     // nodes.insert("main", Vec::<String>::new());
     // println!("{:?}", nodes);
-
+    let mut nodes: Vec<Vec<&String>> = Vec::new();
     let mut last_func: &String = &"".to_string();
     let mut last_verb: &String = &"".to_string();
     let mut verb = &"".to_string();
@@ -83,38 +83,57 @@ fn main() {
     let mut cluster_flag2 = false;
     let mut cluster_entry_func = &"".to_string();
     let mut child_parent = Vec::new();
+    let mut node_id = String::new();
 
 
     // connections.push(["".to_string(), "".to_string()]);
     // println!("len {}, inside len {}", connections.len(), connections[0].len());
+    fn check_node(fnc: &String, last_func: &String, nodes: &mut Vec<Vec<&String>>, node_id: &mut String){
+
+        if nodes.len() > 0{
+            for line in &mut nodes.iter(){
+                if fnc == line[0] && last_func == line[1]{
+                    node_id = &mut line[2].clone();
+                }
+            }
+        } else {
+            fnc.push('!');
+            node_id = &mut fnc.clone();
+            nodes.push([&fnc.clone(), &last_func.clone(), &node_id.clone()].to_vec()); 
+        }
+    }
         
     for (ind,fcn) in funcs.iter().enumerate(){
         verb = &verbs[ind];
+
         // println!("{} {} {} {}, ind {}, 1 {}, 2 {}, 3 {} \n", fcn, verb,last_func, last_verb, ind, verb == &"start".to_string() &&  last_verb == &"end".to_string(), verb == &"start".to_string() &&  last_verb == &"start".to_string(), verb == &"end".to_string() &&  last_verb == &"end".to_string());    
 
         if verb == &"start".to_string() &&  last_verb == &"end".to_string(){
             // println!("connection {} {} ", last_func, fcn);
+            check_node(&fcn.to_string(), &last_func.to_string(), &mut nodes, &mut node_id);
+
             connections.push([last_func.to_string(), fcn.to_string()]);
             if cluster_flag2 {
-                cluster_nodes2.push(fcn.to_string());
+                cluster_nodes2.push(node_id);
             } 
             if cluster_flag1 {
-                cluster_nodes.push(fcn.to_string());
+                cluster_nodes.push(node_id);
             }
             last_func = fcn;
             last_verb = verb;
 
         } else if verb == &"start".to_string() &&  last_verb == &"start".to_string(){
+            check_node(&fcn.to_string(), &last_func.to_string(), &mut nodes, &mut node_id);
             if cluster_flag1 == false{
                 cluster_flag1 = true;
                 cluster_name = last_func;
-                cluster_nodes.push(fcn.to_string());
+                cluster_nodes.push(node_id);
                 cluster_entry_func = last_func;
             } else {
                 cluster_flag2 = true;
                 cluster_name2 = last_func;
-                cluster_nodes.push(fcn.to_string());
-                cluster_nodes2.push(fcn.to_string());
+                cluster_nodes.push(node_id);
+                cluster_nodes2.push(node_id);
                 cluster_entry_func = last_func;
                 child_parent.push((cluster_name, cluster_name2));
             }
@@ -133,7 +152,7 @@ fn main() {
                 clusters_child.insert(cluster_name2.to_string(), cluster_nodes2.clone());
                 cluster_nodes2.clear();
             }
-            connections.push([last_func.to_string(), fcn.to_string()]);
+            connections.push([last_func.to_string(), node_id]);
             last_func = fcn;
             last_verb = verb;
             
