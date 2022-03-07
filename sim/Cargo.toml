@@ -1,0 +1,36 @@
+[package]
+name = "bit-rustc-sim"
+version = "0.1.0"
+edition = "2021"
+
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+csv = "1.1.6"
+serde_derive = "1"
+serde = "1"
+serde_json = "*"
+# na = {package = "nalgebra", version = "0.24.0"}
+nalgebra = "0.27"
+log = "0.4"
+log4rs = "1"
+env_logger = "0.8"
+chrono = "0.4"
+cc = "1.0.46"
+time = "0.3"
+#adcs = "0.1.0"
+adcs = { path = "../adcs" }
+
+[build-dependencies]
+bindgen = "0.53.1"
+cc = { version = "1.0.46", features = ["parallel"] }
+#cc = "1.0.46"
+openmp-sys = "*"
+
+# latex in documentation
+[package.metadata.docs.rs]
+rustdoc-args = [ "--html-in-header", "./src/header.html" ]
+
+[profile.dev]
+debug = 1 # This is the default for dev profiles
