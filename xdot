@@ -1,0 +1,54 @@
+digraph {
+	graph [bb="0,0,640.02,324"];
+	node [label="\N"];
+	subgraph cluster_0 {
+		graph [label=update_equatorial_coordinates];
+		node_1	[height=0.5,
+			label=calculate_rotation_matric_eq,
+			pos="496.39,128",
+			width=3.9899];
+	}
+	subgraph cluster_2 {
+		graph [label=update_ctrl];
+		subgraph cluster_7 {
+			graph [label=update_desired_gimbal_rpy];
+			node_5	[height=0.5,
+				label=update_hor_to_eq_conversion,
+				pos="480.39,40",
+				width=4.0802];
+			node_6	[height=0.5,
+				label=extract_gimbal_rpy,
+				pos="408.39,40",
+				width=2.7803];
+			node_5 -> node_6	[pos="e,408.4,40 408.44,40 408.43,40 408.42,40 408.42,40"];
+		}
+		node_3	[height=0.5,
+			label=calculate_rotation_matric_eq,
+			pos="474.39,304",
+			width=3.9899];
+		node_4	[height=0.5,
+			label=update_desired_gimbal_rpy,
+			pos="402.39,304",
+			width=3.8274];
+		node_3 -> node_4	[pos="e,402.4,304 402.44,304 402.43,304 402.42,304 402.42,304"];
+	}
+	bit_one_step	[height=0.5,
+		pos="153.39,18",
+		width=1.9137];
+	bound_gondola_position	[height=0.5,
+		pos="153.39,90",
+		width=3.3941];
+	bit_one_step -> bound_gondola_position	[pos="e,153.39,71.587 153.39,36.169 153.39,43.869 153.39,53.026 153.39,61.583"];
+	update_equatorial_coordinates	[height=0.5,
+		pos="153.39,162",
+		width=4.2607];
+	bound_gondola_position -> update_equatorial_coordinates	[pos="e,153.39,143.59 153.39,108.17 153.39,115.87 153.39,125.03 153.39,133.58"];
+	update_gimbal_coordinates	[height=0.5,
+		pos="153.39,234",
+		width=3.8274];
+	update_equatorial_coordinates -> update_gimbal_coordinates	[pos="e,153.39,215.59 153.39,180.17 153.39,187.87 153.39,197.03 153.39,205.58"];
+	update_ctrl	[height=0.5,
+		pos="153.39,306",
+		width=1.7693];
+	update_gimbal_coordinates -> update_ctrl	[pos="e,153.39,287.59 153.39,252.17 153.39,259.87 153.39,269.03 153.39,277.58"];
+}

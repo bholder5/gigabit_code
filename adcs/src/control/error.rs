@@ -82,6 +82,7 @@ impl Error {
     ///
     /// `self.err_sum_k:Vector3<f64>` the current error sum
     pub fn update_pointing_positional_error(&mut self, state: &st::State, phi: na::Matrix3::<f64>) {
+        trace!("update_positional_pointing_error start");
         // calculate the fine pointing coupled error
         println!("eq desired: {} eq k: {}", state.eq_d.rot, state.eq_k.rot);
         self.rot_err = state.eq_d.rot.rotation_to(&state.eq_k.rot);
@@ -133,13 +134,14 @@ impl Error {
                 self.err_th = comb_err;
                 println!("error weight: {}, error term 1: {}, error term 2: {}, gmb err: {}, fine err: {}", err_weight, ((1.0 - err_weight) * (phi*self.err_fine_th)), (err_weight * self.err_gmb_th), self.err_fine_th, self.err_gmb_th);
             }
+            trace!("update_positional_pointing_error end");
         }
         
     }
 
     pub fn update_pointing_velocity_error_terms(&mut self, state: &st::State, slew_flag: &bool) {
         // println!("start of pointing velocity error terms");
-        
+        trace!("update_pointing_velocity_error_terms start");
         let _d_theta: na::Vector3::<f64> = state.gmb_k.gmm.cholesky().unwrap().inverse() * state.omega;
 
         let mut _roll_rate_des: f64 = 0.0;
@@ -175,9 +177,9 @@ impl Error {
 
 
         self.err_rate = na::Vector3::<f64>::from_row_slice(&err_gmb_rate);
+        trace!("update_pointing_velocity_error_terms end");
         self.err_rate_sum = (self.err_rate_sum * self._err_decay)
             + (self.err_rate * self._ctrl_dt)
-
     }
 
 }

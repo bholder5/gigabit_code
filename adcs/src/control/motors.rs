@@ -3,6 +3,8 @@
 //! This crate defines structs `TorqueMotor` and `StepperMotor` complete with implementations necessary to 
 //! safely update and command the motor
 use std::f64::consts::{PI};
+#[allow(unused_imports)]
+use log::{debug, error, info, trace, warn};
 
 #[derive(Debug, Clone)]
 pub struct TorqueMotor {
@@ -31,12 +33,14 @@ impl TorqueMotor {
     ///
     /// - `self.tau_applied` - the applied torque sent to the motor
     pub fn bound_requested_torque(&mut self) {
+        trace!("bound_requested_torque start");
         let mag = self.tau_request.abs();
         if mag > self._tau_max {
             self.tau_applied = self.tau_request.signum() * self._tau_max;
         } else {
             self.tau_applied = self.tau_request;
         }
+        trace!("bound_requested_torque end");
     }
 
     pub fn fmot_new() -> TorqueMotor {
@@ -81,12 +85,14 @@ pub struct StepperMotor {
 
 impl StepperMotor {
     pub fn calculate_pivot_speed(&mut self, rw: &TorqueMotor) {
+        trace!("calculate_pivot_speed start");
         let temp1: f64 = -self.gain1 * (rw.omega - self.omega_rw_nom);
         // println!("copntribution from temp1 {:}", temp1);
         let temp2: f64 = -self.gain2 * rw.tau_request;
         // println!("copntribution from temp2 {:}", temp2);
         self.omega_request = (temp1 + temp2);
         // println!("requested pivot speed is: {:}", self.omega_request);
+        trace!("calculate_pivot_speed end");
     }
 
     pub fn pivot_new() -> StepperMotor{

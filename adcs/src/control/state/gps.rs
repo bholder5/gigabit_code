@@ -35,6 +35,7 @@ impl Gps {
     }
 
     pub fn get_greenwhich_apparent_sidereal_time(&mut self){
+        trace!("get_greenwhich_apparent_sidereal_time start");
         let dt = chrono::prelude::Utc::now();
         // let dt = chrono::DateTime::<chrono::Utc>::from_utc(
         //     chrono::NaiveDateTime::from_timestamp_opt(self.utc,0).unwrap(),
@@ -75,5 +76,6 @@ impl Gps {
         let gast = astro::time::apprnt_sidr(gmst, nut.0, mn_obliq + nut.1);
         debug!("true obliq {}, apparent srt {}", (mn_obliq + nut.1).to_degrees(), gast.to_degrees());
         self.gast = gast.to_degrees();
+        trace!("get_greenwhich_apparent_sidereal_time end");
     }
 }

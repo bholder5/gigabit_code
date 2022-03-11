@@ -39,7 +39,7 @@ fn main() {
             list.push(words[ind].to_string());
         }  
     }
-    // println!("{:?}", list);
+    println!(" list {:?}", list);
 
     let mut funcs = Vec::<String>::new();
     let mut verbs = Vec::<String>::new();
@@ -62,13 +62,13 @@ fn main() {
         }           
     }
     for ind in 0 .. funcs.len(){
-        // println!("{} {}", funcs[ind], verbs[ind]);
+        println!("{} {}", funcs[ind], verbs[ind]);
     }
     
 
     // nodes.insert("main", Vec::<String>::new());
     // println!("{:?}", nodes);
-
+    let mut nodes: Vec<Vec<&String>> = Vec::new();
     let mut last_func: &String = &"".to_string();
     let mut last_verb: &String = &"".to_string();
     let mut verb = &"".to_string();
@@ -82,9 +82,8 @@ fn main() {
     let mut cluster_flag1 = false;
     let mut cluster_flag2 = false;
     let mut cluster_entry_func = &"".to_string();
-    // let mut child_parent = Vec::new();
-    let mut new_clust_name = String::new();
-    let mut node_renames = Vec::new();
+    let mut child_parent = Vec::new();
+    let mut node_id = String::new();
 
 
     // connections.push(["".to_string(), "".to_string()]);
@@ -92,56 +91,35 @@ fn main() {
         
     for (ind,fcn) in funcs.iter().enumerate(){
         verb = &verbs[ind];
-        // println!("{} {} {} {}, ind {}, 1 {}, 2 {}, 3 {} \n", fcn, verb,last_func, last_verb, ind, verb == &"start".to_string() &&  last_verb == &"end".to_string(), verb == &"start".to_string() &&  last_verb == &"start".to_string(), verb == &"end".to_string() &&  last_verb == &"end".to_string());
-        
-        if verb == &"start".to_string() &&  last_verb == &"end".to_string(){
-            if cluster_flag1 == false && cluster_flag2 == false {
-                // println!("connection {} {} ", last_func, fcn);
-                connections.push([last_func.to_string(), fcn.to_string()]);
-                last_func = fcn;
-                last_verb = verb;
-    
-            } else if cluster_flag1 == true{
-                if cluster_flag2 == false{
-                    connections.push([last_func.to_string(), fcn.to_string()]);
-                    cluster_nodes.push(fcn.to_string());
-                    last_func = fcn;
-                    last_verb = verb;
-                } else if cluster_flag2 == true{
-                    println!("ncn {} cn2 {} cn1 {} \n", new_clust_name, cluster_name2, cluster_name);
-                    new_clust_name.push_str(last_func);
-                    new_clust_name.push_str("\n");
-                    println!("{} {}\n", new_clust_name, last_func);
-                    last_func = fcn;
-                    last_verb = verb;     
-                }
-            }
-        }  
 
-        else if verb == &"start".to_string() &&  last_verb == &"start".to_string(){
+        // println!("{} {} {} {}, ind {}, 1 {}, 2 {}, 3 {} \n", fcn, verb,last_func, last_verb, ind, verb == &"start".to_string() &&  last_verb == &"end".to_string(), verb == &"start".to_string() &&  last_verb == &"start".to_string(), verb == &"end".to_string() &&  last_verb == &"end".to_string());    
+
+        if verb == &"start".to_string() &&  last_verb == &"end".to_string(){
+            // println!("connection {} {} ", last_func, fcn);
+
+            connections.push([last_func.to_string(), fcn.to_string()]);
+            if cluster_flag2 {
+                cluster_nodes2.push(node_id);
+            } 
+            if cluster_flag1 {
+                cluster_nodes.push(node_id);
+            }
+            last_func = fcn;
+            last_verb = verb;
+
+        } else if verb == &"start".to_string() &&  last_verb == &"start".to_string(){
             if cluster_flag1 == false{
                 cluster_flag1 = true;
                 cluster_name = last_func;
-                cluster_nodes.push(fcn.to_string());
+                cluster_nodes.push(node_id);
                 cluster_entry_func = last_func;
             } else {
                 cluster_flag2 = true;
                 cluster_name2 = last_func;
-                println!("new cluster name {}",new_clust_name);
-                new_clust_name.push_str(last_func);
-                println!("new cluster name {}",new_clust_name);
-                new_clust_name.push_str("\n");
-                println!("new cluster name {}",new_clust_name);
-                for k in 0 .. last_func.len(){
-                    new_clust_name.push_str("_");
-                }
-                println!("new cluster name {}",new_clust_name);
-                
-
-                // cluster_nodes.push(fcn.to_string());
-                // cluster_nodes2.push(fcn.to_string());
-                // cluster_entry_func = last_func;
-                // child_parent.push((cluster_name, cluster_name2));
+                cluster_nodes.push(node_id);
+                cluster_nodes2.push(node_id);
+                cluster_entry_func = last_func;
+                child_parent.push((cluster_name, cluster_name2));
             }
             
             // connections.push([last_func.to_string(), fcn.to_string()]);
@@ -155,18 +133,12 @@ fn main() {
                 cluster_nodes.clear();
             } else {
                 cluster_flag2 = false;
-                // clusters_child.insert(cluster_name2.to_string(), cluster_nodes2.clone());
-                // cluster_nodes2.clear();
-                {
-                    let nam = new_clust_name.clone();
-                    node_renames.push([cluster_name2.to_string(), nam]);
-                }
-                new_clust_name.clear();
+                clusters_child.insert(cluster_name2.to_string(), cluster_nodes2.clone());
+                cluster_nodes2.clear();
             }
-            connections.push([last_func.to_string(), fcn.to_string()]);
+            connections.push([last_func.to_string(), node_id]);
             last_func = fcn;
             last_verb = verb;
-
             
         } else {
             last_func = fcn;
@@ -195,21 +167,6 @@ fn main() {
     // println!("connections: {:?}", connections);
     // }
 
-    for pair in &node_renames{
-        let old = pair[0].clone();
-        let new = pair[1].clone();
-
-        for con in &mut connections{
-            if con[0] == old{
-                con[0] = new.clone();
-            }
-            if con[1] == old{
-                con[1] = new.clone();
-            }
-        }
-
-    }
-
     let mut f = File::create("example3.dot").unwrap();
 
     let mut output_bytes = Vec::new();
@@ -217,34 +174,33 @@ fn main() {
     let mut writer = DotWriter::from(&mut output_bytes);
     writer.set_pretty_print(true);
     let mut digraph = writer.digraph();
-    println!("\n\n{:?}\n\n", &node_renames);
     {
         for (clust, nodes) in &clusters_parent{
             let mut clust_write = digraph.cluster();
             clust_write.set_label(clust);
             let length = nodes.len();
-            clust_write.edge(&clust, &nodes[0]);
+            clust_write.edge(&clust, &nodes[length-1]);
             if nodes.len() > 1{
                 for ind in 1 .. nodes.len(){
                     clust_write.edge(&nodes[ind-1], &nodes[ind]);
                 }
             }
-            // for pair in &child_parent{
-            //     if pair.0 == clust{
-            //         for (sub_clust, sub_nodes) in &clusters_child{
-            //             if sub_clust == pair.1{
-            //                 let sub_clust_name = pair.1;
-            //                 let mut sub_clust = clust_write.subgraph();
-            //                 let length2 = sub_nodes.len();
-            //                 sub_clust.edge(&sub_clust_name, &sub_nodes[0]);
-            //                 for ind2 in 1 .. length2 {
-            //                     sub_clust.edge(&sub_nodes[ind2-1], &sub_nodes[ind2]);
-            //                 }
-            //             }
-            //         }
+            for pair in &child_parent{
+                if pair.0 == clust{
+                    for (sub_clust, sub_nodes) in &clusters_child{
+                        if sub_clust == pair.1{
+                            let sub_clust_name = pair.1;
+                            let mut sub_clust = clust_write.subgraph();
+                            let length2 = sub_nodes.len();
+                            sub_clust.edge(&sub_clust_name, &sub_nodes[0]);
+                            for ind2 in 1 .. length2 {
+                                sub_clust.edge(&sub_nodes[ind2-1], &sub_nodes[ind2]);
+                            }
+                        }
+                    }
                     
-            //     }
-            // }
+                }
+            }
         }
 
         for item in connections.iter(){
@@ -257,4 +213,52 @@ fn main() {
 }
 
 println!("echo \"{}\" | dot > ex.dot", String::from_utf8(output_bytes).unwrap());
+
+let mut output_bytes2 = Vec::new();
+{
+let mut writer2 = DotWriter::from(&mut output_bytes2);
+    writer2.set_pretty_print(true);
+    let mut digraph = writer2.digraph();
+    digraph.node_named("a");
+    {
+        let mut clust5 = digraph.cluster();
+        clust5.set_label("B");
+        clust5.set_rank_direction(dot_writer::RankDirection::TopBottom);
+        clust5.node_named("b").set_rank(dot_writer::Rank::Min);
+        clust5.node_named("c").set_rank(dot_writer::Rank::Max);
+        clust5.node_named("d").set_rank(dot_writer::Rank::Max);
+        clust5.edge("c", "d");
+        {
+            let mut clust7 = clust5.cluster();
+            clust7.cluster();
+            clust7.set_label("E");
+            clust7.node_named("e");
+            clust7.node_named("f");
+            clust7.edge("e", "f"); 
+        }
+        clust5.node_named("i");
+        {
+            let mut clust7 = clust5.cluster();
+            clust7.cluster();
+            clust7.set_label("E");
+            clust7.node_named("j");
+            clust7.node_named("k");
+            clust7.edge("f", "j"); 
+        }
+    }
+digraph.edge("a","b");
+digraph.edge("b","g");
+digraph.edge("b", "e");
+}
+    println!("echo \"{}\" | dot > ex.dot", String::from_utf8(output_bytes2).unwrap());
+}
+    
+impl Node{
+    fn new(ent: &str) -> Node{
+        let node = Node{
+            name: ent.to_string(),
+            cons: Vec::<String>::new(),
+        };
+        node
+    }
 }

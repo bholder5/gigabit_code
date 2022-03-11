@@ -86,24 +86,24 @@ impl Params {
     ///
     ///`self.C1` - the new current orientation rotation matrix
     pub fn get_omega_meas(&mut self) -> () {
-        // trace!("get_omega_meas start");
+        trace!("get_omega_meas start");
         let mut om: [f64; 3] = [0.; 3];
         unsafe {
-            // trace!("compute_angular_velocity_C start");
+            trace!("compute_angular_velocity_C start");
             compute_angular_velocity_C(
                 self.dthet_thet.as_ptr(),
                 self._zn.as_mut_ptr(),
                 om.as_mut_ptr(),
             );
-            // trace!("compute_angular_velocity_C end");
+            trace!("compute_angular_velocity_C end");
         }
         self.omega_m = Vector3::<f64>::from_row_slice(om.as_ref());
         debug!("omega_m: {:}, om(pointer): {:?}", self.omega_m, om.as_ref());
-        // trace!("get_omega_meas end");
+        trace!("get_omega_meas end");
     }
 
     pub fn update_state(&mut self) -> () {
-        // trace!("update_state start");
+        trace!("update_state start");
         self.theta = Vector9::from_row_slice(&self.x.as_slice()[9..18]);
         self.d_theta_dt = Vector9::from_row_slice(&self.x.as_slice()[0..9]);
         self.bound_gondola_position();
@@ -112,11 +112,11 @@ impl Params {
             "theta: {:}, state_array {:}, dtheta {:}, dthet_thet: {:}",
             self.theta, self.x, self.d_theta_dt, self.dthet_thet
         );
-        // trace!("update_state end");
+        trace!("update_state end");
     }
     /// get phi actual in equatorial frame, thus the declination is -ve
     pub fn get_orientation_vec(&mut self) -> () {
-        // trace!("get_orientation_vector start");
+        trace!("get_orientation_vector start");
         // let mut c_vec :[f64; 9] = [0.0; 9];
         let mut c_vec: [[f64; 3]; 3] = [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]];
         unsafe {
@@ -135,13 +135,13 @@ impl Params {
         let eul = rotmat.euler_angles();
         self.phi_act = [eul.0, -eul.1, eul.2];
         debug!("x_act {:?}", self.phi_act);
-        // trace!("get_orientation_vector end");
+        trace!("get_orientation_vector end");
     }
 
     pub fn get_rw_speed(&mut self) {
-        // trace!("get_rw_speed start");
+        trace!("get_rw_speed start");
         self.omega_rw = self.x[20] / self._i_z_rw;
-        // trace!("get_rw_speed end");
+        trace!("get_rw_speed end");
         // println!("Curent RW speed: {:}", self.omega_rw);
     }
 

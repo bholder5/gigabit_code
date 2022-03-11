@@ -86,8 +86,10 @@ impl State {
     pub fn calculate_coupling_matrix(
         &mut self,
     ) -> na::Matrix<f64, na::U3, na::U3, na::ArrayStorage<f64, na::U3, na::U3>> {
+        trace!("calculate_coupling_matrix start");
         let st2: f64 = self.gmb_k.roll.sin();
         let _phi = na::Matrix3::<f64>::from_row_slice(&[1., 0., 0., 0., 1., st2, 0., st2, 1.]);
+        trace!("calculate_coupling_matrix end");
         _phi
     }
     pub fn update_hor_to_eq_conversion(&mut self){
@@ -109,13 +111,17 @@ impl State {
     }
 
     pub fn update_horizontal_coordinates(&mut self){
+        trace!("update_horizontal_coordinates start");
         self.hor.rot = self.ceh * self.eq_k.rot;
         self.hor.extract_az_el_ir_from_rotmat();
+        trace!("update_horizontal_coordinates end");
     }
 
     pub fn update_current_equatorial_coordinates(&mut self, vec: &[f64; 3]){
+        trace!("update_current_equatorial_coordinates start");
         self.eq_k.update_equatorial_coordinates(vec);
         self.update_horizontal_coordinates();
+        trace!("update_current_equatorial_coordinates end");
     }
 
     pub fn update_desired_gimbal_rpy(&mut self){

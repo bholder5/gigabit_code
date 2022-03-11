@@ -78,7 +78,8 @@ pub struct Record {
 }
 
 pub fn push_record(t: &f64, bp: &Params, _est: &Est, ctrl: &Ctrl) -> Result<(), Box<dyn Error>> {
-    let file_path = "/home/brad/sim_data/out.csv";
+    // let file_path = "/home/brad/sim_data/out.csv";
+    let file_path = "/media/brad/linux_storage/sim_data/out.csv";
 
     if Path::new(&file_path.clone()).exists() {
         let file = OpenOptions::new()

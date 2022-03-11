@@ -65,6 +65,7 @@ impl Ctrl {
     fn calculate_applied_torque(
         &mut self,
     ) {
+        trace!("calculate_applied_torque start");
         let mut temp = na::Vector3::<f64>::zeros();
         let mut temp2 = na::Vector3::<f64>::zeros();
         let mut tau_requested = na::Vector3::<f64>::zeros();
@@ -101,6 +102,7 @@ impl Ctrl {
             "tau applied roll {:} \n pitch: {:} \n rw: {:}",
             self.fmot_roll.tau_applied, self.fmot_pitch.tau_applied, self.rw.tau_applied
         );
+        trace!("calculate_applied_torque end");
     }
     /// Function that ultimately updates the applied torque
     ///
