@@ -38,6 +38,7 @@ fn main() {
     // run initialization and have all relevant
     // bit parameters in the struct
     let mut bp = init_bit();
+    bp.get_orientation_vec();
     let est = Est::init();
     let mut ctrl = Ctrl::new();
 
@@ -66,7 +67,7 @@ fn main() {
     sc::push_record(&t,&bp, &est, &ctrl);
 
     trace!("START");
-    for _step in 0..1 as usize {
+    for _step in 0.. 210000 as usize {
         ///////// beginning of the simulation loop
         /////////////////////////////////////////
         unsafe {
@@ -80,6 +81,7 @@ fn main() {
                 bp._dt,
                 bp._num_steps,
                 bp._tau_piv_max,
+                bp.pitch_nom,
                 y_result.as_mut_ptr(),
             );
             trace!("bit_one_step end");
@@ -101,10 +103,10 @@ fn main() {
         // Calculate control terms based on current step
         // println!("check for control calcs: 20 % step = {:}, step: {:}", (step % 20), step);
 
-        if (step % 1) < 1 {
+        if (step % 1) < 20 {
             js::read_gains(&mut ctrl); // read in gains from json file (for tuning)
 
-            ctrl.state.eq_k.update_equatorial_coordinates(&bp.phi_act);
+            ctrl.state.update_current_equatorial_coordinates(&bp.phi_act);
             // grab_vec3(&mut ctrl.state.omega, &bp.omega_m);
             ctrl.state.omega[0] = bp.omega_m[0].clone();
             ctrl.state.omega[1] = bp.omega_m[1].clone();

@@ -107,6 +107,7 @@ impl State {
         // println!("arg y {:}, argz {:}", arg_y, arg_z);
         // println!("rot y {:}, rotz {:}, ceh {:}", roty, rotz, rotz*roty);
         self.ceh = rotz*roty;
+        // println!("ceh: {}", self.ceh);
         trace!("update_hor_to_eq_conversion end");
     }
 
@@ -130,6 +131,16 @@ impl State {
         self.gmb_d.rot = self.ceh * self.eq_d.rot;
         self.gmb_d.extract_gimbal_rpy();
         trace!("update_desired_gimbal_rpy end");
+
+    }
+    pub fn update_desired_eq_rdf(&mut self){
+        trace!("update_desired_eq_rdf start");
+        self.update_hor_to_eq_conversion();
+        self.gmb_d.calculate_rotation_matrix();
+        self.eq_d.rot = self.ceh.inverse() * self.gmb_d.rot;
+        self.eq_d.extract_ra_dec_fr_from_rotmat();
+        // println!("desired: ra {} dec {} fr {}", self.eq_d.ra, self.eq_d.dec, self.eq_d.fr);
+        trace!("update_desired_eq_rdf end");
 
     }
 }

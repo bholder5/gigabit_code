@@ -198,13 +198,13 @@ fn main() {
     // sort and remove duplicates
     let mut functions = funcs.clone();
     // println!("funcs: {:?}", functions);
-    // functions.sort();
-    // functions.dedup();
+    functions.sort();
+    functions.dedup();
     // println!("funcs: {:?}", functions);
     // {
     // println!("connections: {:?}", connections);
-    // connections.sort();
-    // connections.dedup();
+    connections.sort();
+    connections.dedup();
     // println!("connections: {:?}", connections);
     // println!("\n\n\n parent clusters: {:?}", clusters_parent);
     // println!("\n\n\n child clusters: {:?}", clusters_child);

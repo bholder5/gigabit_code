@@ -44,6 +44,7 @@ impl Gimbal {
     }
 
     pub fn calculate_gimbal_mapping_matrix(&mut self){
+        trace!("calculate_gimbal_mapping_matrix start");
         let rotx = na::Rotation3::<f64>::from_axis_angle(&na::Vector3::x_axis(), self.roll).inverse();
         let roty = na::Rotation3::<f64>::from_axis_angle(&na::Vector3::y_axis(), self.pitch).inverse();
 
@@ -51,10 +52,9 @@ impl Gimbal {
         let col2 = na::Vector3::<f64>::new(0.0, 1.0, 0.0);
         let col3 = roty * rotx * na::Vector3::<f64>::new(0.0, 0.0, 1.0);
         let gmm = na::Matrix3::<f64>::from_columns(&[col1, col2, col3]);
-        self.gmm = gmm
+        self.gmm = gmm;
+        trace!("calculate_gimbal_mapping_matrix end");
     }
-
-
 
     pub fn new() -> Gimbal {
         let roll: f64 = -0.0259154632;

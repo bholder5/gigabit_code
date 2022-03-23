@@ -12,9 +12,9 @@ use crate::miscellaneous as misc;
 
 #[derive(Debug)]
 pub struct Error {
-    pub err_gmb_th: na::Vector3<f64>,
-    pub err_fine_th: na::Vector3<f64>,
-    pub err_th: na::Vector3<f64>,
+    pub err_gmb_th: st::gimbal::Gimbal,
+    pub err_b_th: st::gimbal::Gimbal,
+    pub err_comb_th: na::Vector3<f64>,
     pub err_rate: na::Vector3::<f64>,
     pub err_rate_sum: na::Vector3<f64>,
     pub _err_tc: f64,
@@ -30,20 +30,19 @@ impl Error {
         let _err_tc: f64 = 10.0;
         let _ctrl_dt: f64 = 0.01;
         let _err_decay: f64 = E.powf(-_ctrl_dt / _err_tc);
-        let err_gmb_th = na::Vector3::<f64>::new(0.0, 0.0, 0.0);
-        let err_fine_th = na::Vector3::<f64>::new(0.0, 0.0, 0.0);
-        let err_th = na::Vector3::<f64>::new(0.0, 0.0, 0.0);
+        let err_gmb_th =  st::gimbal::Gimbal::new();
+        let err_b_th = st::gimbal::Gimbal::new();
+        let err_comb_th = na::Vector3::<f64>::new(0.0, 0.0, 0.0);
         let err_rate = na::Vector3::<f64>::new(0.0, 0.0, 0.0);
         let err_rate_sum = na::Vector3::<f64>::new(0.0, 0.0, 0.0);
         let rot_err = na::Rotation3::<f64>::identity();
         let u_lower = 0.00001;
         let u_upper = 0.001;
 
-        let error: Error = Error {
-            
-            err_fine_th,
+        let error: Error = Error { 
+            err_b_th,
             err_gmb_th,
-            err_th,
+            err_comb_th,
             err_rate,
             err_rate_sum,
             rot_err,
@@ -84,55 +83,62 @@ impl Error {
     pub fn update_pointing_positional_error(&mut self, state: &st::State, phi: na::Matrix3::<f64>) {
         trace!("update_positional_pointing_error start");
         // calculate the fine pointing coupled error
-        println!("eq desired: {} eq k: {}", state.eq_d.rot, state.eq_k.rot);
-        self.rot_err = state.eq_d.rot.rotation_to(&state.eq_k.rot);
-        let _rot_err = state.eq_k.rot.rotation_to(&state.eq_d.rot);
-        
-        misc::unxmat(
-            &(na::Rotation3::<f64>::identity().matrix() - self.rot_err.matrix()),
-            &mut self.err_fine_th,
-        );
+        // println!("eq desired: {} eq k: {}", state.eq_d.rot, state.eq_k.rot);
+        // self.rot_err = state.eq_d.rot.rotation_to(&state.eq_k.rot);
+        //rot err in body space
+        let _rot_err = state.eq_k.rot * state.eq_d.rot.inverse();
+        println!("current {:?} \n\n desired {:?}\n\n", state.eq_k, state.eq_d);
+        // misc::unxmat(
+        //     &(na::Rotation3::<f64>::identity().matrix() - self.rot_err.matrix()),
+        //     &mut self.err_eq_th,
+        // );
 
-        println!("linear error rot: {}, error: {}, rot to eul {} {} {}", (na::Rotation3::<f64>::identity().matrix() - self.rot_err.matrix()), self.err_fine_th, _rot_err.euler_angles().0, _rot_err.euler_angles().1, _rot_err.euler_angles().2);
+        // our rotation matrices are the opposite of most crates (including this one);
+        self.err_b_th.rot = _rot_err;
+        self.err_b_th.extract_gimbal_rpy();
 
-        let norm_fine_err = self.err_fine_th.norm();
+
+        let b_vec = na::Vector3::<f64>::new(self.err_b_th.roll, self.err_b_th.pitch, self.err_b_th.yaw);
+        let norm_fine_err = b_vec.norm();
         // println!("norm fine error: {}", norm_fine_err);
         
         if norm_fine_err < self.u_lower{
-            self.err_th = phi * self.err_fine_th.clone();
+            self.err_comb_th = phi * b_vec;
         }
         else{
             let mut _err_gmb = na::Vector3::<f64>::new(
                 state.gmb_d.roll - state.gmb_k.roll, 
                 state.gmb_d.pitch - state.gmb_k.pitch,
-                (state.gmb_d.yaw - state.gmb_k.yaw)
+                state.gmb_d.yaw - state.gmb_k.yaw
             );
-            println!("gmb err: {}", _err_gmb);
+            println!("gmbd{:?} \n\n gmbk{:?}",state.gmb_d, state.gmb_k);
+            println!("gmb err: {}, fine_err: {}", _err_gmb, phi* b_vec);
 
             for ind in 0..3 {
                 if _err_gmb[ind].abs() > PI{
                     let over = _err_gmb[ind] > PI;
                     let under = _err_gmb[ind] < PI;
-                    _err_gmb[ind] = (_err_gmb[ind] - (2.0*PI* (over as u8 as f64)) + (2.0*PI* (under as u8 as f64)));
+                    _err_gmb[ind] = _err_gmb[ind] - (2.0*PI* (over as u8 as f64)) + (2.0*PI* (under as u8 as f64));
 
                 }
             }
-            println!("wrapped gmb err: {}", _err_gmb);
+            // println!("wrapped gmb err: {}", _err_gmb);
 
-            self.err_gmb_th = _err_gmb.clone();
+            self.err_gmb_th.update_gimbal_coordinates(&[_err_gmb[0], _err_gmb[1],_err_gmb[2]]);
         
             if norm_fine_err > self.u_upper {
                 // calculate the gimbal error
-                self.err_th = self.err_gmb_th.clone();
+                self.err_comb_th = _err_gmb.clone();
+                // println!("yaw error {}", self.err_comb_th[2]);
             }
             else {
                 let err_weight: f64 = (norm_fine_err - self.u_lower) / (self.u_upper-self.u_lower);
 
-                let comb_err = ((1.0 - err_weight) * (phi*self.err_fine_th)) 
-                                                                                + (err_weight * self.err_gmb_th);
+                let comb_err = ((1.0 - err_weight) * (phi * _err_gmb)) 
+                                                                                + (err_weight * _err_gmb);
 
-                self.err_th = comb_err;
-                println!("error weight: {}, error term 1: {}, error term 2: {}, gmb err: {}, fine err: {}", err_weight, ((1.0 - err_weight) * (phi*self.err_fine_th)), (err_weight * self.err_gmb_th), self.err_fine_th, self.err_gmb_th);
+                self.err_comb_th = comb_err;
+                // println!("error weight: {}, error term 1: {}, error term 2: {}, gmb err: {}, fine err: {}", err_weight, ((1.0 - err_weight) * (phi*self.err_eq_th)), (err_weight * self.err_gmb_th), self.err_eq_th, self.err_gmb_th);
             }
             trace!("update_positional_pointing_error end");
         }
@@ -157,23 +163,23 @@ impl Error {
             let temp2: f64 = temp1.sqrt();
             let temp3: f64 =  (2.0 * g_const) / (g_lin * PI);
 
-            let _roll_rate_des: f64 = -self.err_th.x.signum() * (2.0 * g_const * (self.err_th.x.abs() * 
-                stat::function::erf::erf(self.err_th.x.abs() * temp2)) + 
-                (temp3 * ((-self.err_th.x.powi(2) * temp1).exp()-1.0))).sqrt();
+            let _roll_rate_des: f64 = -self.err_comb_th.x.signum() * (2.0 * g_const * (self.err_comb_th.x.abs() * 
+                stat::function::erf::erf(self.err_comb_th.x.abs() * temp2)) + 
+                (temp3 * ((-self.err_comb_th.x.powi(2) * temp1).exp()-1.0))).sqrt();
 
-            let _pitch_rate_des: f64 = -self.err_th.y.signum() * (2.0 * g_const * (self.err_th.y.abs() * 
-                stat::function::erf::erf(self.err_th.y.abs() * temp2)) + 
-                (temp3 * ((-self.err_th.y.powi(2) * temp1).exp()-1.0))).sqrt();
+            let _pitch_rate_des: f64 = -self.err_comb_th.y.signum() * (2.0 * g_const * (self.err_comb_th.y.abs() * 
+                stat::function::erf::erf(self.err_comb_th.y.abs() * temp2)) + 
+                (temp3 * ((-self.err_comb_th.y.powi(2) * temp1).exp()-1.0))).sqrt();
 
-            let _yaw_rate_des: f64 = -self.err_th.z.signum() * (2.0 * g_const * (self.err_th.z.abs() * 
-                stat::function::erf::erf(self.err_th.z.abs() * temp2)) + 
-                (temp3 * ((-self.err_th.z.powi(2) * temp1).exp()-1.0))).sqrt();
+            let _yaw_rate_des: f64 = -self.err_comb_th.z.signum() * (2.0 * g_const * (self.err_comb_th.z.abs() * 
+                stat::function::erf::erf(self.err_comb_th.z.abs() * temp2)) + 
+                (temp3 * ((-self.err_comb_th.z.powi(2) * temp1).exp()-1.0))).sqrt();
         }
 
 
-        let err_gmb_rate: [f64; 3] = [(_d_theta.x - _roll_rate_des),
-                                      (_d_theta.y - _pitch_rate_des),
-                                      (_d_theta.z - _yaw_rate_des)];
+        let err_gmb_rate: [f64; 3] = [(_roll_rate_des - _d_theta.x),
+                                      (_pitch_rate_des - _d_theta.y),
+                                      (_yaw_rate_des - _d_theta.z)];
 
 
         self.err_rate = na::Vector3::<f64>::from_row_slice(&err_gmb_rate);

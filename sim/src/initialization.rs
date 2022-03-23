@@ -66,6 +66,7 @@ pub struct Params {
     _roll_theta_max: f64,
     _pitch_theta_max: f64,
     _pitch_theta_min: f64,
+    pub pitch_nom: f64,
     // //
     pub gps: Gps,
 }
@@ -116,6 +117,11 @@ impl Params {
     }
     /// get phi actual in equatorial frame, thus the declination is -ve
     pub fn get_orientation_vec(&mut self) -> () {
+        // /////////////////////////////////////
+        // this function is verified vs matlab
+        // /////////////////////////////////////
+
+
         trace!("get_orientation_vector start");
         // let mut c_vec :[f64; 9] = [0.0; 9];
         let mut c_vec: [[f64; 3]; 3] = [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]];
@@ -158,24 +164,24 @@ impl Params {
             }
         }
 
-        //bound pitch to pitch max
-        if self.theta[8] >= self._pitch_theta_max{
-            self.theta[8] = self._pitch_theta_max;
-            self.x[17] = self._pitch_theta_max;
-            if self.d_theta_dt[8].signum() > 0.0{
-                self.d_theta_dt[8] = 0.0;
-                self.x[8] = 0.0;
-            }
-        }
-        //bound pitch to pitch min
-        if self.theta[8] <= self._pitch_theta_min{
-            self.theta[8] = self._pitch_theta_min;
-            self.x[17] = self._pitch_theta_min;
-            if self.d_theta_dt[8].signum() < 0.0{
-                self.d_theta_dt[8] = 0.0;
-                self.x[8] = 0.0;
-            }
-        }
+        // //bound pitch to pitch max
+        // if self.theta[8] >= self._pitch_theta_max{
+        //     self.theta[8] = self._pitch_theta_max;
+        //     self.x[17] = self._pitch_theta_max;
+        //     if self.d_theta_dt[8].signum() > 0.0{
+        //         self.d_theta_dt[8] = 0.0;
+        //         self.x[8] = 0.0;
+        //     }
+        // }
+        // //bound pitch to pitch min
+        // if self.theta[8] <= self._pitch_theta_min{
+        //     self.theta[8] = self._pitch_theta_min;
+        //     self.x[17] = self._pitch_theta_min;
+        //     if self.d_theta_dt[8].signum() < 0.0{
+        //         self.d_theta_dt[8] = 0.0;
+        //         self.x[8] = 0.0;
+        //     }
+        // }
         trace!("bound_gondola_position end");
     }
 }
@@ -194,14 +200,14 @@ pub fn init_bit() -> Params {
     // ----------------------------------
     let theta = Vector9::from_row_slice(&[
         0.,
-        0.4 * PI / 180.0,
-        0.4 * PI / 180.0,
-        0.1 * PI / 180.0,
-        0.1 * PI / 180.0,
-        0.1 * PI / 180.0,
-        0.,
-        0.1,
-        -40.0 * PI / 180.0,
+        1.0 * 0.4 * PI / 180.0,
+        1.0 * 0.4 * PI / 180.0,
+        1.0 * 0.1 * PI / 180.0,
+        1.0 * 0.1 * PI / 180.0,
+        1.0 * 0.1 * PI / 180.0,
+        0.0,
+        0.0,
+        1.0 * -40.0 * PI / 180.0,
     ]); // joint angles [rad]
     let d_theta_dt = Vector9::from_row_slice(&[0., 0., 0., 0., 0., 0., 0., 0., 0.]); // joint angle rates [rad/s]
     let dthet_thet = Vector18::from_row_slice(&[d_theta_dt.as_slice(), theta.as_slice()].concat());
@@ -214,7 +220,7 @@ pub fn init_bit() -> Params {
         x[_step] = d_theta_dt[_step];
         x[_step + 9] = theta[_step];
     }
-    x[20] = PI * _i_z_rw;
+    // x[20] = PI * _i_z_rw;
     // let x0 = Vector21::from_row_slice(&d_theta_dt_0, &theta_0, &h_rw_0);
 
     let _zn = [
@@ -240,8 +246,9 @@ pub fn init_bit() -> Params {
     let unlock = Vector9::from_row_slice(&[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]);
     let _tau_piv_max: f64 = 20.0;
     let _roll_theta_max: f64 = 6.0*PI/180.0;
-    let _pitch_theta_max: f64 = -60.0*PI/180.0;
-    let _pitch_theta_min: f64 = -20.0 *PI/180.0;
+    let _pitch_theta_max: f64 = -20.0*PI/180.0;
+    let _pitch_theta_min: f64 = -60.0 *PI/180.0;
+    let pitch_nom: f64 = -40.0* PI / 180.0;
     let gps = Gps::new();
     // define params struct_
     let _params = Params {
@@ -262,6 +269,7 @@ pub fn init_bit() -> Params {
         _roll_theta_max,
         _pitch_theta_max,
         _pitch_theta_min,
+        pitch_nom,
         gps,
     };
     info!("Bit initialized: \n {:?}", _params);

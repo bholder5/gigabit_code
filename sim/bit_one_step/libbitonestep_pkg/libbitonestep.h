@@ -5,7 +5,7 @@
  * File: libbitonestep.h
  *
  * MATLAB Coder version            : 5.3
- * C/C++ source code generated on  : 10-Feb-2022 09:31:35
+ * C/C++ source code generated on  : 17-Mar-2022 12:37:13
  */
 
 #ifndef LIBBITONESTEP_H
@@ -24,7 +24,8 @@ extern "C" {
 extern void bit_one_step(const real_T x0[21], const real_T tau_applied[9],
                          const real_T unlock[9], real_T w_piv,
                          boolean_T piv_flag, real_T dt, uint16_T num_steps,
-                         real_T tau_max_piv, real_T y_true[21]);
+                         real_T tau_max_piv, real_T thet_pit_nom,
+                         real_T y_true[21]);
 
 extern void compute_angular_velocity_C(const real_T x[18], real_T z_n[9][3],
                                        real_T omega[3]);

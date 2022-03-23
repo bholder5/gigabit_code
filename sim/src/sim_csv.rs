@@ -60,6 +60,12 @@ pub struct Record {
     err_roll: f64,
     err_pitch: f64,
     err_yaw: f64,
+    err_fine_yaw: f64,
+    err_fine_pitch: f64,
+    err_fine_roll: f64,
+    err_roll_comb: f64,
+    err_pitch_comb: f64,
+    err_yaw_comb: f64,
     err_rate_roll: f64,
     err_rate_pitch: f64,
     err_rate_yaw: f64,
@@ -72,9 +78,19 @@ pub struct Record {
     ra: f64,
     dec: f64,
     fr: f64,
+    ra_d: f64,
+    dec_d: f64,
+    fr_d: f64,
+    roll: f64,
+    pitch: f64,
+    yaw: f64,
+    roll_d: f64,
+    pitch_d: f64,
+    yaw_d: f64,
     tau_roll: f64,
     tau_pitch: f64,
     tau_yaw: f64,
+
 }
 
 pub fn push_record(t: &f64, bp: &Params, _est: &Est, ctrl: &Ctrl) -> Result<(), Box<dyn Error>> {
@@ -112,9 +128,15 @@ pub fn push_record(t: &f64, bp: &Params, _est: &Est, ctrl: &Ctrl) -> Result<(), 
             h2: bp.x[19],
             h3: bp.x[20],
             // ctrl
-            err_roll: ctrl.error.err_th[0],
-            err_pitch: ctrl.error.err_th[1],
-            err_yaw: ctrl.error.err_th[2],
+            err_roll_comb: ctrl.error.err_comb_th[0],
+            err_pitch_comb: ctrl.error.err_comb_th[1],
+            err_yaw_comb: ctrl.error.err_comb_th[2],
+            err_roll: ctrl.error.err_gmb_th.roll,
+            err_pitch: ctrl.error.err_gmb_th.pitch,
+            err_yaw: ctrl.error.err_gmb_th.yaw,
+            err_fine_yaw: ctrl.error.err_b_th.yaw,
+            err_fine_pitch: ctrl.error.err_b_th.pitch,
+            err_fine_roll: ctrl.error.err_b_th.roll,
             err_rate_roll: ctrl.error.err_rate[0],
             err_rate_pitch: ctrl.error.err_rate[1],
             err_rate_yaw: ctrl.error.err_rate[2],
@@ -124,12 +146,24 @@ pub fn push_record(t: &f64, bp: &Params, _est: &Est, ctrl: &Ctrl) -> Result<(), 
             omega_roll: ctrl.state.omega[0],
             omega_pitch: ctrl.state.omega[1],
             omega_yaw: ctrl.state.omega[2],
+            //
             ra: ctrl.state.eq_k.ra,
             dec: ctrl.state.eq_k.dec,
             fr: ctrl.state.eq_k.fr,
+            ra_d: ctrl.state.eq_d.ra,
+            dec_d: ctrl.state.eq_d.dec,
+            fr_d: ctrl.state.eq_d.fr,
+            //
+            roll: ctrl.state.gmb_k.roll,
+            pitch: ctrl.state.gmb_k.pitch,
+            yaw: ctrl.state.gmb_k.yaw,
+            roll_d: ctrl.state.gmb_d.roll,
+            pitch_d: ctrl.state.gmb_d.pitch,
+            yaw_d: ctrl.state.gmb_d.yaw,
+            //
             tau_roll: ctrl.fmot_roll.tau_applied,
             tau_pitch: ctrl.fmot_pitch.tau_applied,
-            tau_yaw: ctrl.rw.tau_applied,
+            tau_yaw: -ctrl.rw.tau_applied,
         })?;
         wtr.flush()?;
     } else {
@@ -163,9 +197,15 @@ pub fn push_record(t: &f64, bp: &Params, _est: &Est, ctrl: &Ctrl) -> Result<(), 
             h2: bp.x[19],
             h3: bp.x[20],
             // ctrl
-            err_roll: ctrl.error.err_th[0],
-            err_pitch: ctrl.error.err_th[1],
-            err_yaw: ctrl.error.err_th[2],
+            err_roll_comb: ctrl.error.err_comb_th[0],
+            err_pitch_comb: ctrl.error.err_comb_th[1],
+            err_yaw_comb: ctrl.error.err_comb_th[2],
+            err_roll: ctrl.error.err_gmb_th.roll,
+            err_pitch: ctrl.error.err_gmb_th.pitch,
+            err_yaw: ctrl.error.err_gmb_th.yaw,
+            err_fine_yaw: ctrl.error.err_b_th.yaw,
+            err_fine_pitch: ctrl.error.err_b_th.pitch,
+            err_fine_roll: ctrl.error.err_b_th.roll,
             err_rate_roll: ctrl.error.err_rate[0],
             err_rate_pitch: ctrl.error.err_rate[1],
             err_rate_yaw: ctrl.error.err_rate[2],
@@ -178,6 +218,17 @@ pub fn push_record(t: &f64, bp: &Params, _est: &Est, ctrl: &Ctrl) -> Result<(), 
             ra: ctrl.state.eq_k.ra,
             dec: ctrl.state.eq_k.dec,
             fr: ctrl.state.eq_k.fr,
+            ra_d: ctrl.state.eq_d.ra,
+            dec_d: ctrl.state.eq_d.dec,
+            fr_d: ctrl.state.eq_d.fr,
+            //
+            roll: ctrl.state.gmb_k.roll,
+            pitch: ctrl.state.gmb_k.pitch,
+            yaw: ctrl.state.gmb_k.yaw,
+            roll_d: ctrl.state.gmb_d.roll,
+            pitch_d: ctrl.state.gmb_d.pitch,
+            yaw_d: ctrl.state.gmb_d.yaw,
+            //
             tau_roll: ctrl.fmot_roll.tau_applied,
             tau_pitch: ctrl.fmot_pitch.tau_applied,
             tau_yaw: ctrl.rw.tau_applied,
@@ -228,10 +279,15 @@ pub fn read_last_state(mut t: f64, bp: &mut Params, _est: &Est, ctrl: &mut Ctrl)
             bp.x[19] = rec.h2;
             bp.x[20] = rec.h3;
             // ctrl
-
-            ctrl.error.err_th[0] = rec.err_roll;
-            ctrl.error.err_th[1] = rec.err_pitch;
-            ctrl.error.err_th[2] = rec.err_yaw;
+            ctrl.error.err_comb_th[0] =  rec.err_roll_comb;
+            ctrl.error.err_comb_th[1] = rec.err_pitch_comb;
+            ctrl.error.err_comb_th[2] = rec.err_yaw_comb;
+            ctrl.error.err_gmb_th.roll = rec.err_roll;
+            ctrl.error.err_gmb_th.pitch = rec.err_pitch;
+            ctrl.error.err_gmb_th.yaw = rec.err_yaw;
+            ctrl.error.err_b_th.yaw = rec.err_fine_yaw;
+            ctrl.error.err_b_th.pitch = rec.err_fine_pitch;
+            ctrl.error.err_b_th.roll = rec.err_fine_roll;
             ctrl.error.err_rate[0] = rec.err_rate_roll;
             ctrl.error.err_rate[1] = rec.err_rate_pitch;
             ctrl.error.err_rate[2] = rec.err_rate_yaw;
@@ -244,6 +300,15 @@ pub fn read_last_state(mut t: f64, bp: &mut Params, _est: &Est, ctrl: &mut Ctrl)
             ctrl.state.eq_k.ra = rec.ra;
             ctrl.state.eq_k.dec = rec.dec;
             ctrl.state.eq_k.fr = rec.fr;
+            ctrl.state.eq_d.ra = rec.ra_d;
+            ctrl.state.eq_d.dec = rec.dec_d;
+            ctrl.state.eq_d.fr = rec.fr_d;
+            ctrl.state.gmb_k.roll = rec.roll;
+            ctrl.state.gmb_k.pitch = rec.pitch;
+            ctrl.state.gmb_k.yaw = rec.yaw;
+            ctrl.state.gmb_d.roll = rec.roll_d;
+            ctrl.state.gmb_d.pitch = rec.pitch_d;
+            ctrl.state.gmb_d.yaw = rec.yaw_d;
             ctrl.fmot_roll.tau_applied = rec.tau_roll;
             ctrl.fmot_pitch.tau_applied = rec.tau_pitch;
             ctrl.rw.tau_applied = rec.tau_yaw;

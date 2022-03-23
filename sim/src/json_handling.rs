@@ -43,9 +43,10 @@ pub struct Read_json {
     fine: Gain_json,
     slew: Gain_json,
     slew_flag: bool,
-    ra_des: f64,
-    dec_des: f64,
-    fr_des: f64,
+    yaw_des: f64,
+    pitch_des: f64,
+    roll_des: f64,
+    new_targ: bool,
 }
 
 pub fn read_gains(ctrl: &mut Ctrl) -> () {
@@ -72,9 +73,16 @@ pub fn read_gains(ctrl: &mut Ctrl) -> () {
                         .update_gain_matrices(&kp_vec, &kd_vec, &ki_vec);
                     ctrl.slew_gains
                         .update_gain_matrices(&kp_vec2, &kd_vec2, &ki_vec2);
-                    ctrl.state.eq_d.fr = u.fr_des;
-                    ctrl.state.eq_d.dec = u.dec_des;
-                    ctrl.state.eq_d.ra = u.ra_des;
+
+                    if u.new_targ{
+                        ctrl.state.gmb_d.roll = u.roll_des;
+                        ctrl.state.gmb_d.pitch = u.pitch_des;
+                        ctrl.state.gmb_d.yaw = u.yaw_des;
+                        ctrl.state.gmb_d.calculate_rotation_matrix();
+                        ctrl.state.update_desired_eq_rdf();
+                        u.new_targ = false;
+                    }
+                    
 
                     ctrl.slew_flag = u.slew_flag;
 

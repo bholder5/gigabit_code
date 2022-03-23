@@ -5,7 +5,7 @@
  * File: libbitonestep.c
  *
  * MATLAB Coder version            : 5.3
- * C/C++ source code generated on  : 10-Feb-2022 09:31:35
+ * C/C++ source code generated on  : 17-Mar-2022 12:37:13
  */
 
 /* Include Files */
@@ -44,8 +44,8 @@ static void axis2rot(const real_T v[3], real_T phi, real_T rot[3][3]);
 static void b_check_forloop_overflow_error(void);
 static void b_rtErrorWithMessageID(const char_T *aFcnName, int32_T aLineNum);
 static void bit_one_step_anonFcn1(const real_T unlock[9], real_T w_piv,
-  boolean_T piv_flag, real_T tau_max_piv, const real_T y_true[21], const real_T
-  tau_applied[9], real_T dw_piv, real_T varargout_1[21]);
+  boolean_T piv_flag, real_T tau_max_piv, real_T thet_pit_nom, const real_T
+  y_true[21], const real_T tau_applied[9], real_T dw_piv, real_T varargout_1[21]);
 static void check_forloop_overflow_error(void);
 static void d_rtErrorWithMessageID(const char_T *r, const char_T *aFcnName,
   int32_T aLineNum);
@@ -195,6 +195,7 @@ static void b_rtErrorWithMessageID(const char_T *aFcnName, int32_T aLineNum)
  *                real_T w_piv
  *                boolean_T piv_flag
  *                real_T tau_max_piv
+ *                real_T thet_pit_nom
  *                const real_T y_true[21]
  *                const real_T tau_applied[9]
  *                real_T dw_piv
@@ -202,8 +203,8 @@ static void b_rtErrorWithMessageID(const char_T *aFcnName, int32_T aLineNum)
  * Return Type  : void
  */
 static void bit_one_step_anonFcn1(const real_T unlock[9], real_T w_piv,
-  boolean_T piv_flag, real_T tau_max_piv, const real_T y_true[21], const real_T
-  tau_applied[9], real_T dw_piv, real_T varargout_1[21])
+  boolean_T piv_flag, real_T tau_max_piv, real_T thet_pit_nom, const real_T
+  y_true[21], const real_T tau_applied[9], real_T dw_piv, real_T varargout_1[21])
 {
   static rtBoundsCheckInfo emlrtBCI = { 1,/* iFirst */
     9,                                 /* iLast */
@@ -277,7 +278,7 @@ static void bit_one_step_anonFcn1(const real_T unlock[9], real_T w_piv,
   boolean_T y;
 
   /* 'bit_one_step:14' @(y_true, tau_applied, dw_piv) bit_propagator(y_true, c_n, z_n, m_n, r_n1_n, m_w_n, p_n, ...  */
-  /* 'bit_one_step:15'     k_d, b_d, g0, unlock, hs_rw_max, tau_applied, w_piv, piv_flag, dw_piv, tau_max_piv) */
+  /* 'bit_one_step:15'     k_d, b_d, g0, unlock, hs_rw_max, tau_applied, w_piv, piv_flag, dw_piv, tau_max_piv, thet_pit_nom) */
   /* split the state */
   /* 'bit_propagator:6' theta = X(10:18); */
   /* 'bit_propagator:7' dtheta = X(1:9); */
@@ -532,10 +533,16 @@ static void bit_one_step_anonFcn1(const real_T unlock[9], real_T w_piv,
     }
   }
 
-  /* 'bit_propagator:22' spring = k_d.*theta; */
-  /* 'bit_propagator:23' damp = b_d.*dtheta; */
+  /* 'bit_propagator:22' theta_spring = theta; */
+  (void)memcpy(&t1[0], &y_true[9], 9U * (sizeof(real_T)));
+
+  /* 'bit_propagator:23' theta_spring(9) = theta(9) - thet_pit_nom; */
+  t1[8] = y_true[17] - thet_pit_nom;
+
+  /* 'bit_propagator:25' spring = k_d.*theta_spring; */
+  /* 'bit_propagator:26' damp = b_d.*dtheta; */
   /* place holder */
-  /* 'bit_propagator:26' [R,r, d_hs] = RW_terms(theta, dtheta, z_n, hs, tau_rw, hs_rw_max); */
+  /* 'bit_propagator:29' [R,r, d_hs] = RW_terms(theta, dtheta, z_n, hs, tau_rw, hs_rw_max); */
   /* UNTITLED Summary of this function goes here */
   /*    Detailed explanation goes here */
   /* calculate the mapping matrix from dtheta to omega */
@@ -641,7 +648,7 @@ static void bit_one_step_anonFcn1(const real_T unlock[9], real_T w_piv,
   /*  w_piv = rw_g1*((-hs(3)/i_rw(3,3))-w_rw_nom) - (rw_g2*tau_rw); */
   /* calculate joint torques from gravity elasticity and damnping according */
   /* to eq 3.37 */
-  /* 'bit_propagator:30' torques = tau_applied - (Pot + spring + damp + R + r); */
+  /* 'bit_propagator:33' torques = tau_applied - (Pot + spring + damp + R + r); */
   for (b_i = 0; b_i < 3; b_i++) {
     for (info = 0; info < 9; info++) {
       tau_piv = s7[info][b_i];
@@ -659,11 +666,6 @@ static void bit_one_step_anonFcn1(const real_T unlock[9], real_T w_piv,
   C_n[0][2] = -y_true[19];
   C_n[1][2] = y_true[18];
   C_n[2][2] = 0.0;
-
-  /*      M = compute_mass_matrix(theta, z_n, r_n1_n, m_w_n, p_n); */
-  /* 'bit_propagator:34' M = mass_mat_func(theta); */
-  /* 'bit_propagator:36' M_decomp = chol(M); */
-  mass_mat_func(*((real_T (*)[9])(&y_true[9])), c_r_tmp);
   for (b_i = 0; b_i < 9; b_i++) {
     tau_piv = b_r_tmp[0][b_i];
     d = b_r_tmp[1][b_i];
@@ -682,11 +684,21 @@ static void bit_one_step_anonFcn1(const real_T unlock[9], real_T w_piv,
         [2])) * dtheta[info];
     }
 
-    tau_piv += Pot[b_i] + (k_d[b_i] * y_true[b_i + 9]);
-    d = r_tmp[2][b_i] * vec_idx_2;
-    Pot[b_i] = d;
-    tau_piv = b_tau_applied[b_i] - (tau_piv + d);
-    t1[b_i] = tau_piv;
+    b_tau_applied[b_i] -= ((Pot[b_i] + (k_d[b_i] * t1[b_i])) + tau_piv) +
+      (r_tmp[2][b_i] * vec_idx_2);
+  }
+
+  for (b_i = 0; b_i < 3; b_i++) {
+    dC_10[b_i][0] = b_tau_applied[3 * b_i];
+    dC_10[b_i][1] = b_tau_applied[(3 * b_i) + 1];
+    dC_10[b_i][2] = b_tau_applied[(3 * b_i) + 2];
+  }
+
+  /*      M = compute_mass_matrix(theta, z_n, r_n1_n, m_w_n, p_n); */
+  /* 'bit_propagator:37' M = mass_mat_func(theta); */
+  /* 'bit_propagator:39' M_decomp = chol(M); */
+  mass_mat_func(*((real_T (*)[9])(&y_true[9])), c_r_tmp);
+  for (b_i = 0; b_i < 9; b_i++) {
     for (info = 0; info < 3; info++) {
       b_C_n[b_i][info][0] = (*((real_T (*)[9][3][3])(&c_r_tmp[0][0])))[b_i][info]
         [0];
@@ -759,46 +771,46 @@ static void bit_one_step_anonFcn1(const real_T unlock[9], real_T w_piv,
     }
   }
 
-  /* 'bit_propagator:40' ddtheta = M_decomp\((M_decomp')\torques); */
-  for (n = 0; n < 9; n++) {
-    dVdtheta_i[n] = t1[n];
-    for (b_i = 0; b_i < 9; b_i++) {
-      c_r_tmp[n][b_i] = (*((real_T (*)[9][9])(&b_C_n[0][0][0])))[b_i][n];
+  /* 'bit_propagator:43' ddtheta = M_decomp\((M_decomp')\torques); */
+  for (b_i = 0; b_i < 9; b_i++) {
+    dVdtheta_i[b_i] = (&dC_10[0][0])[b_i];
+    for (info = 0; info < 9; info++) {
+      c_r_tmp[b_i][info] = (*((real_T (*)[9][9])(&b_C_n[0][0][0])))[info][b_i];
     }
   }
 
   mldivide(c_r_tmp, dVdtheta_i);
   mldivide(*((real_T (*)[9][9])(&b_C_n[0][0][0])), dVdtheta_i);
 
-  /* 'bit_propagator:41' ddtheta = ddtheta.*unlock; */
+  /* 'bit_propagator:44' ddtheta = ddtheta.*unlock; */
   for (b_i = 0; b_i < 9; b_i++) {
     dVdtheta_i[b_i] *= unlock[b_i];
   }
 
-  /* 'bit_propagator:43' if piv_flag == true */
+  /* 'bit_propagator:46' if piv_flag == true */
   if (piv_flag) {
-    /* 'bit_propagator:44' prop_err = 10; */
-    /* 'bit_propagator:45' int_err = 0; */
-    /* 'bit_propagator:46' kp = 1; */
-    /* 'bit_propagator:47' ki = 0.5; */
-    /* 'bit_propagator:48' prop_err = dw_piv - ddtheta(6); */
+    /* 'bit_propagator:47' prop_err = 10; */
+    /* 'bit_propagator:48' int_err = 0; */
+    /* 'bit_propagator:49' kp = 1; */
+    /* 'bit_propagator:50' ki = 0.5; */
+    /* 'bit_propagator:51' prop_err = dw_piv - ddtheta(6); */
     m_i = dw_piv - dVdtheta_i[5];
 
-    /* 'bit_propagator:49' int_err = int_err + prop_err; */
+    /* 'bit_propagator:52' int_err = int_err + prop_err; */
     int_err = m_i;
 
-    /* 'bit_propagator:50' tau_piv = torques(6); */
-    tau_piv = t1[5];
+    /* 'bit_propagator:53' tau_piv = torques(6); */
+    tau_piv = (&dC_10[0][0])[5];
 
-    /* 'bit_propagator:52' while abs(prop_err) > 1e-9 */
+    /* 'bit_propagator:55' while abs(prop_err) > 1e-9 */
     exitg1 = false;
     while ((!exitg1) && (fabs(m_i) > 1.0E-9)) {
-      /* 'bit_propagator:54' tau_piv = tau_piv + ((kp*prop_err) + (ki*int_err)); */
+      /* 'bit_propagator:57' tau_piv = tau_piv + ((kp*prop_err) + (ki*int_err)); */
       tau_piv += m_i + (0.5 * int_err);
 
-      /* 'bit_propagator:55' if abs(tau_piv) > tau_max_piv */
+      /* 'bit_propagator:58' if abs(tau_piv) > tau_max_piv */
       if (fabs(tau_piv) > tau_max_piv) {
-        /* 'bit_propagator:56' tau_piv = sign(tau_piv) * tau_max_piv; */
+        /* 'bit_propagator:59' tau_piv = sign(tau_piv) * tau_max_piv; */
         if (tau_piv < 0.0) {
           tau_piv = -1.0;
         } else if (tau_piv > 0.0) {
@@ -807,10 +819,10 @@ static void bit_one_step_anonFcn1(const real_T unlock[9], real_T w_piv,
           /* no actions */
         }
 
-        t1[5] = tau_piv * tau_max_piv;
+        (&dC_10[0][0])[5] = tau_piv * tau_max_piv;
 
-        /* 'bit_propagator:57' torques(6) = tau_piv; */
-        /* 'bit_propagator:59' ddtheta = M_decomp\((M_decomp')\torques); */
+        /* 'bit_propagator:60' torques(6) = tau_piv; */
+        /* 'bit_propagator:62' ddtheta = M_decomp\((M_decomp')\torques); */
         for (b_i = 0; b_i < 9; b_i++) {
           for (info = 0; info < 9; info++) {
             c_r_tmp[b_i][info] = (*((real_T (*)[9][9])(&b_C_n[0][0][0])))[info]
@@ -818,35 +830,39 @@ static void bit_one_step_anonFcn1(const real_T unlock[9], real_T w_piv,
           }
         }
 
-        mldivide(c_r_tmp, t1);
-        (void)memcpy(&dVdtheta_i[0], &t1[0], 9U * (sizeof(real_T)));
+        mldivide(c_r_tmp, &dC_10[0][0]);
+        for (b_i = 0; b_i < 9; b_i++) {
+          dVdtheta_i[b_i] = (&dC_10[0][0])[b_i];
+        }
+
         mldivide(*((real_T (*)[9][9])(&b_C_n[0][0][0])), dVdtheta_i);
         exitg1 = true;
       } else {
-        /* 'bit_propagator:62' torques(6) = tau_piv; */
-        t1[5] = tau_piv;
+        /* 'bit_propagator:65' torques(6) = tau_piv; */
+        (&dC_10[0][0])[5] = tau_piv;
 
-        /* 'bit_propagator:64' ddtheta = M_decomp\((M_decomp')\torques); */
-        for (n = 0; n < 9; n++) {
-          dVdtheta_i[n] = t1[n];
-          for (b_i = 0; b_i < 9; b_i++) {
-            c_r_tmp[n][b_i] = (*((real_T (*)[9][9])(&b_C_n[0][0][0])))[b_i][n];
+        /* 'bit_propagator:67' ddtheta = M_decomp\((M_decomp')\torques); */
+        for (b_i = 0; b_i < 9; b_i++) {
+          dVdtheta_i[b_i] = (&dC_10[0][0])[b_i];
+          for (info = 0; info < 9; info++) {
+            c_r_tmp[b_i][info] = (*((real_T (*)[9][9])(&b_C_n[0][0][0])))[info]
+              [b_i];
           }
         }
 
         mldivide(c_r_tmp, dVdtheta_i);
         mldivide(*((real_T (*)[9][9])(&b_C_n[0][0][0])), dVdtheta_i);
 
-        /* 'bit_propagator:65' prop_err = dw_piv - ddtheta(6); */
+        /* 'bit_propagator:68' prop_err = dw_piv - ddtheta(6); */
         m_i = dw_piv - dVdtheta_i[5];
 
-        /* 'bit_propagator:66' int_err = int_err + prop_err; */
+        /* 'bit_propagator:69' int_err = int_err + prop_err; */
         int_err += m_i;
       }
     }
   }
 
-  /* 'bit_propagator:70' Xdot = [ddtheta; dtheta; d_hs;]; */
+  /* 'bit_propagator:73' Xdot = [ddtheta; dtheta; d_hs;]; */
   for (n = 0; n < 9; n++) {
     varargout_1[n] = dVdtheta_i[n];
     varargout_1[n + 9] = dtheta[n];
@@ -8613,7 +8629,7 @@ static void rtReportErrorLocation(const char_T *aFcnName, int32_T aLineNo)
 
 /*
  * function [y_true] = bit_one_step(x0, tau_applied, unlock, w_piv, piv_flag,...
- *     dt, num_steps, tau_max_piv)
+ *     dt, num_steps, tau_max_piv, thet_pit_nom)
  *
  * Run initialization script
  *
@@ -8625,12 +8641,14 @@ static void rtReportErrorLocation(const char_T *aFcnName, int32_T aLineNo)
  *                real_T dt
  *                uint16_T num_steps
  *                real_T tau_max_piv
+ *                real_T thet_pit_nom
  *                real_T y_true[21]
  * Return Type  : void
  */
 void bit_one_step(const real_T x0[21], const real_T tau_applied[9], const real_T
                   unlock[9], real_T w_piv, boolean_T piv_flag, real_T dt,
-                  uint16_T num_steps, real_T tau_max_piv, real_T y_true[21])
+                  uint16_T num_steps, real_T tau_max_piv, real_T thet_pit_nom,
+                  real_T y_true[21])
 {
   real_T b_y_true[21];
   real_T k1[21];
@@ -8657,7 +8675,7 @@ void bit_one_step(const real_T x0[21], const real_T tau_applied[9], const real_T
   /*  y_all1 = zeros(18, tf/(dt)); */
   /* 'bit_one_step:12' step = 0; */
   /* 'bit_one_step:14' sys = @(y_true, tau_applied, dw_piv) bit_propagator(y_true, c_n, z_n, m_n, r_n1_n, m_w_n, p_n, ...  */
-  /* 'bit_one_step:15'     k_d, b_d, g0, unlock, hs_rw_max, tau_applied, w_piv, piv_flag, dw_piv, tau_max_piv) */
+  /* 'bit_one_step:15'     k_d, b_d, g0, unlock, hs_rw_max, tau_applied, w_piv, piv_flag, dw_piv, tau_max_piv, thet_pit_nom) */
   /*  sim */
   /* 'bit_one_step:19' for step = 1:num_steps */
   if ((1 <= ((int32_T)num_steps)) && (((int32_T)num_steps) > 65534)) {
@@ -8672,8 +8690,8 @@ void bit_one_step(const real_T x0[21], const real_T tau_applied[9], const real_T
     dw_piv = (w_piv - y_true[5]) / dt;
 
     /* 'bit_one_step:24' k1 = sys(y_true, tau_applied, dw_piv) * dt; */
-    bit_one_step_anonFcn1(unlock, w_piv, piv_flag, tau_max_piv, y_true,
-                          tau_applied, dw_piv, k1);
+    bit_one_step_anonFcn1(unlock, w_piv, piv_flag, tau_max_piv, thet_pit_nom,
+                          y_true, tau_applied, dw_piv, k1);
 
     /* 'bit_one_step:25' k2 = sys(y_true + (k1/2), tau_applied, dw_piv) * dt; */
     for (c_i = 0; c_i < 21; c_i++) {
@@ -8682,8 +8700,8 @@ void bit_one_step(const real_T x0[21], const real_T tau_applied[9], const real_T
       b_y_true[c_i] = y_true[c_i] + (d / 2.0);
     }
 
-    bit_one_step_anonFcn1(unlock, w_piv, piv_flag, tau_max_piv, b_y_true,
-                          tau_applied, dw_piv, k2);
+    bit_one_step_anonFcn1(unlock, w_piv, piv_flag, tau_max_piv, thet_pit_nom,
+                          b_y_true, tau_applied, dw_piv, k2);
 
     /* 'bit_one_step:26' k3 = sys(y_true + (k2/2), tau_applied, dw_piv) * dt; */
     for (c_i = 0; c_i < 21; c_i++) {
@@ -8692,8 +8710,8 @@ void bit_one_step(const real_T x0[21], const real_T tau_applied[9], const real_T
       b_y_true[c_i] = y_true[c_i] + (d / 2.0);
     }
 
-    bit_one_step_anonFcn1(unlock, w_piv, piv_flag, tau_max_piv, b_y_true,
-                          tau_applied, dw_piv, k3);
+    bit_one_step_anonFcn1(unlock, w_piv, piv_flag, tau_max_piv, thet_pit_nom,
+                          b_y_true, tau_applied, dw_piv, k3);
 
     /* 'bit_one_step:27' k4 = sys(y_true + k3, tau_applied, dw_piv) * dt; */
     for (c_i = 0; c_i < 21; c_i++) {
@@ -8702,8 +8720,8 @@ void bit_one_step(const real_T x0[21], const real_T tau_applied[9], const real_T
       b_y_true[c_i] = y_true[c_i] + d;
     }
 
-    bit_one_step_anonFcn1(unlock, w_piv, piv_flag, tau_max_piv, b_y_true,
-                          tau_applied, dw_piv, varargout_1);
+    bit_one_step_anonFcn1(unlock, w_piv, piv_flag, tau_max_piv, thet_pit_nom,
+                          b_y_true, tau_applied, dw_piv, varargout_1);
 
     /* 'bit_one_step:29' tdd = ((k1+(2*k2)+(2*k3)+k4)/6); */
     /* 'bit_one_step:30' y_true = y_true + tdd; */

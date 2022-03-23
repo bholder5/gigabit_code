@@ -2806,6 +2806,7 @@ extern "C" {
         dt: real_T,
         num_steps: uint16_T,
         tau_max_piv: real_T,
+        thet_pit_nom: real_T,
         y_true: *mut real_T,
     );
 }
