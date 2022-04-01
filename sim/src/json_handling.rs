@@ -79,8 +79,9 @@ pub fn read_gains(ctrl: &mut Ctrl) -> () {
                         ctrl.state.gmb_d.pitch = u.pitch_des;
                         ctrl.state.gmb_d.yaw = u.yaw_des;
                         ctrl.state.gmb_d.calculate_rotation_matrix();
-                        ctrl.state.update_desired_eq_rdf();
+                        ctrl.state.update_desired_eq_from_gmb();
                         u.new_targ = false;
+                        // println!("\n\n\n READ GAINS UPDATE\n\n\n{:?}", ctrl.state.gmb_d);
                     }
                     
 

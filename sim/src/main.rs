@@ -15,7 +15,7 @@ mod sim_csv;
 use initialization::*;
 use json_handling as js;
 use sim_csv as sc;
-use adcs::{miscellaneous::*, control::*, estimation::*};
+use adcs::{miscellaneous::*, control::*, estimation::*, verification::*};
 use logging::*;
 
 use bindings::bit_one_step;
@@ -35,6 +35,7 @@ extern crate serde_derive;
 
 fn main() {
     init_log();
+    test_control();
     // run initialization and have all relevant
     // bit parameters in the struct
     let mut bp = init_bit();
@@ -60,14 +61,18 @@ fn main() {
                            // read_last_state(&mut bp, &mut est, &mut ctrl);
                            // bp.get_orientation_vec();
 
+    
+
     tau_applied[6] = ctrl.rw.tau_applied.clone(); //yaw
     tau_applied[7] = ctrl.fmot_roll.tau_applied.clone(); //roll
     tau_applied[8] = ctrl.fmot_pitch.tau_applied.clone(); //pitch
 
     sc::push_record(&t,&bp, &est, &ctrl);
 
+
+
     trace!("START");
-    for _step in 0.. 210000 as usize {
+    for _step in 0.. 0 as usize {
         ///////// beginning of the simulation loop
         /////////////////////////////////////////
         unsafe {
@@ -103,8 +108,8 @@ fn main() {
         // Calculate control terms based on current step
         // println!("check for control calcs: 20 % step = {:}, step: {:}", (step % 20), step);
 
-        if (step % 1) < 20 {
-            js::read_gains(&mut ctrl); // read in gains from json file (for tuning)
+        if (step % 1) < 1 {
+            // js::read_gains(&mut ctrl); // read in gains from json file (for tuning)
 
             ctrl.state.update_current_equatorial_coordinates(&bp.phi_act);
             // grab_vec3(&mut ctrl.state.omega, &bp.omega_m);

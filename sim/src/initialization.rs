@@ -139,7 +139,7 @@ impl Params {
         ));
         debug!("rotmat {:} from thet: {:}", rotmat, self.theta);
         let eul = rotmat.euler_angles();
-        self.phi_act = [eul.0, -eul.1, eul.2];
+        self.phi_act = [eul.0, -eul.1, -eul.2];
         debug!("x_act {:?}", self.phi_act);
         trace!("get_orientation_vector end");
     }
@@ -200,11 +200,11 @@ pub fn init_bit() -> Params {
     // ----------------------------------
     let theta = Vector9::from_row_slice(&[
         0.,
-        1.0 * 0.4 * PI / 180.0,
-        1.0 * 0.4 * PI / 180.0,
-        1.0 * 0.1 * PI / 180.0,
-        1.0 * 0.1 * PI / 180.0,
-        1.0 * 0.1 * PI / 180.0,
+        0.0 * 0.4 * PI / 180.0,
+        0.0 * 0.4 * PI / 180.0,
+        0.0 * 0.1 * PI / 180.0,
+        0.0 * 0.1 * PI / 180.0,
+        0.0 * 0.1 * PI / 180.0,
         0.0,
         0.0,
         1.0 * -40.0 * PI / 180.0,

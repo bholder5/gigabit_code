@@ -22,8 +22,8 @@
         "kd_yaw": 0.0
     },
     "slew_flag": false,
-    "roll_des": 0.05,
-    "pitch_des": -0.75,
+    "roll_des": 0.0,
+    "pitch_des": -0.69,
     "yaw_des": 0.0,
-    "new_targ": false
+    "new_targ": true
 }
