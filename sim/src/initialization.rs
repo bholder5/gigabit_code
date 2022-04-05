@@ -121,7 +121,6 @@ impl Params {
         // this function is verified vs matlab
         // /////////////////////////////////////
 
-
         trace!("get_orientation_vector start");
         // let mut c_vec :[f64; 9] = [0.0; 9];
         let mut c_vec: [[f64; 3]; 3] = [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]];
@@ -151,14 +150,14 @@ impl Params {
         // println!("Curent RW speed: {:}", self.omega_rw);
     }
 
-    fn bound_gondola_position(&mut self){
+    fn bound_gondola_position(&mut self) {
         trace!("bound_gondola_position start");
-        
+
         //bound roll to +/- roll max
-        if self.theta[7].abs() >= self._roll_theta_max{
+        if self.theta[7].abs() >= self._roll_theta_max {
             self.theta[7] = self.theta[7].signum() * self._roll_theta_max;
             self.x[16] = self.theta[7];
-            if self.d_theta_dt[7].signum() == self.theta[7].signum(){
+            if self.d_theta_dt[7].signum() == self.theta[7].signum() {
                 self.d_theta_dt[7] = 0.0;
                 self.x[7] = 0.0;
             }
@@ -245,10 +244,10 @@ pub fn init_bit() -> Params {
     let phi_act = [0.0; 3];
     let unlock = Vector9::from_row_slice(&[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]);
     let _tau_piv_max: f64 = 20.0;
-    let _roll_theta_max: f64 = 6.0*PI/180.0;
-    let _pitch_theta_max: f64 = -20.0*PI/180.0;
-    let _pitch_theta_min: f64 = -60.0 *PI/180.0;
-    let pitch_nom: f64 = -40.0* PI / 180.0;
+    let _roll_theta_max: f64 = 6.0 * PI / 180.0;
+    let _pitch_theta_max: f64 = -20.0 * PI / 180.0;
+    let _pitch_theta_min: f64 = -60.0 * PI / 180.0;
+    let pitch_nom: f64 = -40.0 * PI / 180.0;
     let gps = Gps::new();
     // define params struct_
     let _params = Params {
@@ -283,17 +282,13 @@ pub struct Gps {
     utc: f64,
 }
 
-impl Gps{
-    pub fn new()-> Gps{
+impl Gps {
+    pub fn new() -> Gps {
         let lat = 47.002282304922659;
         let lon = -82.210336016074365;
         let utc = 946684800.0;
 
-        let gps = Gps{
-            lat,
-            lon,
-            utc
-        };
+        let gps = Gps { lat, lon, utc };
         gps
     }
 }

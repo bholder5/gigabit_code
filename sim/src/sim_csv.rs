@@ -11,9 +11,9 @@
 //! -generating sensors measurements from the simulation state
 //!
 
+use crate::initialization::Params;
 use adcs::control::Ctrl;
 use adcs::estimation::Est;
-use crate::initialization::Params;
 // import crate for matrix math
 
 // use std::fmt;
@@ -90,7 +90,6 @@ pub struct Record {
     tau_roll: f64,
     tau_pitch: f64,
     tau_yaw: f64,
-
 }
 
 pub fn push_record(t: &f64, bp: &Params, _est: &Est, ctrl: &Ctrl) -> Result<(), Box<dyn Error>> {
@@ -279,7 +278,7 @@ pub fn read_last_state(mut t: f64, bp: &mut Params, _est: &Est, ctrl: &mut Ctrl)
             bp.x[19] = rec.h2;
             bp.x[20] = rec.h3;
             // ctrl
-            ctrl.error.err_comb_th[0] =  rec.err_roll_comb;
+            ctrl.error.err_comb_th[0] = rec.err_roll_comb;
             ctrl.error.err_comb_th[1] = rec.err_pitch_comb;
             ctrl.error.err_comb_th[2] = rec.err_yaw_comb;
             ctrl.error.err_gmb_th.roll = rec.err_roll;
@@ -321,4 +320,3 @@ pub fn read_last_state(mut t: f64, bp: &mut Params, _est: &Est, ctrl: &mut Ctrl)
         }
     }
 }
-

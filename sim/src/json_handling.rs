@@ -14,8 +14,8 @@
 use adcs::control::Ctrl;
 
 // use std::fmt;
-use std::error::Error;
 pub use std::env;
+use std::error::Error;
 
 pub use std::ffi::OsString;
 pub use std::fs::{File, OpenOptions};
@@ -74,7 +74,7 @@ pub fn read_gains(ctrl: &mut Ctrl) -> () {
                     ctrl.slew_gains
                         .update_gain_matrices(&kp_vec2, &kd_vec2, &ki_vec2);
 
-                    if u.new_targ{
+                    if u.new_targ {
                         ctrl.state.gmb_d.roll = u.roll_des;
                         ctrl.state.gmb_d.pitch = u.pitch_des;
                         ctrl.state.gmb_d.yaw = u.yaw_des;
@@ -83,7 +83,6 @@ pub fn read_gains(ctrl: &mut Ctrl) -> () {
                         u.new_targ = false;
                         // println!("\n\n\n READ GAINS UPDATE\n\n\n{:?}", ctrl.state.gmb_d);
                     }
-                    
 
                     ctrl.slew_flag = u.slew_flag;
 

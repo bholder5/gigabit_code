@@ -5,9 +5,9 @@
 extern crate nalgebra as na;
 
 /// Function to grab and copy the contents of an `na::Vector3<f64>` type into another location.
-/// 
+///
 /// # Arguments
-/// 
+///
 /// `v2: &na::Vector3<f64>` - the vector slice to be copied
 /// `v1: &mut na::Vector3<f64>` - and mutable vector slice to be copied into
 #[allow(dead_code)]
@@ -17,12 +17,12 @@ pub fn grab_vec3(v1: &mut na::Vector3<f64>, v2: &na::Vector3<f64>) -> () {
     }
 }
 /// Function to deconstruct a cross matrix.
-/// 
+///
 /// # Details
 /// This function takes in a crossed matrix and reconstructs the original vector being crossed
-/// 
+///
 /// # Arguments
-/// 
+///
 /// `rot: &na::Mector3<f64>` - the matrix to be deconstructed
 /// `phi: &mut na::Vector3<f64>` - the vector to be reconstructed
 pub fn unxmat(rot: &na::Matrix3<f64>, phi: &mut na::Vector3<f64>) -> () {

@@ -16,14 +16,14 @@ pub struct Coords {
     pub gmb_d: gb::Gimbal,
 }
 
-impl Coords{
+impl Coords {
     pub fn new() -> Coords {
         let eq_k = eq::Equatorial::new();
         let eq_d = eq::Equatorial::new();
         let gmb_k = gb::Gimbal::new();
         let gmb_d = gb::Gimbal::new();
 
-        let coords = Coords{
+        let coords = Coords {
             eq_k,
             eq_d,
             gmb_k,

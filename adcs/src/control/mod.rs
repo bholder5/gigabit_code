@@ -2,15 +2,15 @@
 //!
 //! This crate implements a struct `Ctrl` complete with ans initialization and methods that are required for calculating the control torques for the BIT gondola (simulation).
 
+pub mod error;
 pub mod gains;
 pub mod motors;
 pub mod state;
-pub mod error;
 
+use error as er;
 use gains as gns;
 use motors as mot;
 use state as st;
-use error as er;
 
 // import crate for matrix math
 extern crate nalgebra as na;
@@ -62,9 +62,7 @@ impl Ctrl {
     /// - `self.fmot_roll.tau_applied: f64`: the applied torque in roll
     /// - `self.fmot_pitch.tau_applied: f64`: the applied torque in pitch
     /// - `self.fmot_rw.tau_applied: f64`: the applied torque in yaw
-    fn calculate_applied_torque(
-        &mut self,
-    ) {
+    fn calculate_applied_torque(&mut self) {
         trace!("calculate_applied_torque start");
         let mut temp = na::Vector3::<f64>::zeros();
         let mut temp2 = na::Vector3::<f64>::zeros();
@@ -120,14 +118,14 @@ impl Ctrl {
         // update Chat_k based on yaw pitch roll in xhat_k
         self.state.update_desired_gimbal_rpy();
         let phi = self.state.calculate_coupling_matrix();
-        self.error.update_pointing_positional_error(&self.state, phi);
-        self.error.update_pointing_velocity_error_terms(&mut self.state, &self.slew_flag);
+        self.error
+            .update_pointing_positional_error(&self.state, phi);
+        self.error
+            .update_pointing_velocity_error_terms(&mut self.state, &self.slew_flag);
 
         self.calculate_applied_torque();
         self.pivot.calculate_pivot_speed(&self.rw);
         trace!("update_ctrl end");
-    
-        
     }
 
     /// Function to initialize the control matrix with default values
@@ -139,7 +137,7 @@ impl Ctrl {
         let ctrl: Ctrl = Ctrl {
             fmot_roll: mot::TorqueMotor::fmot_new(),
             fmot_pitch: mot::TorqueMotor::fmot_new(),
-            rw: mot::TorqueMotor::rw_new(), 
+            rw: mot::TorqueMotor::rw_new(),
             pivot: mot::StepperMotor::pivot_new(),
             fine_gains: gns::Gains::new(),
             slew_gains: gns::Gains::new(),

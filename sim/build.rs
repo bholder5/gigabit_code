@@ -5,7 +5,6 @@ use std::process::Command;
 use std::path::PathBuf;
 fn main() {
     // compile the C static library for running the bit simulation in folder bit_one_step
-    
 
     cc::Build::new()
         .file("bit_one_step/libbitonestep.c")
@@ -41,5 +40,5 @@ fn main() {
     let out_path = PathBuf::from("src/");
     bindings
         .write_to_file(out_path.join("bindings.rs"))
-        .expect("Couldn't write bindings!");   
+        .expect("Couldn't write bindings!");
 }

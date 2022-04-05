@@ -1,4 +1,4 @@
-//! Outlines a struct and implements functions associated 
+//! Outlines a struct and implements functions associated
 //! specifically with handling gimbal coordinates for use
 //!  in the ADCS Pointing system.
 
@@ -18,7 +18,7 @@ pub struct Gimbal {
     pub yaw: f64,
     /// Rotation matrix associated with the yaw roll pitch (312) euler sequence
     pub rot: na::Rotation3<f64>,
-    /// the gimbal mapping matrix, maps from boresight telescope frame to 
+    /// the gimbal mapping matrix, maps from boresight telescope frame to
     /// gimbal coordinates ($\dot\theta = \Phi_{gmm}\omega$)
     pub gmm: na::Matrix3<f64>,
 }
@@ -28,11 +28,11 @@ impl Gimbal {
     ///
     /// # Detailed Explanation
     ///
-    /// This functions updates the rotation matrix based on 
-    /// the gimbal 312 euler parameters currently in the 
-    /// gimbal struct according to: 
+    /// This functions updates the rotation matrix based on
+    /// the gimbal 312 euler parameters currently in the
+    /// gimbal struct according to:
     /// $$ C_{b,G} = C_{y}(pitch)C_{x}(roll)C_{z}(yaw)$$
-    /// 
+    ///
     /// # Arguments
     ///
     /// - `roll: f64` - Roll
@@ -42,11 +42,14 @@ impl Gimbal {
     /// # Results
     ///
     /// - `self.rot: na::Matrix3<f64>` - $C_{b,G}$ the orientation rotation matrix
-    pub fn calculate_rotation_matrix(&mut self){
+    pub fn calculate_rotation_matrix(&mut self) {
         trace!("calculate_rotation_matrix start");
-        let rotx = na::Rotation3::<f64>::from_axis_angle(&na::Vector3::x_axis(), self.roll).inverse();
-        let roty = na::Rotation3::<f64>::from_axis_angle(&na::Vector3::y_axis(), self.pitch).inverse();
-        let rotz = na::Rotation3::<f64>::from_axis_angle(&na::Vector3::z_axis(), self.yaw).inverse();
+        let rotx =
+            na::Rotation3::<f64>::from_axis_angle(&na::Vector3::x_axis(), self.roll).inverse();
+        let roty =
+            na::Rotation3::<f64>::from_axis_angle(&na::Vector3::y_axis(), self.pitch).inverse();
+        let rotz =
+            na::Rotation3::<f64>::from_axis_angle(&na::Vector3::z_axis(), self.yaw).inverse();
 
         // calculating the CbH using the gimbal euler 312 rotation.
         self.rot = roty * rotx * rotz;
@@ -57,24 +60,24 @@ impl Gimbal {
     ///
     /// # Detailed Explanation
     ///
-    /// This functions updates the yaw pitch and roll and subsequently 
-    /// updates the rotation matrix based on the new parameters. 
-    /// The vector contains the euler angles in the following order 
+    /// This functions updates the yaw pitch and roll and subsequently
+    /// updates the rotation matrix based on the new parameters.
+    /// The vector contains the euler angles in the following order
     /// - $$ Vec = [roll, pitch, yaw]^T$$
     ///
     /// # Arguments
     /// - `vec: &[f64; 3]` - the new equatorial euler angles
-    /// 
+    ///
     /// # Results
     /// - `roll: f64` - Roll
     /// - `pitch: f64` - Pitch
     /// - `yaw: f64` - Yaw
     /// - `self.rot: na::Rotation3<f64>` - orientation rotation matrix
-    pub fn update_gimbal_coordinates(&mut self, vec: &[f64; 3]){
+    pub fn update_gimbal_coordinates(&mut self, vec: &[f64; 3]) {
         trace!("update_gimbal_coordinates start");
-        self.roll  = vec[0];
+        self.roll = vec[0];
         self.pitch = vec[1];
-        self.yaw  = vec[2];
+        self.yaw = vec[2];
 
         self.calculate_rotation_matrix();
         trace!("update_gimbal_coordinates end");
@@ -84,39 +87,41 @@ impl Gimbal {
     /// # Detailed Explanation
     ///
     /// This functions updates the ra dec and field rotation from
-    /// a rotation matrix ($C_G$) according to 
+    /// a rotation matrix ($C_G$) according to
     /// - $$ Pitch = \atan2(-C_G(1,3), C_G(3,3))$$
     /// - $$ Roll = \asin(C_G(2,3))$$
     /// - $$ Yaw = \atan2(-C_G(2,1), C_E(2,2))$$
     ///
     /// # Arguments
     /// - `vec: &[f64; 3]` - the new equatorial euler angles
-    /// 
+    ///
     /// # Results
     /// - `roll: f64` - Roll
     /// - `pitch: f64` - Pitch
     /// - `yaw: f64` - Yaw
-    pub fn extract_gimbal_rpy(&mut self){
+    pub fn extract_gimbal_rpy(&mut self) {
         trace!("extract_gimbal_rpy start");
-        self.roll = self.rot[(1,2)].asin();
-        self.pitch = (-self.rot[(0,2)]).atan2(self.rot[(2,2)]);
-        self.yaw = (-self.rot[(1,0)]).atan2(self.rot[(1,1)]);
+        self.roll = self.rot[(1, 2)].asin();
+        self.pitch = (-self.rot[(0, 2)]).atan2(self.rot[(2, 2)]);
+        self.yaw = (-self.rot[(1, 0)]).atan2(self.rot[(1, 1)]);
         // println!("mat: {} roll: {}, pitch {}, yaw {}", self.rot,self.roll, self.pitch, self.yaw);
         trace!("extract_gimbal_rpy end");
     }
     /// Function to calculate the gimbal mapping matrix for mapping joint rates to angular velocity
-    /// 
+    ///
     /// # Detailed Explanation
-    /// 
-    /// This function calculates the gimbal mapping matrix for use in the control system. This 
+    ///
+    /// This function calculates the gimbal mapping matrix for use in the control system. This
     /// matrix is necessary for determining joint torques necessary to correct for deviations in telescope
-    /// angular velocity. The gimbal mapping matrix $S(\theta)$ can be calculated (for the 312 euler 
+    /// angular velocity. The gimbal mapping matrix $S(\theta)$ can be calculated (for the 312 euler
     /// sequence of the bit gondola) according to
     ///  $$ S(\theta) = C_{x}()$$
-    pub fn calculate_gimbal_mapping_matrix(&mut self){
+    pub fn calculate_gimbal_mapping_matrix(&mut self) {
         trace!("calculate_gimbal_mapping_matrix start");
-        let rotx = na::Rotation3::<f64>::from_axis_angle(&na::Vector3::x_axis(), self.roll).inverse();
-        let roty = na::Rotation3::<f64>::from_axis_angle(&na::Vector3::y_axis(), self.pitch).inverse();
+        let rotx =
+            na::Rotation3::<f64>::from_axis_angle(&na::Vector3::x_axis(), self.roll).inverse();
+        let roty =
+            na::Rotation3::<f64>::from_axis_angle(&na::Vector3::y_axis(), self.pitch).inverse();
 
         let col1 = roty * na::Vector3::<f64>::new(1.0, 0.0, 0.0);
         let col2 = na::Vector3::<f64>::new(0.0, 1.0, 0.0);
@@ -135,7 +140,7 @@ impl Gimbal {
         let yaw: f64 = -0.0278;
         let rot = na::Rotation3::<f64>::identity();
         let gmm = na::Matrix3::<f64>::identity();
-        let mut gimbal = Gimbal{
+        let mut gimbal = Gimbal {
             roll,
             pitch,
             yaw,

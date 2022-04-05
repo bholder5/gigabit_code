@@ -1,6 +1,6 @@
 //! The Gains submodule details the structs and implementations for the control gains.
 //!
-//! This crate implements a struct `Gains` complete with implementations necessary to 
+//! This crate implements a struct `Gains` complete with implementations necessary to
 //! read in new gains from an input source and re-build the gain matrices for PID control
 
 // import crate for matrix math
@@ -44,7 +44,7 @@ impl Gains {
         self.kd = na::Matrix3::<f64>::from_partial_diagonal(kd_vec);
     }
 
-    pub fn new() -> Gains{
+    pub fn new() -> Gains {
         let kp_vec = [0.10, 0.10, 3.0];
         let ki_vec = [0.00001, 0.000, 0.0001];
         let kd_vec = [0.010, 0.0010, 0.01];

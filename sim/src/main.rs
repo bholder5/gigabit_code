@@ -8,15 +8,15 @@
 // #[allow(unused_attributes)]
 mod bindings;
 mod initialization;
-mod logging;
 mod json_handling;
+mod logging;
 mod sim_csv;
 
+use adcs::{control::*, estimation::*, miscellaneous::*, verification::*};
 use initialization::*;
 use json_handling as js;
-use sim_csv as sc;
-use adcs::{miscellaneous::*, control::*, estimation::*, verification::*};
 use logging::*;
+use sim_csv as sc;
 
 use bindings::bit_one_step;
 
@@ -27,9 +27,9 @@ pub use log4rs::append::file::FileAppender;
 pub use log4rs::config::{Appender, Config, Root};
 pub use log4rs::encode::pattern::PatternEncoder;
 
-extern crate time;
 extern crate csv;
 extern crate serde;
+extern crate time;
 // #[macro_use]
 extern crate serde_derive;
 
@@ -56,23 +56,19 @@ fn main() {
     let mut y_result: [f64; 21] = [0.; 21];
 
     js::read_gains(&mut ctrl); // read in gains from json file (for tuning)
-                           // ctrl.update_gain_matrices();
-                           // ctrl.update_desired_orientation_matrix();
-                           // read_last_state(&mut bp, &mut est, &mut ctrl);
-                           // bp.get_orientation_vec();
-
-    
+                               // ctrl.update_gain_matrices();
+                               // ctrl.update_desired_orientation_matrix();
+                               // read_last_state(&mut bp, &mut est, &mut ctrl);
+                               // bp.get_orientation_vec();
 
     tau_applied[6] = ctrl.rw.tau_applied.clone(); //yaw
     tau_applied[7] = ctrl.fmot_roll.tau_applied.clone(); //roll
     tau_applied[8] = ctrl.fmot_pitch.tau_applied.clone(); //pitch
 
-    sc::push_record(&t,&bp, &est, &ctrl);
-
-
+    sc::push_record(&t, &bp, &est, &ctrl);
 
     trace!("START");
-    for _step in 0.. 0 as usize {
+    for _step in 0..0 as usize {
         ///////// beginning of the simulation loop
         /////////////////////////////////////////
         unsafe {
@@ -111,13 +107,16 @@ fn main() {
         if (step % 1) < 1 {
             // js::read_gains(&mut ctrl); // read in gains from json file (for tuning)
 
-            ctrl.state.update_current_equatorial_coordinates(&bp.phi_act);
+            ctrl.state
+                .update_current_equatorial_coordinates(&bp.phi_act);
             // grab_vec3(&mut ctrl.state.omega, &bp.omega_m);
             ctrl.state.omega[0] = bp.omega_m[0].clone();
             ctrl.state.omega[1] = bp.omega_m[1].clone();
             ctrl.state.omega[2] = bp.omega_m[2].clone();
             ctrl.rw.omega = bp.omega_rw;
-            ctrl.state.gmb_k.update_gimbal_coordinates(&[bp.x[16], bp.x[17], bp.x[15]]);
+            ctrl.state
+                .gmb_k
+                .update_gimbal_coordinates(&[bp.x[16], bp.x[17], bp.x[15]]);
 
             ctrl.update_ctrl();
 
@@ -132,7 +131,7 @@ fn main() {
         }
 
         // record the data
-        sc::push_record(&t,&bp, &est, &ctrl);
+        sc::push_record(&t, &bp, &est, &ctrl);
     }
     trace!("END");
 }

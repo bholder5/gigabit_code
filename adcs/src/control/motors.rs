@@ -1,10 +1,10 @@
 //! The Torque Motor submodule details the structs and implementations for the torque and stepper motors calculations and commanding.
 //!
-//! This crate defines structs `TorqueMotor` and `StepperMotor` complete with implementations necessary to 
+//! This crate defines structs `TorqueMotor` and `StepperMotor` complete with implementations necessary to
 //! safely update and command the motor
-use std::f64::consts::{PI};
 #[allow(unused_imports)]
 use log::{debug, error, info, trace, warn};
+use std::f64::consts::PI;
 
 #[derive(Debug, Clone)]
 pub struct TorqueMotor {
@@ -55,7 +55,7 @@ impl TorqueMotor {
         };
         fmot
     }
-    
+
     pub fn rw_new() -> TorqueMotor {
         let rw: TorqueMotor = TorqueMotor {
             omega: 0.0,
@@ -95,7 +95,7 @@ impl StepperMotor {
         trace!("calculate_pivot_speed end");
     }
 
-    pub fn pivot_new() -> StepperMotor{
+    pub fn pivot_new() -> StepperMotor {
         let gain1: f64 = 0.030;
         let k_flight_train: f64 = 0.001745329251994;
         let i_rw: f64 = 4.5;
