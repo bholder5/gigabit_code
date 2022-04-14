@@ -7,9 +7,13 @@
 extern crate nalgebra as na;
 
 #[derive(Debug, Clone)]
+/// a struct to hold the gains for the PID control
 pub struct Gains {
+    /// proportional gain diagonal matrix
     pub kp: na::Matrix3<f64>,
+    /// derivitive gain diagonal matrix
     pub kd: na::Matrix3<f64>,
+    /// integral gain diagonal matrix
     pub ki: na::Matrix3<f64>,
 }
 
@@ -44,6 +48,7 @@ impl Gains {
         self.kd = na::Matrix3::<f64>::from_partial_diagonal(kd_vec);
     }
 
+    /// Function to instantiate a new Gains struct with default values
     pub fn new() -> Gains {
         let kp_vec = [0.10, 0.10, 3.0];
         let ki_vec = [0.00001, 0.000, 0.0001];

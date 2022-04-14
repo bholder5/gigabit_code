@@ -1,6 +1,5 @@
 extern crate bindgen;
 extern crate openmp_sys;
-use std::process::Command;
 
 use std::path::PathBuf;
 fn main() {

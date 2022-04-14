@@ -20,7 +20,7 @@ pub struct Gps {
     /// Longitude in degrees
     pub lon: f64,
     /// UTC time in Unix time (seconds from Jan 1 1970?)
-    pub _utc: i64,
+    pub _utc: chrono::DateTime<chrono::Utc>,
     /// greenwhich apparent sidereal time in degrees
     /// (This is corrected for nutation and obliquity)
     pub gast: f64,
@@ -33,7 +33,7 @@ impl Gps {
     pub fn new() -> Gps {
         let lat = 47.002282304922659;
         let lon = 82.210336016074365;
-        let _utc = 946684800;
+        let _utc = chrono::prelude::Utc::now();
         let gast = 0.0;
         let mut gps = Gps {
             lat,
@@ -65,23 +65,16 @@ impl Gps {
     pub fn get_greenwhich_apparent_sidereal_time(&mut self) {
         // this was tested against python and websites and thus is not in the matlab live script
         trace!("get_greenwhich_apparent_sidereal_time start");
-        let dt = chrono::prelude::Utc::now();
-
-        // break down the DateTime into a day object
-        let _day = astro::time::DayOfMonth {
-            day: dt.day() as u8,
-            hr: dt.hour() as u8,
-            min: dt.minute() as u8,
-            sec: dt.second() as f64,
-            time_zone: 0.0,
-        };
+        // let dt = chrono::prelude::Utc::now();
+        let dt = self._utc.clone();
 
         //use day object to calculate the decimal day
         let decimal_day = {
-            _day.day as f64
-                + (_day.hr as f64) / 24.0
-                + _day.min as f64 / (24.0 * 60.0)
-                + _day.sec as f64 / (24.0 * 3600.0)
+            dt.day() as f64
+                + (dt.hour() as f64) / 24.0
+                + dt.minute() as f64 / (24.0 * 60.0)
+                + dt.second() as f64 / (24.0 * 3600.0)
+                + dt.nanosecond() as f64 / (24.0 * 3600.0 * 1e9)
         };
 
         // use decimal day to create a complete date object

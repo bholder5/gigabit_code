@@ -23,10 +23,34 @@ pub fn grab_vec3(v1: &mut na::Vector3<f64>, v2: &na::Vector3<f64>) -> () {
 ///
 /// # Arguments
 ///
-/// `rot: &na::Mector3<f64>` - the matrix to be deconstructed
+/// `rot: &na::Matrix3<f64>` - the matrix to be deconstructed
 /// `phi: &mut na::Vector3<f64>` - the vector to be reconstructed
 pub fn unxmat(rot: &na::Matrix3<f64>, phi: &mut na::Vector3<f64>) -> () {
     phi[0] = (rot[(2, 1)] - rot[(1, 2)]) / 2.0;
     phi[1] = (rot[(0, 2)] - rot[(2, 0)]) / 2.0;
     phi[2] = (rot[(1, 0)] - rot[(0, 1)]) / 2.0;
+}
+/// Function to grenerate the cross matric from a vector
+///
+/// # Details
+///
+/// This function takes in a vector and generates the cross matrix from it
+///
+/// # Arguments
+///
+/// `phi: &na::Vector3<f64>` - the vector to be crossed
+///
+/// # Results
+///
+/// `rot: na::Matrix3<f64>` - the cross matrix
+pub fn xmat(phi: &na::Vector3<f64>, rot: &mut na::Matrix3<f64>) {
+    rot[(0, 1)] = -phi[2];
+    rot[(1, 0)] = phi[2];
+    rot[(0, 2)] = phi[1];
+    rot[(2, 0)] = -phi[1];
+    rot[(1, 2)] = -phi[0];
+    rot[(2, 1)] = phi[0];
+    rot[(0, 0)] = 0.0;
+    rot[(1, 1)] = 0.0;  
+    rot[(2, 2)] = 0.0;
 }

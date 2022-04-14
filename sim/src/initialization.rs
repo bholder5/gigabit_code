@@ -12,34 +12,23 @@
 //!
 
 use crate::bindings::{compute_angular_velocity_C, compute_rotation_mat_C};
-use adcs::control::Ctrl;
-use adcs::estimation::Est;
-// import crate for matrix math
-
 extern crate nalgebra as na;
-pub use na::{Matrix3, Matrix6, MatrixMN, Rotation3, Vector3, Vector6};
-// use std::fmt;
-use std::error::Error;
-// use std::io;
-use csv::WriterBuilder;
+
 pub use std::env;
 use std::f64::consts::PI;
 pub use std::ffi::OsString;
 pub use std::fs::{File, OpenOptions};
-use std::io::BufReader;
 pub use std::path::Path;
 
 #[allow(unused_imports)]
 use log::{debug, error, info, trace, warn};
-use serde::Deserialize;
-use serde::Serialize;
 
 // Create a matrix type
 /// A stack-allocated, column-major, 9 dimensional vector
-pub type Vector9 = na::MatrixMN<f64, na::U9, na::U1>;
+pub type Vector9 = na::SMatrix<f64, 9, 1>;
 /// A stack-allocated, column-major, 21 dimensional vector
-pub type Vector18 = na::MatrixMN<f64, na::U18, na::U1>;
-pub type Vector21 = na::MatrixMN<f64, na::U21, na::U1>;
+pub type Vector18 = na::SMatrix<f64, 18, 1>;
+pub type Vector21 = na::SMatrix<f64, 21, 1>;
 
 /// number of degrees of freedom in the simulation (from balloon to telescope)
 pub const N_DOF: u8 = 9;
@@ -56,7 +45,7 @@ pub struct Params {
     pub _zn: [[f64; 3]; 9],
     pub omega_rw: f64,
     pub _i_z_rw: f64,
-    pub omega_m: Vector3<f64>,
+    pub omega_m: na::Vector3<f64>,
     pub _dt: f64,
     pub _num_steps: u16,
     pub phi_act: [f64; 3],
@@ -68,7 +57,6 @@ pub struct Params {
     _pitch_theta_min: f64,
     pub pitch_nom: f64,
     // //
-    pub gps: Gps,
 }
 
 impl Params {
@@ -98,7 +86,7 @@ impl Params {
             );
             trace!("compute_angular_velocity_C end");
         }
-        self.omega_m = Vector3::<f64>::from_row_slice(om.as_ref());
+        self.omega_m = na::Vector3::<f64>::from_row_slice(om.as_ref());
         debug!("omega_m: {:}, om(pointer): {:?}", self.omega_m, om.as_ref());
         trace!("get_omega_meas end");
     }
@@ -133,7 +121,7 @@ impl Params {
         }
         let c = c_vec.as_ref();
         // println!("{:?}", [c[0], c[1], c[2]].concat());
-        let rotmat = Rotation3::<f64>::from_matrix(&Matrix3::<f64>::from_row_slice(
+        let rotmat = na::Rotation3::<f64>::from_matrix(&na::Matrix3::<f64>::from_row_slice(
             &[c[0], c[1], c[2]].concat(),
         ));
         debug!("rotmat {:} from thet: {:}", rotmat, self.theta);
@@ -163,24 +151,24 @@ impl Params {
             }
         }
 
-        // //bound pitch to pitch max
-        // if self.theta[8] >= self._pitch_theta_max{
-        //     self.theta[8] = self._pitch_theta_max;
-        //     self.x[17] = self._pitch_theta_max;
-        //     if self.d_theta_dt[8].signum() > 0.0{
-        //         self.d_theta_dt[8] = 0.0;
-        //         self.x[8] = 0.0;
-        //     }
-        // }
-        // //bound pitch to pitch min
-        // if self.theta[8] <= self._pitch_theta_min{
-        //     self.theta[8] = self._pitch_theta_min;
-        //     self.x[17] = self._pitch_theta_min;
-        //     if self.d_theta_dt[8].signum() < 0.0{
-        //         self.d_theta_dt[8] = 0.0;
-        //         self.x[8] = 0.0;
-        //     }
-        // }
+        //bound pitch to pitch max
+        if self.theta[8] >= self._pitch_theta_max{
+            self.theta[8] = self._pitch_theta_max;
+            self.x[17] = self._pitch_theta_max;
+            if self.d_theta_dt[8].signum() > 0.0{
+                self.d_theta_dt[8] = 0.0;
+                self.x[8] = 0.0;
+            }
+        }
+        //bound pitch to pitch min
+        if self.theta[8] <= self._pitch_theta_min{
+            self.theta[8] = self._pitch_theta_min;
+            self.x[17] = self._pitch_theta_min;
+            if self.d_theta_dt[8].signum() < 0.0{
+                self.d_theta_dt[8] = 0.0;
+                self.x[8] = 0.0;
+            }
+        }
         trace!("bound_gondola_position end");
     }
 }
@@ -211,7 +199,7 @@ pub fn init_bit() -> Params {
     let d_theta_dt = Vector9::from_row_slice(&[0., 0., 0., 0., 0., 0., 0., 0., 0.]); // joint angle rates [rad/s]
     let dthet_thet = Vector18::from_row_slice(&[d_theta_dt.as_slice(), theta.as_slice()].concat());
 
-    let omega_rw: f64 = 0.0;
+    let omega_rw: f64 = PI;
     let _i_z_rw: f64 = 4.5;
 
     let mut x = Vector21::zeros();
@@ -219,7 +207,7 @@ pub fn init_bit() -> Params {
         x[_step] = d_theta_dt[_step];
         x[_step + 9] = theta[_step];
     }
-    // x[20] = PI * _i_z_rw;
+    x[20] = PI * _i_z_rw;
     // let x0 = Vector21::from_row_slice(&d_theta_dt_0, &theta_0, &h_rw_0);
 
     let _zn = [
@@ -238,7 +226,7 @@ pub fn init_bit() -> Params {
     // [0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]
     // [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0]]);
 
-    let omega_m = Vector3::<f64>::zeros();
+    let omega_m = na::Vector3::<f64>::zeros();
     let _dt = 0.0001;
     let _num_steps: u16 = 10;
     let phi_act = [0.0; 3];
@@ -248,7 +236,7 @@ pub fn init_bit() -> Params {
     let _pitch_theta_max: f64 = -20.0 * PI / 180.0;
     let _pitch_theta_min: f64 = -60.0 * PI / 180.0;
     let pitch_nom: f64 = -40.0 * PI / 180.0;
-    let gps = Gps::new();
+    // let gps = Gps::new();
     // define params struct_
     let _params = Params {
         theta,
@@ -269,26 +257,7 @@ pub fn init_bit() -> Params {
         _pitch_theta_max,
         _pitch_theta_min,
         pitch_nom,
-        gps,
     };
     info!("Bit initialized: \n {:?}", _params);
     return _params;
-}
-
-#[derive(Debug, Deserialize, Default)]
-pub struct Gps {
-    lat: f64,
-    lon: f64,
-    utc: f64,
-}
-
-impl Gps {
-    pub fn new() -> Gps {
-        let lat = 47.002282304922659;
-        let lon = -82.210336016074365;
-        let utc = 946684800.0;
-
-        let gps = Gps { lat, lon, utc };
-        gps
-    }
 }

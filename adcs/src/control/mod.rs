@@ -25,25 +25,36 @@ use log::{debug, error, info, trace, warn};
 // matrices
 #[derive(Debug)]
 pub struct Ctrl {
-    /// Fine pointing motors max torque
+    /// Struct to represent the roll frameless motors
     pub fmot_roll: mot::TorqueMotor,
+    /// Struct to represent the pitch frameless motors
     pub fmot_pitch: mot::TorqueMotor,
+    /// Struct to represent the reaction wheel motor
     pub rw: mot::TorqueMotor,
+    /// Struct to represent the pivot stepper motor
     pub pivot: mot::StepperMotor,
+    /// Struct to represent the fine pointing controller gains
     pub fine_gains: gns::Gains,
+    /// Struct to represent the coarse pointing controller gains
     pub slew_gains: gns::Gains,
+    /// Struct to represent the error state of the system
     pub error: er::Error,
+    /// Struct to represent the state of the system
     pub state: st::State,
+    /// flag to signal if the gondola should be slewing
     pub slew_flag: bool,
 }
 
 impl Ctrl {
     /// Function that calculates the requested control torques based on the current error and integrated error
+    ///
     /// # Detailed Explanation
-    /// This function takes the current yaw pitch roll error, integrated error and rate error (gyro measurement) and calculates the torques to request on each axis using a PID controller
-    /// $$\tau_{req} = K_p\phi_{err,k} + K_d \omega_{err,k} + K_i \phi_{err,sum,k} $$, where $\omega_{err,k} = \omega_k$ for fine pointing
+    ///
+    /// This function takes the current yaw pitch roll error, integrated error and rate error
+    /// (gyro measurement) and calculates the torques to request on each axis using a PID controller
+    /// $$\tau_{req} = K_p\phi_{err rate,k} + K_i \phi_{err rate,sum,k} $$,
     ///  
-    ///  -these error terms are calculated in `update_error_terms`
+    ///  -these error terms are calculated in functions implemented on the `error` struct
     ///
     /// # Arguments
     ///  -`self.error.err_th:Vector3<f64>`: $\phi_{err,k}$ the current error in euler angles
@@ -62,44 +73,34 @@ impl Ctrl {
     /// - `self.fmot_roll.tau_applied: f64`: the applied torque in roll
     /// - `self.fmot_pitch.tau_applied: f64`: the applied torque in pitch
     /// - `self.fmot_rw.tau_applied: f64`: the applied torque in yaw
-    fn calculate_applied_torque(&mut self) {
+    pub fn calculate_applied_torque(&mut self) {
         trace!("calculate_applied_torque start");
-        let mut temp = na::Vector3::<f64>::zeros();
+
         let mut temp2 = na::Vector3::<f64>::zeros();
         let mut tau_requested = na::Vector3::<f64>::zeros();
 
-        let mut gains = self.fine_gains.clone();
-        let phi = na::Matrix3::<f64>::identity();
+        let gains = self.fine_gains.clone();
 
-        phi.mul_to(&self.error.err_rate, &mut temp);
-        info!("{:} x {:} = {:}", &phi, &self.error.err_rate, &temp);
-        gains.kp.ad_mul_to(&temp, &mut tau_requested);
-        info!("{:} x {:} = {:}", &gains.kp, &temp, &tau_requested);
+        gains.kp.ad_mul_to(&self.error.err_rate, &mut tau_requested);
+        // println!("{:} x {:} = {:}", &gains.kp, &self.error.err_rate, &tau_requested);
 
-        // phi.mul_to(&(self.error.err_om), &mut temp);
-        // info!("{:} x {:} = {:}", &phi, &self.error.err_om, &temp);
-        // gains.kd.mul_to(&temp, &mut temp2);
-        // info!("{:} x {:} = {:}", &gains.kd, &temp, &temp2);
-        // tau_requested = tau_requested + temp2;
-
-        phi.mul_to(&self.error.err_rate_sum, &mut temp);
-        info!("{:} x {:} = {:}", &phi, &self.error.err_rate_sum, &temp);
-        gains.ki.mul_to(&temp, &mut temp2);
-        info!("{:} x {:} = {:}", &gains.ki, &temp, &temp2);
+        gains.ki.mul_to(&self.error.err_rate_sum, &mut temp2);
+        // println!("{:} x {:} = {:}", &gains.ki, &self.error.err_rate_sum, &temp2);
         tau_requested = tau_requested + temp2;
+        // println!("tau_requested {}", &tau_requested);
 
         self.fmot_roll.tau_request = tau_requested[0];
         self.fmot_pitch.tau_request = tau_requested[1];
-        // reverse rw torque because opposite acts on gondola
+        // reverse rw torque because opposite acts on gondola (for simulation)
         self.rw.tau_request = -tau_requested[2];
 
         self.fmot_roll.bound_requested_torque();
         self.fmot_pitch.bound_requested_torque();
         self.rw.bound_requested_torque();
-        debug!(
-            "tau applied roll {:} \n pitch: {:} \n rw: {:}",
-            self.fmot_roll.tau_applied, self.fmot_pitch.tau_applied, self.rw.tau_applied
-        );
+        // println!(
+        //     "tau applied roll {:} \n pitch: {:} \n rw: {:}",
+        //     self.fmot_roll.tau_applied, self.fmot_pitch.tau_applied, self.rw.tau_applied
+        // );
         trace!("calculate_applied_torque end");
     }
     /// Function that ultimately updates the applied torque
@@ -118,6 +119,7 @@ impl Ctrl {
         // update Chat_k based on yaw pitch roll in xhat_k
         self.state.update_desired_gimbal_rpy();
         let phi = self.state.calculate_coupling_matrix();
+        self.state.gmb_k.calculate_inverse_gimbal_mapping_matrix();
         self.error
             .update_pointing_positional_error(&self.state, phi);
         self.error

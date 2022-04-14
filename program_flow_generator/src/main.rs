@@ -1,4 +1,4 @@
-use dot_writer::{Attributes, Color, DotWriter, Shape, Style};
+use dot_writer::{Attributes, DotWriter};
 use regex::RegexSetBuilder;
 use std::collections::HashMap;
 use std::fs::File;
@@ -48,7 +48,7 @@ fn main() {
             in_loop = false;
         }
         if in_loop {
-            if ((ent == "start") ^ (ent == "end")) {
+            if (ent == "start") ^ (ent == "end") {
                 verbs.push(ent.to_string());
             } else {
                 funcs.push(ent.to_string());
@@ -67,6 +67,7 @@ fn main() {
 
     let mut last_func: &String = &"".to_string();
     let mut last_verb: &String = &"".to_string();
+    #[allow(unused_assignments)]
     let mut verb = &"".to_string();
     let mut connections = Vec::new();
     let mut cluster_name = &"".to_string();
@@ -81,10 +82,11 @@ fn main() {
     let mut cluster_flag1 = false;
     let mut cluster_flag2 = false;
     let mut cluster_flag3 = false;
+    #[allow(unused_variables)]
     let mut cluster_entry_func = &"".to_string();
     let mut child_parent = Vec::new();
     let mut childs_child = Vec::new();
-    let mut new_clust_name = String::new();
+    let _new_clust_name = String::new();
     // let mut node_renames = Vec::new();
 
     // connections.push(["".to_string(), "".to_string()]);
@@ -221,7 +223,7 @@ fn main() {
         }
     }
 
-    let mut f = File::create("example3.dot").unwrap();
+    let _f = File::create("example3.dot").unwrap();
     let mut clusters_parent_id = HashMap::<String, Vec<dot_writer::NodeId>>::new();
     let mut clusters_child_id = HashMap::<String, Vec<dot_writer::NodeId>>::new();
     let mut clusters_childschild_id = HashMap::<String, Vec<dot_writer::NodeId>>::new();
@@ -245,7 +247,6 @@ fn main() {
                 }
                 clusters_parent_id.insert(clust.to_string(), node_ids.clone());
 
-                let length = nodes.len();
                 // clust_write.edge(&clust, &node_ids[0]);
 
                 if nodes.len() > 1 {

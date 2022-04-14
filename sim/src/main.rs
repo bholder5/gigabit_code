@@ -11,12 +11,14 @@ mod initialization;
 mod json_handling;
 mod logging;
 mod sim_csv;
+mod measurements;
 
-use adcs::{control::*, estimation::*, miscellaneous::*, verification::*};
+use adcs::{control::*, estimation::*, verification::*};
 use initialization::*;
 use json_handling as js;
 use logging::*;
 use sim_csv as sc;
+use measurements as ms;
 
 use bindings::bit_one_step;
 
@@ -35,13 +37,16 @@ extern crate serde_derive;
 
 fn main() {
     init_log();
-    test_control();
+    // the verification function for all tihngs in the control module.
+    // test_control();
+    test_estimation();
     // run initialization and have all relevant
     // bit parameters in the struct
     let mut bp = init_bit();
     bp.get_orientation_vec();
-    let est = Est::init();
+    let est = Estimator::new();
     let mut ctrl = Ctrl::new();
+    let mut meas = ms::Meas::new();
 
     // define Simulation parameters
     let mut step: u64 = 0; //integer for tracking rate of control
@@ -58,14 +63,14 @@ fn main() {
     js::read_gains(&mut ctrl); // read in gains from json file (for tuning)
                                // ctrl.update_gain_matrices();
                                // ctrl.update_desired_orientation_matrix();
-                               // read_last_state(&mut bp, &mut est, &mut ctrl);
+    // sc::read_last_state(&mut bp, &mut est, &mut ctrl);
                                // bp.get_orientation_vec();
 
     tau_applied[6] = ctrl.rw.tau_applied.clone(); //yaw
     tau_applied[7] = ctrl.fmot_roll.tau_applied.clone(); //roll
     tau_applied[8] = ctrl.fmot_pitch.tau_applied.clone(); //pitch
 
-    sc::push_record(&t, &bp, &est, &ctrl);
+    sc::push_record(&t, &bp, &est, &ctrl).unwrap();
 
     trace!("START");
     for _step in 0..0 as usize {
@@ -78,7 +83,7 @@ fn main() {
                 tau_applied.as_ptr(),
                 bp.unlock.as_ptr(),
                 ctrl.pivot.omega_request,
-                false as u8,
+                true as u8,
                 bp._dt,
                 bp._num_steps,
                 bp._tau_piv_max,
@@ -91,6 +96,7 @@ fn main() {
 
         step = step + 1;
         t = t + 0.001;
+        ctrl.state.gps._utc = ctrl.state.gps._utc + chrono::Duration::milliseconds(1);
         bp.x = Vector21::from_row_slice(y_result.as_ref());
 
         // reassign the state matrix to the last state matrix
@@ -99,13 +105,14 @@ fn main() {
         bp.get_omega_meas();
         bp.get_orientation_vec();
         bp.get_rw_speed();
+        meas.read_measurements(&bp);
 
         // debug!("new state array is: {:}", &bp.x);
         // Calculate control terms based on current step
         // println!("check for control calcs: 20 % step = {:}, step: {:}", (step % 20), step);
 
-        if (step % 1) < 1 {
-            // js::read_gains(&mut ctrl); // read in gains from json file (for tuning)
+        if (step % 10) < 1 {
+            js::read_gains(&mut ctrl); // read in gains from json file (for tuning)
 
             ctrl.state
                 .update_current_equatorial_coordinates(&bp.phi_act);
@@ -131,7 +138,7 @@ fn main() {
         }
 
         // record the data
-        sc::push_record(&t, &bp, &est, &ctrl);
+        sc::push_record(&t, &bp, &est, &ctrl).unwrap();
     }
     trace!("END");
 }

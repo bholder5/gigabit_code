@@ -38,7 +38,7 @@ pub struct State {
     /// eqautorial to horizontal mapping rotation matrix
     pub ceh: na::Rotation3<f64>,
     /// offset from imbalance between horizontal frame and body fized frame
-    b2h_offset: na::Rotation3<f64>,
+    _b2h_offset: na::Rotation3<f64>,
 }
 
 impl State {
@@ -62,7 +62,7 @@ impl State {
         let gmb_k = gb::Gimbal::new();
         let gmb_d = gb::Gimbal::new();
         let ceh = na::Rotation3::<f64>::identity();
-        let b2h_offset = na::Rotation3::<f64>::identity();
+        let _b2h_offset = na::Rotation3::<f64>::identity();
 
         let state: State = State {
             omega,
@@ -74,7 +74,7 @@ impl State {
             gmb_k,
             gmb_d,
             ceh,
-            b2h_offset,
+            _b2h_offset,
         };
         state
     }
@@ -98,9 +98,7 @@ impl State {
     /// # Result
     ///
     /// `_phi` - the coupling matrix for use in the control algorithm.
-    pub fn calculate_coupling_matrix(
-        &mut self,
-    ) -> na::Matrix<f64, na::U3, na::U3, na::ArrayStorage<f64, na::U3, na::U3>> {
+    pub fn calculate_coupling_matrix(&mut self) -> na::Matrix3<f64> {
         trace!("calculate_coupling_matrix start");
         let st2: f64 = self.gmb_k.roll.sin();
         let _phi = na::Matrix3::<f64>::from_row_slice(&[1., 0., 0., 0., 1., st2, 0., st2, 1.]);
@@ -239,12 +237,12 @@ impl State {
     }
 
     /// Temp fucntion for testing error functions
-    /// 
+    ///
     pub fn update_current_eq_from_gmb(&mut self) {
         trace!("update_current_eq_rdf start");
         self.update_hor_to_eq_conversion();
         self.gmb_k.calculate_rotation_matrix();
-        self.eq_k.rot = self.gmb_k.rot * self.ceh.inverse();
+        self.eq_k.rot = self.gmb_k.rot * self.ceh;
         self.eq_k.extract_ra_dec_fr_from_rotmat();
         // println!("desired: ra {} dec {} fr {}", self.eq_d.ra, self.eq_d.dec, self.eq_d.fr);
         trace!("update_current_eq_rdf end");

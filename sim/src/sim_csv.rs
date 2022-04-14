@@ -13,28 +13,26 @@
 
 use crate::initialization::Params;
 use adcs::control::Ctrl;
-use adcs::estimation::Est;
-// import crate for matrix math
+use adcs::estimation::Estimator;
 
-// use std::fmt;
 use std::error::Error;
-// use std::io;
 use csv::WriterBuilder;
 pub use std::env;
 
 pub use std::ffi::OsString;
 pub use std::fs::{File, OpenOptions};
-use std::io::BufReader;
 pub use std::path::Path;
 
 #[allow(unused_imports)]
 use log::{debug, error, info, trace, warn};
 use serde::Deserialize;
 use serde::Serialize;
+use chrono::{Utc, NaiveDateTime};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Record {
     t: f64,
+    utc: f64,
     dth1: f64,
     dth2: f64,
     dth3: f64,
@@ -72,9 +70,15 @@ pub struct Record {
     err_rate_sum_roll: f64,
     err_rate_sum_pitch: f64,
     err_rate_sum_yaw: f64,
+    rate_des_roll: f64,
+    rate_des_pitch: f64,
+    rate_des_yaw: f64,
     omega_roll: f64,
     omega_pitch: f64,
     omega_yaw: f64,
+    omega_gmm_i_roll: f64,
+    omega_gmm_i_pitch: f64,
+    omega_gmm_i_yaw: f64,
     ra: f64,
     dec: f64,
     fr: f64,
@@ -92,7 +96,7 @@ pub struct Record {
     tau_yaw: f64,
 }
 
-pub fn push_record(t: &f64, bp: &Params, _est: &Est, ctrl: &Ctrl) -> Result<(), Box<dyn Error>> {
+pub fn push_record(t: &f64, bp: &Params, _est: &Estimator, ctrl: &Ctrl) -> Result<(), Box<dyn Error>> {
     // let file_path = "/home/brad/sim_data/out.csv";
     let file_path = "/media/brad/linux_storage/sim_data/out.csv";
 
@@ -105,6 +109,7 @@ pub fn push_record(t: &f64, bp: &Params, _est: &Est, ctrl: &Ctrl) -> Result<(), 
 
         wtr.serialize(Record {
             t: t.clone(),
+            utc: ctrl.state.gps._utc.timestamp() as f64,
             dth1: bp.x[0],
             dth2: bp.x[1],
             dth3: bp.x[2],
@@ -142,9 +147,15 @@ pub fn push_record(t: &f64, bp: &Params, _est: &Est, ctrl: &Ctrl) -> Result<(), 
             err_rate_sum_roll: ctrl.error.err_rate_sum[0],
             err_rate_sum_pitch: ctrl.error.err_rate_sum[1],
             err_rate_sum_yaw: ctrl.error.err_rate_sum[2],
+            rate_des_roll: ctrl.error.rate_des[0],
+            rate_des_pitch: ctrl.error.rate_des[1],
+            rate_des_yaw: ctrl.error.rate_des[2],
             omega_roll: ctrl.state.omega[0],
             omega_pitch: ctrl.state.omega[1],
             omega_yaw: ctrl.state.omega[2],
+            omega_gmm_i_roll: ctrl.error._d_theta[0],
+            omega_gmm_i_pitch: ctrl.error._d_theta[1],
+            omega_gmm_i_yaw: ctrl.error._d_theta[2],
             //
             ra: ctrl.state.eq_k.ra,
             dec: ctrl.state.eq_k.dec,
@@ -174,6 +185,7 @@ pub fn push_record(t: &f64, bp: &Params, _est: &Est, ctrl: &Ctrl) -> Result<(), 
         let mut wtr = WriterBuilder::new().has_headers(true).from_writer(file);
         wtr.serialize(Record {
             t: t.clone(),
+            utc: ctrl.state.gps._utc.timestamp() as f64,
             dth1: bp.x[0],
             dth2: bp.x[1],
             dth3: bp.x[2],
@@ -211,9 +223,15 @@ pub fn push_record(t: &f64, bp: &Params, _est: &Est, ctrl: &Ctrl) -> Result<(), 
             err_rate_sum_roll: ctrl.error.err_rate_sum[0],
             err_rate_sum_pitch: ctrl.error.err_rate_sum[1],
             err_rate_sum_yaw: ctrl.error.err_rate_sum[2],
+            rate_des_roll: ctrl.error.rate_des[0],
+            rate_des_pitch: ctrl.error.rate_des[1],
+            rate_des_yaw: ctrl.error.rate_des[2],
             omega_roll: ctrl.state.omega[0],
             omega_pitch: ctrl.state.omega[1],
             omega_yaw: ctrl.state.omega[2],
+            omega_gmm_i_roll: ctrl.error._d_theta[0],
+            omega_gmm_i_pitch: ctrl.error._d_theta[1],
+            omega_gmm_i_yaw: ctrl.error._d_theta[2],
             ra: ctrl.state.eq_k.ra,
             dec: ctrl.state.eq_k.dec,
             fr: ctrl.state.eq_k.fr,
@@ -238,7 +256,7 @@ pub fn push_record(t: &f64, bp: &Params, _est: &Est, ctrl: &Ctrl) -> Result<(), 
 }
 
 #[allow(dead_code)]
-pub fn read_last_state(mut t: f64, bp: &mut Params, _est: &Est, ctrl: &mut Ctrl) -> () {
+pub fn read_last_state(mut _t: f64, bp: &mut Params, _est: &Estimator, ctrl: &mut Ctrl) -> () {
     let file_path = "/media/brad/linux_storage/sim_data/out.csv";
 
     if Path::new(&file_path.clone()).exists() {
@@ -255,7 +273,8 @@ pub fn read_last_state(mut t: f64, bp: &mut Params, _est: &Est, ctrl: &mut Ctrl)
         if let Some(result) = iter.last() {
             let rec: Record = result.unwrap();
             println!("{:?}", rec);
-            t = rec.t.clone();
+            _t = rec.t.clone();
+            ctrl.state.gps._utc = chrono::DateTime::<Utc>::from_utc(NaiveDateTime::from_timestamp_opt(rec.utc as i64, 0).unwrap(), Utc);
             bp.x[0] = rec.dth1;
             bp.x[1] = rec.dth2;
             bp.x[2] = rec.dth3;
@@ -293,9 +312,15 @@ pub fn read_last_state(mut t: f64, bp: &mut Params, _est: &Est, ctrl: &mut Ctrl)
             ctrl.error.err_rate_sum[0] = rec.err_rate_sum_roll;
             ctrl.error.err_rate_sum[1] = rec.err_rate_sum_pitch;
             ctrl.error.err_rate_sum[2] = rec.err_rate_sum_yaw;
+            ctrl.error.rate_des[0] = rec.rate_des_roll;
+            ctrl.error.rate_des[1] = rec.rate_des_pitch;
+            ctrl.error.rate_des[2] = rec.rate_des_yaw;
             ctrl.state.omega[0] = rec.omega_roll;
             ctrl.state.omega[1] = rec.omega_pitch;
             ctrl.state.omega[2] = rec.omega_yaw;
+            ctrl.error._d_theta[0] = rec.omega_gmm_i_roll;
+            ctrl.error._d_theta[1] = rec.omega_gmm_i_pitch;
+            ctrl.error._d_theta[2] = rec.omega_gmm_i_yaw;
             ctrl.state.eq_k.ra = rec.ra;
             ctrl.state.eq_k.dec = rec.dec;
             ctrl.state.eq_k.fr = rec.fr;

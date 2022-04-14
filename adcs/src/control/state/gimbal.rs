@@ -18,9 +18,12 @@ pub struct Gimbal {
     pub yaw: f64,
     /// Rotation matrix associated with the yaw roll pitch (312) euler sequence
     pub rot: na::Rotation3<f64>,
-    /// the gimbal mapping matrix, maps from boresight telescope frame to
-    /// gimbal coordinates ($\dot\theta = \Phi_{gmm}\omega$)
+    /// the gimbal mapping matrix, maps from gimbal coordinates to boresight telescope frame to
+    /// ($\omega = \Phi_{gmm}\dot\theta$)
     pub gmm: na::Matrix3<f64>,
+    /// the inverse of the gimbal mapping matrix, maps from boresight telescope frame to
+    /// gimbal coordinates ($\dot\theta = \Phi_{gmm}^{-1}\omega$)
+    pub gmm_i: na::Matrix3<f64>,
 }
 
 impl Gimbal {
@@ -115,7 +118,7 @@ impl Gimbal {
     /// matrix is necessary for determining joint torques necessary to correct for deviations in telescope
     /// angular velocity. The gimbal mapping matrix $S(\theta)$ can be calculated (for the 312 euler
     /// sequence of the bit gondola) according to
-    ///  $$ S(\theta) = C_{x}()$$
+    ///  $$ S(\theta) = e_y + C_{y}(\theta_2)e_x + C_{y}(\theta_2)C_{x}(\theta_1)e_z$$
     pub fn calculate_gimbal_mapping_matrix(&mut self) {
         trace!("calculate_gimbal_mapping_matrix start");
         let rotx =
@@ -130,6 +133,36 @@ impl Gimbal {
         self.gmm = gmm;
         trace!("calculate_gimbal_mapping_matrix end");
     }
+    /// Function to calculate the invese of thegimbal mapping matrix for
+    /// mapping angular velocity to joint rates
+    ///
+    /// # Detailed Explanation
+    ///
+    /// This function calculates the inverse of the gimbal mapping matrix for use in the control system. This
+    /// matrix is necessary for determining joint rates from the gyro measurements. The inverse gimbal mapping
+    ///  matrix $S^{-1}(\theta)$ can be calculated (for the 312 euler
+    /// sequence of the bit gondola) according to
+    ///  $$ \left(\begin{array}{ccc} \cos \left(P\right) & 0 & \sin \left(P\right)\\\frac{\sin \left(P\right)\,\sin
+    ///  \left(R\right)}{\cos \left(R\right)} & 1 & -\frac{\cos \left(P\right)\,\sin \left(R\right)}{\cos \left(R\right)}\\
+    /// -\frac{\sin \left(P\right)}{\cos \left(R\right)} & 0 & \frac{\cos \left(P\right)}{\cos \left(R\right)}
+    /// \end{array}\right)$$
+    ///
+    /// NOT TESTED
+    pub fn calculate_inverse_gimbal_mapping_matrix(&mut self) {
+        trace!("calculate_inverse_gimbal_mapping_matrix start");
+        let mut gmm_i = na::Matrix3::<f64>::zeros();
+
+        gmm_i[(0, 0)] = self.pitch.cos();
+        gmm_i[(0, 2)] = self.pitch.sin();
+        gmm_i[(1, 0)] = self.pitch.sin() * self.roll.sin() / self.roll.cos();
+        gmm_i[(1, 1)] = 1.0;
+        gmm_i[(1, 2)] = -self.pitch.cos() * self.roll.sin() / self.roll.cos();
+        gmm_i[(2, 0)] = -self.pitch.sin() / self.roll.cos();
+        gmm_i[(2, 2)] = self.pitch.cos() / self.roll.cos();
+
+        self.gmm_i = gmm_i;
+        trace!("calculate_inverse_gimbal_mapping_matrix end");
+    }
 
     /// This function creates a new instance of the Gimbal struct
     /// initialized with selected initial values and then calculates
@@ -140,12 +173,14 @@ impl Gimbal {
         let yaw: f64 = -0.0278;
         let rot = na::Rotation3::<f64>::identity();
         let gmm = na::Matrix3::<f64>::identity();
+        let gmm_i = na::Matrix3::<f64>::identity();
         let mut gimbal = Gimbal {
             roll,
             pitch,
             yaw,
             rot,
             gmm,
+            gmm_i,
         };
         gimbal.calculate_rotation_matrix();
         gimbal
