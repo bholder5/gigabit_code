@@ -96,4 +96,10 @@ impl GyroBs {
         self.deconstruct_measurement();
         self.om_b = self.omega_m + self.bias;
     }
+    pub fn reset(&mut self){
+        self.c_bg = na::Rotation3::identity();
+        self.a_g = na::Matrix3::identity();
+        self.bias = na::Vector3::new(0.0, 0.0, 0.0);
+
+    }
 }

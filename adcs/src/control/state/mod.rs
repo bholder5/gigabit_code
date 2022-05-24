@@ -7,7 +7,6 @@
 extern crate nalgebra as na;
 
 // Declare the sub-modules for the state module for organizational purposes
-pub mod coords;
 pub mod equitorial;
 pub mod gimbal;
 pub mod gps;
@@ -31,6 +30,8 @@ pub struct State {
     pub eq_d: eq::Equatorial,
     /// Current horizontal coordinates (for telemetry purposes only)
     pub hor: hor::Horizontal,
+    /// Desired Horizontal coordinates
+    pub hor_d: hor::Horizontal,
     /// Current gimbal coordinates
     pub gmb_k: gb::Gimbal,
     /// Desired gimbal coordinates
@@ -59,6 +60,7 @@ impl State {
         let eq_k = eq::Equatorial::new();
         let eq_d = eq::Equatorial::new();
         let hor = hor::Horizontal::new();
+        let hor_d = hor::Horizontal::new();
         let gmb_k = gb::Gimbal::new();
         let gmb_d = gb::Gimbal::new();
         let ceh = na::Rotation3::<f64>::identity();
@@ -71,6 +73,7 @@ impl State {
             eq_k,
             eq_d,
             hor,
+            hor_d,
             gmb_k,
             gmb_d,
             ceh,
@@ -201,6 +204,8 @@ impl State {
         self.update_hor_to_eq_conversion();
         self.gmb_d.rot = self.eq_d.rot * self.ceh;
         self.gmb_d.extract_gimbal_rpy();
+        self.hor_d.rot = self.gmb_d.rot.clone();
+        self.hor_d.extract_az_el_ir_from_rotmat();
         trace!("update_desired_gimbal_rpy end");
     }
     /// Function to update the desired equatorial coordinates from the desired

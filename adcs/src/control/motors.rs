@@ -135,10 +135,10 @@ impl StepperMotor {
 
     /// Function to instantiate a new StepperMotor struct for the pivot motor with default values
     pub fn pivot_new() -> StepperMotor {
-        let gain1: f64 = 0.030;
+        let gain1: f64 = 0.000005;
         let k_flight_train: f64 = 0.001745329251994;
         let i_rw: f64 = 4.5;
-        let gain2: f64 = 0.8 * (2.0 * ((gain1 / (i_rw * k_flight_train)).sqrt()));
+        let gain2: f64 = 0.05 * (2.0 * ((gain1 / (i_rw * k_flight_train)).sqrt()));
 
         let pivot: StepperMotor = StepperMotor {
             omega: 0.0,

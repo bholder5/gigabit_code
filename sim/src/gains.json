@@ -1,18 +1,18 @@
 {
 	"fine": {
-        "kp_roll": 100.0,
-        "ki_roll": 101.0,
+        "kp_roll": 1000.0,
+        "ki_roll": 8000.0,
         "kd_roll": 0.0,
-        "kp_pitch": 1000.0,
-        "ki_pitch": 1000.0,
+        "kp_pitch": 350.0,
+        "ki_pitch": 8050.0,
         "kd_pitch": 0.0,
-        "kp_yaw": 1000.0,
-        "ki_yaw": 1000.0,
+        "kp_yaw": 500.0,
+        "ki_yaw": 50000.0,
         "kd_yaw": 0.0
     },
     "slew_flag":true,
-    "roll_des": 0.1,
-    "pitch_des": -0.69,
-    "yaw_des": 0.7,
+    "roll_des": -0.1,
+    "pitch_des": -0.59,
+    "yaw_des": 1.0,
     "new_targ": false
 }

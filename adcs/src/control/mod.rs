@@ -89,10 +89,10 @@ impl Ctrl {
         tau_requested = tau_requested + temp2;
         // println!("tau_requested {}", &tau_requested);
 
-        self.fmot_roll.tau_request = tau_requested[0];
-        self.fmot_pitch.tau_request = tau_requested[1];
+        self.fmot_roll.tau_request = 1.0*tau_requested[0];
+        self.fmot_pitch.tau_request = 1.0*tau_requested[1];
         // reverse rw torque because opposite acts on gondola (for simulation)
-        self.rw.tau_request = -tau_requested[2];
+        self.rw.tau_request = -1.0*tau_requested[2];
 
         self.fmot_roll.bound_requested_torque();
         self.fmot_pitch.bound_requested_torque();

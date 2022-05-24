@@ -44,7 +44,7 @@ fn main() {
     // bit parameters in the struct
     let mut bp = init_bit();
     bp.get_orientation_vec();
-    let est = Estimator::new();
+    let mut est = Estimator::new();
     let mut ctrl = Ctrl::new();
     let mut meas = ms::Meas::new();
 
@@ -70,10 +70,12 @@ fn main() {
     tau_applied[7] = ctrl.fmot_roll.tau_applied.clone(); //roll
     tau_applied[8] = ctrl.fmot_pitch.tau_applied.clone(); //pitch
 
-    sc::push_record(&t, &bp, &est, &ctrl).unwrap();
+    sc::push_record(&t, &bp, &est, &ctrl, &meas).unwrap();
+
+    let mut first_LIS = true;
 
     trace!("START");
-    for _step in 0..0 as usize {
+    for _step in 0..10000000 as usize {
         ///////// beginning of the simulation loop
         /////////////////////////////////////////
         unsafe {
@@ -96,7 +98,8 @@ fn main() {
 
         step = step + 1;
         t = t + 0.001;
-        ctrl.state.gps._utc = ctrl.state.gps._utc + chrono::Duration::milliseconds(1);
+        meas.gps.utc = meas.gps.utc + chrono::Duration::milliseconds(1);
+        ctrl.state.gps = meas.gps.clone();
         bp.x = Vector21::from_row_slice(y_result.as_ref());
 
         // reassign the state matrix to the last state matrix
@@ -104,18 +107,37 @@ fn main() {
         bp.update_state();
         bp.get_omega_meas();
         bp.get_orientation_vec();
-        bp.get_rw_speed();
+        bp.get_rw_speed();     
+        
+        ctrl.state
+                .update_current_equatorial_coordinates(&bp.phi_act);
+
+
+        //Meas is the struct holding the actual gyro calibration terms
+        meas.cbh = ctrl.state.hor.rot.clone();
         meas.read_measurements(&bp);
 
+        est.gyros_bs.read_gyros(meas.gyros_bs.omega_m, t.clone());
+        est.propogate();
+
+        if (step % 500) < 1 {
+            est.corr.read_LIS(&ctrl.state.eq_k.rot);
+            if first_LIS {
+                est.eq_hat_k.rot = ctrl.state.eq_k.rot.clone();
+                est.gyros_bs.reset();
+                first_LIS = false;
+            }
+            est.correct_estimate();  
+        }
+        
+        
         // debug!("new state array is: {:}", &bp.x);
         // Calculate control terms based on current step
         // println!("check for control calcs: 20 % step = {:}, step: {:}", (step % 20), step);
 
-        if (step % 10) < 1 {
+        if (step % 100) < 1 {                     
             js::read_gains(&mut ctrl); // read in gains from json file (for tuning)
 
-            ctrl.state
-                .update_current_equatorial_coordinates(&bp.phi_act);
             // grab_vec3(&mut ctrl.state.omega, &bp.omega_m);
             ctrl.state.omega[0] = bp.omega_m[0].clone();
             ctrl.state.omega[1] = bp.omega_m[1].clone();
@@ -123,14 +145,14 @@ fn main() {
             ctrl.rw.omega = bp.omega_rw;
             ctrl.state
                 .gmb_k
-                .update_gimbal_coordinates(&[bp.x[16], bp.x[17], bp.x[15]]);
+                .update_gimbal_coordinates(&[bp.x[16], bp.x[17], -ctrl.state.hor.az.clone()]);
 
             ctrl.update_ctrl();
 
             // update actual torque vector with applied torques
-            tau_applied[6] = ctrl.rw.tau_applied; //yaw
-            tau_applied[7] = ctrl.fmot_roll.tau_applied; //roll
-            tau_applied[8] = ctrl.fmot_pitch.tau_applied; //pitch
+            tau_applied[6] = 1.0*ctrl.rw.tau_applied; //yaw
+            tau_applied[7] = 1.0*ctrl.fmot_roll.tau_applied; //roll
+            tau_applied[8] = 1.0*ctrl.fmot_pitch.tau_applied; //pitch
 
             // if (step % 1000) < 1{
             //     println!("step: {:}", step);
@@ -138,7 +160,7 @@ fn main() {
         }
 
         // record the data
-        sc::push_record(&t, &bp, &est, &ctrl).unwrap();
+        sc::push_record(&t, &bp, &est, &ctrl, &meas).unwrap();
     }
     trace!("END");
 }

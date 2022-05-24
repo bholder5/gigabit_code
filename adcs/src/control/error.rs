@@ -50,7 +50,7 @@ pub struct Error {
 impl Error {
     /// This function generates a new instance of the Error struct with default values
     pub fn new() -> Error {
-        let _err_tc: f64 = 10.0;
+        let _err_tc: f64 = 1.0;
         let _ctrl_dt: f64 = 0.01;
         let _err_decay: f64 = E.powf(-_ctrl_dt / _err_tc);
         let err_gmb_th = st::gimbal::Gimbal::new();
@@ -60,7 +60,7 @@ impl Error {
         let err_rate_sum = na::Vector3::<f64>::new(0.0, 0.0, 0.0);
         let rate_des = na::Vector3::<f64>::new(0.0, 0.0, 0.0);
         let rot_err = na::Rotation3::<f64>::identity();
-        let u_lower = 0.005;
+        let u_lower = 0.003;
         let u_upper = 0.1;
         let _d_theta = na::Vector3::<f64>::new(0.0, 0.0, 0.0);
 
@@ -115,8 +115,16 @@ impl Error {
 
         // parameterize the rotation error into euler angles
         let _rot_err_eul = _rot_err.inverse().euler_angles();
+        
 
         let err_vec = na::Vector3::<f64>::new(_rot_err_eul.0, _rot_err_eul.1, _rot_err_eul.2);
+        // println!("des ra {}, dec {}, fr {}", &state.eq_d.ra, &state.eq_d.dec, &state.eq_d.fr);
+        // println!("cur ra {}, dec {}, fr {}", &state.eq_k.ra, &state.eq_k.dec, &state.eq_k.fr);
+        
+        // println!("eq_des: {:.7}, eq_k: {:.7}, eq_err: {:.7}", &state.eq_d.rot, &state.eq_k.rot, &_rot_err);
+        // println!("gps time {}, gps lat {}, gps lon {}", &state.gps.utc, &state.gps.lat, &state.gps.lon);
+        // println!("desired gimbal roll {}, pitch {}, yaw {}", &state.gmb_d.roll, &state.gmb_d.pitch, &state.gmb_d.yaw);
+        // println!("current gimbal roll {}, pitch {}, yaw {}", &state.gmb_k.roll, &state.gmb_k.pitch, &state.gmb_k.yaw);
 
         let norm_fine_err = err_vec.norm();
         // println!("norm fine error: {}", norm_fine_err);
@@ -127,26 +135,32 @@ impl Error {
         self.err_b_th.pitch = mapped_err[1];
         self.err_b_th.yaw = mapped_err[2];
 
+        // println!("mapped err {:?}", &mapped_err);
+
+        let mut _err_gmb = na::Vector3::<f64>::new(
+            state.gmb_d.roll - state.gmb_k.roll,
+            state.gmb_d.pitch - state.gmb_k.pitch,
+            state.gmb_d.yaw - state.gmb_k.yaw,
+        );
+        // println!("gmb err {:?}", &_err_gmb);
+        for ind in 0..3 {
+            if _err_gmb[ind].abs() > PI {
+                let over = _err_gmb[ind] > PI;
+                let under = _err_gmb[ind] < PI;
+                _err_gmb[ind] = _err_gmb[ind] - (2.0 * PI * (over as u8 as f64))
+                    + (2.0 * PI * (under as u8 as f64));
+            }
+        }
+
         if norm_fine_err < self.u_lower {
             self.err_comb_th = phi * err_vec;
-            // println!("less than u.lower");
+            println!("\nless than u.lower\n");
         } else {
-            let mut _err_gmb = na::Vector3::<f64>::new(
-                state.gmb_d.roll - state.gmb_k.roll,
-                state.gmb_d.pitch - state.gmb_k.pitch,
-                state.gmb_d.yaw - state.gmb_k.yaw,
-            );
+            
             // println!("gmbd{:?} \n\n gmbk{:?}",state.gmb_d, state.gmb_k);
-            println!("gmb err: {}", _err_gmb);
+            // println!("gmb err: {}", _err_gmb);
 
-            for ind in 0..3 {
-                if _err_gmb[ind].abs() > PI {
-                    let over = _err_gmb[ind] > PI;
-                    let under = _err_gmb[ind] < PI;
-                    _err_gmb[ind] = _err_gmb[ind] - (2.0 * PI * (over as u8 as f64))
-                        + (2.0 * PI * (under as u8 as f64));
-                }
-            }
+            
             // println!("wrapped gmb err: {}", _err_gmb);
 
             self.err_gmb_th
@@ -208,7 +222,7 @@ impl Error {
 
         if slew_flag == &true {
             let g_const: f64 = 1.0;
-            let g_lin: f64 = 0.00001;
+            let g_lin: f64 = 0.0200;
 
             let temp1: f64 = g_lin.powi(2) * PI / (4.0 * g_const.powi(2));
             let temp2: f64 = temp1.sqrt();
@@ -238,7 +252,7 @@ impl Error {
                     .sqrt();
         }
 
-        let max_accel = 0.005 * self._ctrl_dt;
+        let max_accel = 0.02 * self._ctrl_dt;
         let des_roll_accel = _roll_rate_des - self.rate_des.x;
 
         if des_roll_accel.abs() > max_accel {

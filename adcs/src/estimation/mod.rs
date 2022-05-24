@@ -52,4 +52,10 @@ impl Estimator {
         info!("Estimation initialized: \n {:?}", est);
         return est;
     }
+    pub fn propogate(&mut self) {
+        self.prop.propogate(&mut self.eq_hat_k, &self.gyros_bs);
+    }
+    pub fn correct_estimate(&mut self) {
+        self.corr.correct_estimate(&mut self.eq_hat_k, &mut self.prop, &mut self.gyros_bs);
+    }
 }

@@ -20,7 +20,7 @@ pub struct Gps {
     /// Longitude in degrees
     pub lon: f64,
     /// UTC time in Unix time (seconds from Jan 1 1970?)
-    pub _utc: chrono::DateTime<chrono::Utc>,
+    pub utc: chrono::DateTime<chrono::Utc>,
     /// greenwhich apparent sidereal time in degrees
     /// (This is corrected for nutation and obliquity)
     pub gast: f64,
@@ -33,12 +33,12 @@ impl Gps {
     pub fn new() -> Gps {
         let lat = 47.002282304922659;
         let lon = 82.210336016074365;
-        let _utc = chrono::prelude::Utc::now();
+        let utc = chrono::prelude::Utc::now();
         let gast = 0.0;
         let mut gps = Gps {
             lat,
             lon,
-            _utc,
+            utc,
             gast,
         };
         gps.get_greenwhich_apparent_sidereal_time();
@@ -66,7 +66,7 @@ impl Gps {
         // this was tested against python and websites and thus is not in the matlab live script
         trace!("get_greenwhich_apparent_sidereal_time start");
         // let dt = chrono::prelude::Utc::now();
-        let dt = self._utc.clone();
+        let dt = self.utc.clone();
 
         //use day object to calculate the decimal day
         let decimal_day = {

@@ -42,7 +42,7 @@ impl Propogation {
             psi_hat_mat: na::Rotation3::identity(),
             fk: Matrix18::zeros(),
             lk: Matrix18x9::zeros(),
-            p_hat: Matrix18::zeros(),
+            p_hat: Matrix18::identity(),
             _q_k: Matrix9::identity() * 1e-15,
         }
     }
