@@ -29,12 +29,18 @@ pub struct Error {
     pub err_rate: na::Vector3<f64>,
     /// Integrated gimbal rate error (roll, pitch, yaw)
     pub err_rate_sum: na::Vector3<f64>,
+     /// Integrated gimbal fine error (roll, pitch, yaw)
+     pub err_fine_sum: na::Vector3<f64>,
     /// desired gimbal rates (roll, pitch, yaw)
     pub rate_des: na::Vector3<f64>,
     /// Integrated rate error time constant of decay
-    pub _err_tc: f64,
-    /// Decay constant, function of control rate and decay time constant
-    pub _err_decay: f64,
+    pub _err_tc_v: f64,
+    /// Decay constant for rate error integral, function of control rate and decay time constant
+    pub _err_decay_v: f64,
+    /// Integrated fine error time constant of decay
+    pub _err_tc_p: f64,
+    /// Decay constant for position error integral, function of control rate and decay time constant
+    pub _err_decay_p: f64,
     /// Control algorithm time step
     pub _ctrl_dt: f64,
     /// Positional error in rotation matrix form
@@ -50,14 +56,17 @@ pub struct Error {
 impl Error {
     /// This function generates a new instance of the Error struct with default values
     pub fn new() -> Error {
-        let _err_tc: f64 = 1.0;
+        let _err_tc_v: f64 = 1.0;
+        let _err_tc_p: f64 = 50.0;
         let _ctrl_dt: f64 = 0.01;
-        let _err_decay: f64 = E.powf(-_ctrl_dt / _err_tc);
+        let _err_decay_v: f64 = E.powf(-_ctrl_dt / _err_tc_v);
+        let _err_decay_p: f64 = E.powf(-_ctrl_dt / _err_tc_p);
         let err_gmb_th = st::gimbal::Gimbal::new();
         let err_b_th = st::gimbal::Gimbal::new();
         let err_comb_th = na::Vector3::<f64>::new(0.0, 0.0, 0.0);
         let err_rate = na::Vector3::<f64>::new(0.0, 0.0, 0.0);
         let err_rate_sum = na::Vector3::<f64>::new(0.0, 0.0, 0.0);
+        let err_fine_sum = na::Vector3::<f64>::new(0.0, 0.0, 0.0);
         let rate_des = na::Vector3::<f64>::new(0.0, 0.0, 0.0);
         let rot_err = na::Rotation3::<f64>::identity();
         let u_lower = 0.003;
@@ -70,11 +79,14 @@ impl Error {
             err_comb_th,
             err_rate,
             err_rate_sum,
+            err_fine_sum,
             rate_des,
             rot_err,
-            _err_tc,
+            _err_tc_v,
+            _err_tc_p,
             _ctrl_dt,
-            _err_decay,
+            _err_decay_v,
+            _err_decay_p,
             u_lower,
             u_upper,
             _d_theta,
@@ -152,17 +164,14 @@ impl Error {
             }
         }
 
+        //decay the fine suym error regarless of error but only integrate it if error is in fine error bracket
+        self.err_fine_sum = self.err_fine_sum * self._err_decay_p;
+
         if norm_fine_err < self.u_lower {
             self.err_comb_th = phi * err_vec;
-            println!("\nless than u.lower\n");
+            self.err_fine_sum = self.err_fine_sum + (self.err_comb_th * self._ctrl_dt);
         } else {
             
-            // println!("gmbd{:?} \n\n gmbk{:?}",state.gmb_d, state.gmb_k);
-            // println!("gmb err: {}", _err_gmb);
-
-            
-            // println!("wrapped gmb err: {}", _err_gmb);
-
             self.err_gmb_th
                 .update_gimbal_coordinates(&[_err_gmb[0], _err_gmb[1], _err_gmb[2]]);
 
@@ -297,6 +306,6 @@ impl Error {
         // println!("err_rate_sum {}, err_decay {}, err_rate {}, _ctrl_dt {}", self.err_rate_sum, self._err_decay, self.err_rate, self._ctrl_dt);
         // println!("err_rate_sum {}, err_rate {} _d_theta {} gmm^-1 {} omega {}", self.err_rate_sum, self.err_rate, _d_theta,state.gmb_k.gmm.cholesky().unwrap().inverse(), state.omega);
 
-        self.err_rate_sum = (self.err_rate_sum * self._err_decay) + (self.err_rate * self._ctrl_dt)
+        self.err_rate_sum = (self.err_rate_sum * self._err_decay_v) + (self.err_rate * self._ctrl_dt)
     }
 }

@@ -25,6 +25,7 @@ pub struct Estimator {
     pub prop: propogation::Propogation,
     //Correction terms
     pub corr: correction::Correction,
+    pub reset: bool,
     
 }
 impl Estimator {
@@ -39,6 +40,7 @@ impl Estimator {
         let eq_hat_k = eq::Equatorial::new();
         let prop = propogation::Propogation::new();
         let corr = correction::Correction::new();
+        let reset = true;
         // DEFINE SYSTEMATIC TERMS
         // ----------------------------------
 
@@ -48,6 +50,7 @@ impl Estimator {
             eq_hat_k,
             prop,
             corr,
+            reset,
         };
         info!("Estimation initialized: \n {:?}", est);
         return est;

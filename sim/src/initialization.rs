@@ -56,6 +56,8 @@ pub struct Params {
     _pitch_theta_max: f64,
     _pitch_theta_min: f64,
     pub pitch_nom: f64,
+    pub latency: bool,
+    pub ctrl_from_est: bool,
     // //
 }
 
@@ -236,6 +238,8 @@ pub fn init_bit() -> Params {
     let _pitch_theta_max: f64 = -20.0 * PI / 180.0;
     let _pitch_theta_min: f64 = -60.0 * PI / 180.0;
     let pitch_nom: f64 = -40.0 * PI / 180.0;
+    let latency = false;
+    let ctrl_from_est = false;
     // let gps = Gps::new();
     // define params struct_
     let _params = Params {
@@ -257,6 +261,8 @@ pub fn init_bit() -> Params {
         _pitch_theta_max,
         _pitch_theta_min,
         pitch_nom,
+        latency,
+        ctrl_from_est,
     };
     info!("Bit initialized: \n {:?}", _params);
     return _params;

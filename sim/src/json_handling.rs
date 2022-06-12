@@ -12,6 +12,8 @@
 //!
 
 use adcs::control::Ctrl;
+use adcs::estimation::Estimator;
+use crate::initialization::Params;
 
 // use std::fmt;
 pub use std::env;
@@ -33,21 +35,23 @@ pub struct Gain_json {
     ki_roll: f64,
     ki_pitch: f64,
     ki_yaw: f64,
-    kd_roll: f64,
-    kd_pitch: f64,
-    kd_yaw: f64,
+    kip_roll: f64,
+    kip_pitch: f64,
+    kip_yaw: f64,
 }
 #[derive(Debug, Deserialize, Default)]
 pub struct Read_json {
     fine: Gain_json,
-    slew_flag: bool,
     yaw_des: f64,
     pitch_des: f64,
     roll_des: f64,
     new_targ: bool,
+    latency: bool,
+    ctrl_from_est: bool,
+    est_reset: bool,
 }
 
-pub fn read_gains(ctrl: &mut Ctrl) -> () {
+pub fn read_gains(ctrl: &mut Ctrl, bp: &mut Params, est: &mut Estimator) -> () {
     let path = "sim/src/gains.json";
 
     #[allow(unused_assignments)]
@@ -62,10 +66,10 @@ pub fn read_gains(ctrl: &mut Ctrl) -> () {
                     //rewrite control gain vecs;
                     let kp_vec = [u.fine.kp_roll, u.fine.kp_pitch, u.fine.kp_yaw];
                     let ki_vec = [u.fine.ki_roll, u.fine.ki_pitch, u.fine.ki_yaw];
-                    let kd_vec = [u.fine.kd_roll, u.fine.kd_pitch, u.fine.kd_yaw];
+                    let kip_vec = [u.fine.kip_roll, u.fine.kip_pitch, u.fine.kip_yaw];
 
                     ctrl.fine_gains
-                        .update_gain_matrices(&kp_vec, &kd_vec, &ki_vec);
+                        .update_gain_matrices(&kp_vec, &kip_vec, &ki_vec);
 
                     if u.new_targ {
                         ctrl.state.gmb_d.roll = u.roll_des;
@@ -77,7 +81,9 @@ pub fn read_gains(ctrl: &mut Ctrl) -> () {
                         // println!("\n\n\n READ GAINS UPDATE\n\n\n{:?}", ctrl.state.gmb_d);
                     }
 
-                    ctrl.slew_flag = u.slew_flag;
+                    bp.latency = u.latency;
+                    bp.ctrl_from_est = u.ctrl_from_est;
+                    est.reset = u.est_reset;
 
                 }
                 Err(err) => {

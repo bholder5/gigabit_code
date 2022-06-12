@@ -3,7 +3,7 @@
 //! This includes injecting offsets, changes in scale and bias
 
 use nalgebra as na;
-
+#[derive(Clone)]
 /// struct for the boresight gyroscope measurements generation
 pub struct Gyro_bs {
     /// Actual boresight angular velocity
@@ -28,16 +28,16 @@ impl Gyro_bs {
             // remember to invert
             c_bg_i: na::Rotation3::identity(),
             // remember to invert
-            // a_g_inv: na::Matrix3::from_row_slice(&[1.004999976946721,
-            //     0.000096039954031,
-            //     0.000192049170358,
-            //    -0.000096015363867,
-            //     0.994999987192623,
-            //    -0.000128046099911,
-            //    -0.000192061465440,
-            //     0.000128027657288,
-            //     1.002499973360656]).try_inverse().unwrap(),
-            a_g_inv: na::Matrix3::<f64>::identity(),
+            a_g_inv: na::Matrix3::from_row_slice(&[1.004999976946721,
+                0.000096039954031,
+                0.000192049170358,
+               -0.000096015363867,
+                0.994999987192623,
+               -0.000128046099911,
+               -0.000192061465440,
+                0.000128027657288,
+                1.002499973360656]).try_inverse().unwrap(),
+            // a_g_inv: na::Matrix3::<f64>::identity(),
             bias: na::Vector3::new(0.000001, -0.000005, 0.0000075),
             bias_drift: 0.0,
         }

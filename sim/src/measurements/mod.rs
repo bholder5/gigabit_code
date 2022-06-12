@@ -5,11 +5,15 @@ pub mod gyros;
 use crate::initialization::Params;
 use adcs::control::state as st;
 use nalgebra as na;
-
+#[derive(Clone)]
 pub struct Meas {
     pub gyros_bs: gyros::Gyro_bs,
     pub gps: st::gps::Gps,
-    pub cbh: na::Rotation3<f64>
+    pub cbh: na::Rotation3<f64>,
+    pub roll: f64,
+    pub pitch: f64,
+    /// yaw_p is azimuth with opposite sign, not the position of OF WRT pivot
+    pub yaw_p: f64,
 }
 
 impl Meas {
@@ -17,11 +21,15 @@ impl Meas {
         Meas {
             gyros_bs: gyros::Gyro_bs::new(),
             gps: st::gps::Gps::new(),
-            cbh: na::Rotation3::<f64>::identity()
+            cbh: na::Rotation3::<f64>::identity(),
+            roll: 0.0,
+            pitch: 0.0,
+            yaw_p: 0.0,
         }
     }
 
-    pub fn read_measurements(&mut self, bp: &Params) {
+    pub fn read_measurements(&mut self, bp: &Params, sim_state: &st::State) -> () {
+        // READ GYROS/GENERATE GYRO BORESIGHT MEASUREMENT
         // bp.omega_m was the "measurement" before this function, 
         // hence it is actually omega_k
         self.gps.get_greenwhich_apparent_sidereal_time();
@@ -38,5 +46,11 @@ impl Meas {
         let w_di = na::Vector3::<f64>::new(0.0, 0.0, 15.04108/206265.0);
         self.gyros_bs.omega_k = bp.omega_m + (self.cbh * ceh.transpose() * w_di);
         self.gyros_bs.generate_measurement();
+
+        // ENCODERS
+        self.roll = bp.x[16];
+        self.pitch = bp.x[17];
+        self.yaw_p = -sim_state.hor.az;
+
     }
 }

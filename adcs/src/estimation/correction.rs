@@ -67,7 +67,7 @@ impl Correction{
         let err_mat = self.eq_act.rot * eq_hat.rot.inverse();
         let err_eul = err_mat.inverse().euler_angles();
         let err = na::Vector3::<f64>::new(err_eul.0, err_eul.1, err_eul.2);
-        println!("Err mat {:.6} err euler angles {} {} {} err vector {:}", err_mat, err_eul.0, err_eul.1, err_eul.2, err);
+        // println!("Err mat {:.6} err euler angles {} {} {} err vector {:}", err_mat, err_eul.0, err_eul.1, err_eul.2, err);
 
         let wk: na::Matrix3::<f64> = (self._h_k * prop.p_hat * self._h_k.transpose()) + (self._mrmi);
         // println!("WK {:}", wk);

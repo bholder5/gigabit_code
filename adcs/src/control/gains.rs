@@ -11,8 +11,8 @@ extern crate nalgebra as na;
 pub struct Gains {
     /// proportional gain diagonal matrix
     pub kp: na::Matrix3<f64>,
-    /// derivitive gain diagonal matrix
-    pub kd: na::Matrix3<f64>,
+    /// Positional Integral gain diagonal matrix
+    pub kip: na::Matrix3<f64>,
     /// integral gain diagonal matrix
     pub ki: na::Matrix3<f64>,
 }
@@ -40,24 +40,24 @@ impl Gains {
     pub fn update_gain_matrices(
         &mut self,
         kp_vec: &[f64; 3],
-        kd_vec: &[f64; 3],
+        kip_vec: &[f64; 3],
         ki_vec: &[f64; 3],
     ) -> () {
         self.kp = na::Matrix3::<f64>::from_partial_diagonal(kp_vec);
         self.ki = na::Matrix3::<f64>::from_partial_diagonal(ki_vec);
-        self.kd = na::Matrix3::<f64>::from_partial_diagonal(kd_vec);
+        self.kip = na::Matrix3::<f64>::from_partial_diagonal(kip_vec);
     }
 
     /// Function to instantiate a new Gains struct with default values
     pub fn new() -> Gains {
         let kp_vec = [0.10, 0.10, 3.0];
         let ki_vec = [0.00001, 0.000, 0.0001];
-        let kd_vec = [0.010, 0.0010, 0.01];
+        let kip_vec = [0.010, 0.0010, 0.01];
         let kp = na::Matrix3::<f64>::from_partial_diagonal(&kp_vec);
-        let kd = na::Matrix3::<f64>::from_partial_diagonal(&kd_vec);
+        let kip = na::Matrix3::<f64>::from_partial_diagonal(&kip_vec);
         let ki = na::Matrix3::<f64>::from_partial_diagonal(&ki_vec);
 
-        let gains: Gains = Gains { kp, kd, ki };
+        let gains: Gains = Gains { kp, kip, ki };
 
         gains
     }

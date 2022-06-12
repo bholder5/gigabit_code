@@ -77,6 +77,7 @@ impl Ctrl {
         trace!("calculate_applied_torque start");
 
         let mut temp2 = na::Vector3::<f64>::zeros();
+        let mut temp3 = na::Vector3::<f64>::zeros();
         let mut tau_requested = na::Vector3::<f64>::zeros();
 
         let gains = self.fine_gains.clone();
@@ -85,8 +86,10 @@ impl Ctrl {
         // println!("{:} x {:} = {:}", &gains.kp, &self.error.err_rate, &tau_requested);
 
         gains.ki.mul_to(&self.error.err_rate_sum, &mut temp2);
+
+        gains.kip.mul_to(&self.error.err_fine_sum, &mut temp3);
         // println!("{:} x {:} = {:}", &gains.ki, &self.error.err_rate_sum, &temp2);
-        tau_requested = tau_requested + temp2;
+        tau_requested = tau_requested + temp2 + temp3;
         // println!("tau_requested {}", &tau_requested);
 
         self.fmot_roll.tau_request = 1.0*tau_requested[0];

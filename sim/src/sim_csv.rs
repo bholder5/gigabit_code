@@ -13,6 +13,7 @@
 
 use crate::initialization::Params;
 use adcs::control::Ctrl;
+use adcs::control::state::State;
 use adcs::estimation::Estimator;
 use crate::measurements::Meas;
 
@@ -113,7 +114,7 @@ pub struct Record {
     gyro_bs_bias_yaw_act: f64,
 }
 
-pub fn push_record(t: &f64, bp: &Params, est: &Estimator, ctrl: &Ctrl, meas: &Meas) -> Result<(), Box<dyn Error>> {
+pub fn push_record(t: &f64, bp: &Params, est: &Estimator, ctrl: &Ctrl, meas: &Meas, sim_st: &State) -> Result<(), Box<dyn Error>> {
     // let file_path = "/home/brad/sim_data/out.csv";
     let file_path = "/media/brad/linux_storage/sim_data/out.csv";
 
@@ -126,7 +127,7 @@ pub fn push_record(t: &f64, bp: &Params, est: &Estimator, ctrl: &Ctrl, meas: &Me
 
         wtr.serialize(Record {
             t: t.clone(),
-            utc: ctrl.state.gps.utc.timestamp() as f64,
+            utc: meas.gps.utc.timestamp() as f64,
             dth1: bp.x[0],
             dth2: bp.x[1],
             dth3: bp.x[2],
@@ -174,22 +175,22 @@ pub fn push_record(t: &f64, bp: &Params, est: &Estimator, ctrl: &Ctrl, meas: &Me
             omega_gmm_i_pitch: ctrl.error._d_theta[1],
             omega_gmm_i_yaw: ctrl.error._d_theta[2],
             //
-            az: ctrl.state.hor.az,
-            el: ctrl.state.hor.el,
-            ir: ctrl.state.hor.ir,
+            az: sim_st.hor.az,
+            el: sim_st.hor.el,
+            ir: sim_st.hor.ir,
             az_d: ctrl.state.hor_d.az,
             el_d: ctrl.state.hor_d.el,
             ir_d: ctrl.state.hor_d.ir,
-            ra: ctrl.state.eq_k.ra,
-            dec: ctrl.state.eq_k.dec,
-            fr: ctrl.state.eq_k.fr,
+            ra: sim_st.eq_k.ra,
+            dec: sim_st.eq_k.dec,
+            fr: sim_st.eq_k.fr,
             ra_d: ctrl.state.eq_d.ra,
             dec_d: ctrl.state.eq_d.dec,
             fr_d: ctrl.state.eq_d.fr,
             //
-            roll: ctrl.state.gmb_k.roll,
-            pitch: ctrl.state.gmb_k.pitch,
-            yaw: ctrl.state.gmb_k.yaw,
+            roll: meas.roll,
+            pitch: meas.pitch,
+            yaw: meas.yaw_p,
             roll_d: ctrl.state.gmb_d.roll,
             pitch_d: ctrl.state.gmb_d.pitch,
             yaw_d: ctrl.state.gmb_d.yaw,
@@ -218,7 +219,7 @@ pub fn push_record(t: &f64, bp: &Params, est: &Estimator, ctrl: &Ctrl, meas: &Me
         let mut wtr = WriterBuilder::new().has_headers(true).from_writer(file);
         wtr.serialize(Record {
             t: t.clone(),
-            utc: ctrl.state.gps.utc.timestamp() as f64,
+            utc: meas.gps.utc.timestamp() as f64,
             dth1: bp.x[0],
             dth2: bp.x[1],
             dth3: bp.x[2],
@@ -265,22 +266,22 @@ pub fn push_record(t: &f64, bp: &Params, est: &Estimator, ctrl: &Ctrl, meas: &Me
             omega_gmm_i_roll: ctrl.error._d_theta[0],
             omega_gmm_i_pitch: ctrl.error._d_theta[1],
             omega_gmm_i_yaw: ctrl.error._d_theta[2],
-            az: ctrl.state.hor.az,
-            el: ctrl.state.hor.el,
-            ir: ctrl.state.hor.ir,
+            az: sim_st.hor.az,
+            el: sim_st.hor.el,
+            ir: sim_st.hor.ir,
             az_d: ctrl.state.hor_d.az,
             el_d: ctrl.state.hor_d.el,
             ir_d: ctrl.state.hor_d.ir,
-            ra: ctrl.state.eq_k.ra,
-            dec: ctrl.state.eq_k.dec,
-            fr: ctrl.state.eq_k.fr,
+            ra: sim_st.eq_k.ra,
+            dec: sim_st.eq_k.dec,
+            fr: sim_st.eq_k.fr,
             ra_d: ctrl.state.eq_d.ra,
             dec_d: ctrl.state.eq_d.dec,
             fr_d: ctrl.state.eq_d.fr,
             //
-            roll: ctrl.state.gmb_k.roll,
-            pitch: ctrl.state.gmb_k.pitch,
-            yaw: ctrl.state.gmb_k.yaw,
+            roll: meas.roll,
+            pitch: meas.pitch,
+            yaw: meas.yaw_p,
             roll_d: ctrl.state.gmb_d.roll,
             pitch_d: ctrl.state.gmb_d.pitch,
             yaw_d: ctrl.state.gmb_d.yaw,
@@ -305,7 +306,7 @@ pub fn push_record(t: &f64, bp: &Params, est: &Estimator, ctrl: &Ctrl, meas: &Me
 }
 
 #[allow(dead_code)]
-pub fn read_last_state(mut _t: f64, bp: &mut Params, est: &mut Estimator, ctrl: &mut Ctrl, meas: &mut Meas) -> () {
+pub fn read_last_state(mut _t: f64, bp: &mut Params, est: &mut Estimator, ctrl: &mut Ctrl, meas: &mut Meas, sim_st: &mut State) -> () {
     let file_path = "/media/brad/linux_storage/sim_data/out.csv";
 
     if Path::new(&file_path.clone()).exists() {
@@ -323,7 +324,7 @@ pub fn read_last_state(mut _t: f64, bp: &mut Params, est: &mut Estimator, ctrl: 
             let rec: Record = result.unwrap();
             println!("{:?}", rec);
             _t = rec.t.clone();
-            ctrl.state.gps.utc = chrono::DateTime::<Utc>::from_utc(NaiveDateTime::from_timestamp_opt(rec.utc as i64, 0).unwrap(), Utc);
+            meas.gps.utc = chrono::DateTime::<Utc>::from_utc(NaiveDateTime::from_timestamp_opt(rec.utc as i64, 0).unwrap(), Utc);
             bp.x[0] = rec.dth1;
             bp.x[1] = rec.dth2;
             bp.x[2] = rec.dth3;
@@ -370,24 +371,24 @@ pub fn read_last_state(mut _t: f64, bp: &mut Params, est: &mut Estimator, ctrl: 
             ctrl.error._d_theta[0] = rec.omega_gmm_i_roll;
             ctrl.error._d_theta[1] = rec.omega_gmm_i_pitch;
             ctrl.error._d_theta[2] = rec.omega_gmm_i_yaw;
-            ctrl.state.eq_k.ra = rec.ra;
-            ctrl.state.eq_k.dec = rec.dec;
-            ctrl.state.eq_k.fr = rec.fr;
+            sim_st.eq_k.ra = rec.ra;
+            sim_st.eq_k.dec = rec.dec;
+            sim_st.eq_k.fr = rec.fr;
             ctrl.state.eq_d.ra = rec.ra_d;
             ctrl.state.eq_d.dec = rec.dec_d;
             ctrl.state.eq_d.fr = rec.fr_d;
-            ctrl.state.gmb_k.roll = rec.roll;
-            ctrl.state.gmb_k.pitch = rec.pitch;
-            ctrl.state.gmb_k.yaw = rec.yaw;
+            meas.roll = rec.roll;
+            meas.pitch = rec.pitch;
+            meas.yaw_p = rec.yaw;
             ctrl.state.gmb_d.roll = rec.roll_d;
             ctrl.state.gmb_d.pitch = rec.pitch_d;
             ctrl.state.gmb_d.yaw = rec.yaw_d;
             ctrl.fmot_roll.tau_applied = rec.tau_roll;
             ctrl.fmot_pitch.tau_applied = rec.tau_pitch;
             ctrl.rw.tau_applied = rec.tau_yaw;
-            ctrl.state.hor.az = rec.az;
-            ctrl.state.hor.el = rec.el;
-            ctrl.state.hor.ir = rec.ir;
+            sim_st.hor.az = rec.az;
+            sim_st.hor.el = rec.el;
+            sim_st.hor.ir = rec.ir;
             ctrl.state.hor_d.az = rec.az_d;
             ctrl.state.hor_d.el = rec.el_d;
             ctrl.state.hor_d.ir = rec.ir_d;
