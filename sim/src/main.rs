@@ -13,6 +13,7 @@ mod logging;
 mod sim_csv;
 mod measurements;
 mod disturbances;
+mod flex_sim;
 
 use adcs::{control::*, estimation::*, verification::*};
 use initialization::*;
@@ -21,6 +22,7 @@ use logging::*;
 use sim_csv as sc;
 use measurements as ms;
 use disturbances as dist;
+use flex_sim as f_sim;
 
 use bindings::bit_one_step;
 
@@ -38,6 +40,7 @@ extern crate time;
 extern crate serde_derive;
 
 fn main() {
+
     init_log();
     // the verification function for all tihngs in the control module.
     // test_control();
@@ -45,7 +48,10 @@ fn main() {
     // run initialization and have all relevant
     // bit parameters in the struct
     let mut bp = init_bit();
-    bp.get_orientation_vec();
+    let mut flex = f_sim::init_flex_model();
+    bp.get_orientation_vec(&flex);
+    
+
     let mut est = Estimator::new();
     let mut ctrl = Ctrl::new();
     let mut sim_state = state::State::new();
@@ -75,7 +81,7 @@ fn main() {
     tau_applied[7] = ctrl.fmot_roll.tau_applied.clone(); //roll
     tau_applied[8] = ctrl.fmot_pitch.tau_applied.clone(); //pitch
 
-    sc::push_record(&t, &bp, &est, &ctrl, &meas, &sim_state).unwrap();
+    sc::push_record(&t, &bp, &est, &ctrl, &meas, &sim_state, &flex).unwrap();
 
     let mut first_LIS = true;
 
@@ -88,7 +94,7 @@ fn main() {
 
 
     trace!("START");
-    for _step in 0..100000000 as usize {
+    for _step in 0..10 as usize {
         
         ///////// beginning of the simulation loop
         /////////////////////////////////////////
@@ -108,6 +114,12 @@ fn main() {
             );
             trace!("bit_one_step end");
         }
+        
+        if flex.flex_enable{
+            flex.propogate_flex(&[tau_applied[6], tau_applied[7], tau_applied[8]], bp._dt, bp._num_steps);
+        // flex.propogate_flex(&[1., 1., 1.], bp._dt, bp._num_steps);
+        }
+
         // println!("Pivot request {:}", ctrl.pivot.omega_request);
 
         step = step + 1;
@@ -122,14 +134,14 @@ fn main() {
         bp.x = Vector21::from_row_slice(y_result.as_ref());
         bp.update_state();
         bp.get_omega_meas();
-        bp.get_orientation_vec();
+        bp.get_orientation_vec(&flex);
         bp.get_rw_speed();
 
         sim_state.update_current_equatorial_coordinates(&bp.phi_act);
 
         //Meas is the struct holding the actual gyro calibration terms
         meas.cbh = sim_state.hor.rot.clone();
-        meas.read_measurements(&bp, &sim_state);
+        meas.read_measurements(&bp, &sim_state, &flex);
 
         if bp.latency {
             est.gyros_bs.read_gyros(late_meas.gyros_bs.omega_m, t.clone());
@@ -202,7 +214,7 @@ fn main() {
         }
 
         // record the data
-        sc::push_record(&t, &bp, &est, &ctrl, &meas, &sim_state).unwrap();
+        sc::push_record(&t, &bp, &est, &ctrl, &meas, &sim_state, &flex).unwrap();
         js::read_gains(&mut ctrl, &mut bp, &mut est); // read in gains from json file (for tuning)
 
     }

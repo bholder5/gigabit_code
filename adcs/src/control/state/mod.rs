@@ -171,6 +171,8 @@ impl State {
 
         self.update_hor_to_eq_conversion();
         self.eq_k.rot = self.hor.rot * self.ceh.inverse();
+        // pre multiply seld.eq_k.rot by phi_
+
         self.eq_k.extract_ra_dec_fr_from_rotmat();
         trace!("update_current_equatorial_coordinates end");
     }

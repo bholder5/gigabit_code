@@ -11,11 +11,13 @@
 //! -generating sensors measurements from the simulation state
 //!
 
+use crate::flex_sim::Flex_model;
 use crate::initialization::Params;
 use adcs::control::Ctrl;
 use adcs::control::state::State;
 use adcs::estimation::Estimator;
 use crate::measurements::Meas;
+use crate::flex_sim as fx;
 
 use std::error::Error;
 use csv::WriterBuilder;
@@ -114,7 +116,7 @@ pub struct Record {
     gyro_bs_bias_yaw_act: f64,
 }
 
-pub fn push_record(t: &f64, bp: &Params, est: &Estimator, ctrl: &Ctrl, meas: &Meas, sim_st: &State) -> Result<(), Box<dyn Error>> {
+pub fn push_record(t: &f64, bp: &Params, est: &Estimator, ctrl: &Ctrl, meas: &Meas, sim_st: &State, flex: &fx::Flex_model) -> Result<(), Box<dyn Error>> {
     // let file_path = "/home/brad/sim_data/out.csv";
     let file_path = "/media/brad/linux_storage/sim_data/out.csv";
 
@@ -306,7 +308,7 @@ pub fn push_record(t: &f64, bp: &Params, est: &Estimator, ctrl: &Ctrl, meas: &Me
 }
 
 #[allow(dead_code)]
-pub fn read_last_state(mut _t: f64, bp: &mut Params, est: &mut Estimator, ctrl: &mut Ctrl, meas: &mut Meas, sim_st: &mut State) -> () {
+pub fn read_last_state(mut _t: f64, bp: &mut Params, est: &mut Estimator, ctrl: &mut Ctrl, meas: &mut Meas, sim_st: &mut State, flex: &fx::Flex_model) -> () {
     let file_path = "/media/brad/linux_storage/sim_data/out.csv";
 
     if Path::new(&file_path.clone()).exists() {
@@ -365,9 +367,9 @@ pub fn read_last_state(mut _t: f64, bp: &mut Params, est: &mut Estimator, ctrl: 
             ctrl.error.rate_des[0] = rec.rate_des_roll;
             ctrl.error.rate_des[1] = rec.rate_des_pitch;
             ctrl.error.rate_des[2] = rec.rate_des_yaw;
-            ctrl.state.omega[0] = rec.omega_roll;
-            ctrl.state.omega[1] = rec.omega_pitch;
-            ctrl.state.omega[2] = rec.omega_yaw;
+            ctrl.state.omega[0] = rec.omega_roll;//bore
+            ctrl.state.omega[1] = rec.omega_pitch;//pitch
+            ctrl.state.omega[2] = rec.omega_yaw;//cross_pitch
             ctrl.error._d_theta[0] = rec.omega_gmm_i_roll;
             ctrl.error._d_theta[1] = rec.omega_gmm_i_pitch;
             ctrl.error._d_theta[2] = rec.omega_gmm_i_yaw;

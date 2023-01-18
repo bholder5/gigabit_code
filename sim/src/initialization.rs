@@ -12,6 +12,7 @@
 //!
 
 use crate::bindings::{compute_angular_velocity_C, compute_rotation_mat_C};
+use crate::flex_sim::Flex_model;
 extern crate nalgebra as na;
 
 pub use std::env;
@@ -106,7 +107,7 @@ impl Params {
         trace!("update_state end");
     }
     /// get phi actual in equatorial frame, thus the declination is -ve
-    pub fn get_orientation_vec(&mut self) -> () {
+    pub fn get_orientation_vec(&mut self, flex: &Flex_model) -> () {
         // /////////////////////////////////////
         // this function is verified vs matlab
         // /////////////////////////////////////
@@ -121,11 +122,24 @@ impl Params {
                 c_vec.as_mut_ptr(),
             )
         }
-        let c = c_vec.as_ref();
+        //orientation in boresight so add flex here
+        let mut c = c_vec.as_ref();
+
         // println!("{:?}", [c[0], c[1], c[2]].concat());
-        let rotmat = na::Rotation3::<f64>::from_matrix(&na::Matrix3::<f64>::from_row_slice(
+        let mut rotmat = na::Rotation3::<f64>::from_matrix(&na::Matrix3::<f64>::from_row_slice(
             &[c[0], c[1], c[2]].concat(),
         ));
+
+        if flex.flex_enable{
+            let flex_pos_mat= na::Rotation3::from_axis_angle(
+                &na::Unit::new_normalize(flex.g1_pos_out.clone()),
+                flex.g1_pos_out.norm().clone(),
+            )
+            .inverse();
+          
+            rotmat = flex_pos_mat * rotmat;
+        }
+        
         // println!("rotmat {:.7} from thet: {:}", rotmat, self.theta);
         let eul = rotmat.inverse().euler_angles();
         self.phi_act = [eul.0, -eul.1, -eul.2];
@@ -238,8 +252,8 @@ pub fn init_bit() -> Params {
     let _pitch_theta_max: f64 = -20.0 * PI / 180.0;
     let _pitch_theta_min: f64 = -60.0 * PI / 180.0;
     let pitch_nom: f64 = -40.0 * PI / 180.0;
-    let latency = false;
-    let ctrl_from_est = false;
+    let latency = true;
+    let ctrl_from_est = true;
     // let gps = Gps::new();
     // define params struct_
     let _params = Params {

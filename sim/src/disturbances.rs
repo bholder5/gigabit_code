@@ -7,6 +7,7 @@ pub struct Wind_torque {
     pub az: Normal<f64>,
     pub el: Normal<f64>,
     pub roll: Normal<f64>,
+    pub en: bool,
 }
 
 impl Wind_torque {
@@ -16,12 +17,15 @@ impl Wind_torque {
             az: Normal::<f64>::new(0.0, 0.034).unwrap(),
             el: Normal::<f64>::new(0.0, 2.83).unwrap(),
             roll: Normal::<f64>::new(0.0, 2.83).unwrap(),
+            en: false,
         }
     }
 
     pub fn generate(&mut self) {
-        self.tau[0] = self.az.sample(&mut rand::thread_rng());
-        self.tau[1] = self.roll.sample(&mut rand::thread_rng());
-        self.tau[2] = self.el.sample(&mut rand::thread_rng());
+        if self.en{
+            self.tau[0] = self.az.sample(&mut rand::thread_rng());
+            self.tau[1] = self.roll.sample(&mut rand::thread_rng());
+            self.tau[2] = self.el.sample(&mut rand::thread_rng());
+        }
     }
 }

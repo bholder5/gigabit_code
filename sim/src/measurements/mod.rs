@@ -4,6 +4,7 @@
 pub mod gyros;
 use crate::initialization::Params;
 use adcs::control::state as st;
+use crate::flex_sim;
 use nalgebra as na;
 #[derive(Clone)]
 pub struct Meas {
@@ -28,7 +29,7 @@ impl Meas {
         }
     }
 
-    pub fn read_measurements(&mut self, bp: &Params, sim_state: &st::State) -> () {
+    pub fn read_measurements(&mut self, bp: &Params, sim_state: &st::State, flex: &flex_sim::Flex_model) -> () {
         // READ GYROS/GENERATE GYRO BORESIGHT MEASUREMENT
         // bp.omega_m was the "measurement" before this function, 
         // hence it is actually omega_k
@@ -44,12 +45,25 @@ impl Meas {
         let ceh = rotz * roty;
 
         let w_di = na::Vector3::<f64>::new(0.0, 0.0, 15.04108/206265.0);
+        // need to add in flexible affects.
         self.gyros_bs.omega_k = bp.omega_m + (self.cbh * ceh.transpose() * w_di);
+
+        if flex.flex_enable{
+            self.gyros_bs.omega_k = flex.g1_out + self.gyros_bs.omega_k;
+        }
+
         self.gyros_bs.generate_measurement();
 
         // ENCODERS
-        self.roll = bp.x[16];
-        self.pitch = bp.x[17];
+
+        if flex.flex_enable{
+            self.roll = bp.x[16] + flex.c_out[1];
+            self.pitch = bp.x[17] + flex.c_out[3];
+        } else {
+            self.roll = bp.x[16];
+            self.pitch = bp.x[17];
+        }
+        
         self.yaw_p = -sim_state.hor.az;
 
     }
