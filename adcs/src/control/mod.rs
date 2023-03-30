@@ -6,11 +6,13 @@ pub mod error;
 pub mod gains;
 pub mod motors;
 pub mod state;
+pub mod flex_control;
 
 use error as er;
 use gains as gns;
 use motors as mot;
 use state as st;
+use flex_control as fc;
 
 // import crate for matrix math
 extern crate nalgebra as na;

@@ -12,6 +12,7 @@ extern crate nalgebra as na;
 use std::time::{Duration, Instant};
 
 pub type Eta = na::SMatrix<f64, 104, 1>;
+pub type HEta = na::SMatrix<f64, 52, 1>;
 
 pub struct Flex_model {
     // //
@@ -34,19 +35,40 @@ impl Flex_model{
     pub fn propogate_flex(&mut self, tau:  &[f64; 3], dt: f64, num_steps: u16){
         let tau = na::Vector5::from_row_slice(&[tau[0], tau[1]/2.0, tau[1]/2.0, tau[2]/2.0, tau[2]/2.0]);
         // println!("{}", self.eta);
-        let now = Instant::now();
+        // let now = Instant::now();
+        let mut k1 = Eta::zeros();
+        let mut k2 = Eta::zeros();
+        let mut k3 = Eta::zeros();
+        let mut k4 = Eta::zeros();
+
+        let tau_contrib = self.b_mat * tau;
+
         for step in 0..num_steps{
-            let k1 = ((self.a_mat*self.eta) + (self.b_mat * tau))*dt;            
-            let k2 = ((self.a_mat*(self.eta + (k1/2.0))) + (self.b_mat * tau))*dt;
-            let k3 = ((self.a_mat*(self.eta + (k2/2.0))) + (self.b_mat * tau))*dt;
-            let k4 = ((self.a_mat*(self.eta + k3))     + (self.b_mat * tau))*dt;
+            let eta0 = self.eta.clone();
+            k1 = (self.calc_eta_dot(&eta0) + tau_contrib) * dt;
+            // let k1 = ((self.a_mat*self.eta) + tau_contrib)*dt; 
+            // k2 = ((self.a_mat*(self.eta + (k1/2.0))) + tau_contrib)*dt;
+            k2 = (self.calc_eta_dot(&(&eta0 + (k1/2.0))) + tau_contrib)*dt;
+            // println!("Test of new calc {}", k2-k2a);
+            // k3 = ((self.a_mat*(self.eta + (k2/2.0))) + tau_contrib)*dt;
+            k3 = (self.calc_eta_dot(&(&eta0 + (k2/2.0))) + tau_contrib)*dt;
+            // k4 = ((self.a_mat*(self.eta + k3))     + tau_contrib)*dt;
+            k4 = (self.calc_eta_dot(&(&eta0 + (k3))) + tau_contrib)*dt;
 
             let eta_dot = (k1+(2.0*k2)+(2.0*k3)+k4)/6.0;
             self.eta = self.eta + eta_dot;
-
-            self.update_gyro_outputs();
         }
-        println!("elapsed: {}", now.elapsed().as_micros());
+        self.update_gyro_outputs();
+        // println!("elapsed: {}", now.elapsed().as_micros());
+    }
+
+    fn calc_eta_dot(&mut self, eta0: &Eta) -> Eta{
+        let eta = HEta::from_row_slice(&eta0.as_slice()[0..52]);
+        let d_eta = HEta::from_row_slice(&eta0.as_slice()[52..104]);
+
+        let out2 = (-self.k_mat * eta);
+        let out = Eta::from_row_slice(&[&d_eta.as_slice()[0..52], &out2.as_slice()[0..52]].concat());
+        return out
     }
     
     fn update_gyro_outputs(&mut self){

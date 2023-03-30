@@ -32,6 +32,7 @@ use log::{debug, error, info, trace, warn};
 pub use log4rs::append::file::FileAppender;
 pub use log4rs::config::{Appender, Config, Root};
 pub use log4rs::encode::pattern::PatternEncoder;
+use std::time::{Duration, Instant};
 
 extern crate csv;
 extern crate serde;
@@ -40,6 +41,12 @@ extern crate time;
 extern crate serde_derive;
 
 fn main() {
+
+    let mut fc = flex_control::PassiveControl::init_pc();
+    fc.care();
+    fc.lyap();
+
+
 
     init_log();
     // the verification function for all tihngs in the control module.
@@ -94,10 +101,11 @@ fn main() {
 
 
     trace!("START");
-    for _step in 0..10 as usize {
+    for _step in 0..0 as usize {
         
         ///////// beginning of the simulation loop
         /////////////////////////////////////////
+        // let now1 = Instant::now();
         unsafe {
             trace!("bit_one_step start");
             bit_one_step(
@@ -114,11 +122,13 @@ fn main() {
             );
             trace!("bit_one_step end");
         }
-        
+        // println!("bit one step {}", now1.elapsed().as_micros());
+        // let now2 = Instant::now();
         if flex.flex_enable{
             flex.propogate_flex(&[tau_applied[6], tau_applied[7], tau_applied[8]], bp._dt, bp._num_steps);
         // flex.propogate_flex(&[1., 1., 1.], bp._dt, bp._num_steps);
         }
+        // println!("flex {}", now2.elapsed().as_micros());
 
         // println!("Pivot request {:}", ctrl.pivot.omega_request);
 

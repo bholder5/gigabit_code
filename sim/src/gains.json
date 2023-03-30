@@ -1,14 +1,14 @@
 {
 	"fine": {
-        "kp_roll": 87.0,
+        "kp_roll": 187.0,
         "ki_roll": 500.0,
-        "kip_roll": 87.0,
-        "kp_pitch": 42.0,
+        "kip_roll": 287.0,
+        "kp_pitch": 142.0,
         "ki_pitch": 500.0,
         "kip_pitch": 87.0,
-        "kp_yaw": 55.0,
-        "ki_yaw": 87.0,
-        "kip_yaw": 6.5
+        "kp_yaw": 200.0,
+        "ki_yaw": 187.0,
+        "kip_yaw": 16.5
     },
     "roll_des": -0.1,
     "pitch_des": -0.3,

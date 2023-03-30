@@ -19,6 +19,8 @@ env_logger = "0.8"
 chrono = "0.4"
 astro = "2"
 statrs = "0.15.0"
+ndarray = "*"
+ndarray-linalg = "*"
 
 # latex in documentation
 [package.metadata.docs.rs]
