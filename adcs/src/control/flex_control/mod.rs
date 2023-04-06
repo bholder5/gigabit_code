@@ -19,7 +19,9 @@ pub struct PassiveControl {
     b_c: na::DMatrix<f64>,
     c_c: na::DMatrix<f64>,
     state: na::DVector<f64>,
-    u: na::DVector<f64>,
+    pub u: na::DVector<f64>, //the requested torque
+    pub u_rigid: na::DVector<f64>,
+    pub enable: bool,
 }
 
 impl PassiveControl{
@@ -28,16 +30,17 @@ impl PassiveControl{
         let b_full = init_bmat();
         let num_modes: usize = 2;
         let num_states: usize = 2*num_modes;
-        let r = na::Matrix5::<f64>::identity();
-        let ql = na::DMatrix::<f64>::identity(num_states, num_states);
-        let qr = na::DMatrix::<f64>::identity(num_states, num_states);
+        let r = 0.01 * na::Matrix5::<f64>::identity();
+        let ql = 1.0*na::DMatrix::<f64>::identity(num_states, num_states);
+        let qr = 1000.0 * na::DMatrix::<f64>::identity(num_states, num_states);
         let a_cl = na::DMatrix::<f64>::zeros(num_states, num_states);
         let p_lyap = na::DMatrix::<f64>::zeros(num_states, num_states);
         let b_c = na::DMatrix::<f64>::zeros(num_states, 5);
         let c_c = na::DMatrix::<f64>::zeros(5, num_states);
         let state = na::DVector::<f64>::zeros(num_states);
         let u = na::DVector::<f64>::zeros(5);
-        
+        let u_rigid = na::DVector::<f64>::zeros(3);
+        let enable = true;      
 
 
         let passive_control = PassiveControl {
@@ -53,7 +56,9 @@ impl PassiveControl{
             b_c,
             c_c,
             state,
-            u
+            u,
+            u_rigid,
+            enable
         };
         return passive_control
 
@@ -203,7 +208,7 @@ impl PassiveControl{
     
     }
 
-    pub fn propogate_flex(&mut self, gyro:  &[f64; 5], dt: f64, num_steps: u16){
+    pub fn propogate_control_state(&mut self, gyro:  &[f64], dt: f64, num_steps: u16){
         let gyro_v = na::DVector::from_row_slice(gyro);
         // println!("{}", self.eta);
         // let now = Instant::now();
@@ -226,6 +231,11 @@ impl PassiveControl{
             let state_dot = (k1+(2.0*k2)+(2.0*k3)+k4)/6.0;
             self.state = state0 + state_dot;
         }
+        let tau_des = &self.c_c * &self.state;
+        self.u = tau_des.clone();
+        let u_r = na::DVector::from_row_slice(&[tau_des[0], ((tau_des[1] + tau_des[2])/2.0), ((tau_des[3] + tau_des[4])/2.0)]);
+        self.u_rigid = u_r;
+        println!("tau in fc: {} \n tau rigid: {}", tau_des.clone(), self.u_rigid.clone());
     }
 
 }

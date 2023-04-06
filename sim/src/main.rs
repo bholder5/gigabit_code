@@ -101,7 +101,7 @@ fn main() {
 
 
     trace!("START");
-    for _step in 0..0 as usize {
+    for _step in 0..1000000 as usize {
         
         ///////// beginning of the simulation loop
         /////////////////////////////////////////
@@ -125,9 +125,10 @@ fn main() {
         // println!("bit one step {}", now1.elapsed().as_micros());
         // let now2 = Instant::now();
         if flex.flex_enable{
-            flex.propogate_flex(&[tau_applied[6], tau_applied[7], tau_applied[8]], bp._dt, bp._num_steps);
+            flex.propogate_flex(&[tau_applied[6] + fc.u_rigid[0], tau_applied[7]+fc.u_rigid[1], tau_applied[8]+fc.u_rigid[2]], bp._dt, bp._num_steps, &fc);
         // flex.propogate_flex(&[1., 1., 1.], bp._dt, bp._num_steps);
         }
+        
         // println!("flex {}", now2.elapsed().as_micros());
 
         // println!("Pivot request {:}", ctrl.pivot.omega_request);
@@ -163,6 +164,10 @@ fn main() {
 
         
         est.propogate();
+
+        if fc.enable{
+            fc.propogate_control_state(flex.c_out.as_slice(), bp._dt, bp._num_steps)
+        }
 
         if (step % 1000) < 1 {
             est.corr.read_LIS(&sim_state.eq_k.rot);
@@ -207,11 +212,13 @@ fn main() {
 
             ctrl.update_ctrl();
 
+
             //Disturbance generation
             wind.generate();
             tau_applied[0] = wind.tau[0].clone();
             tau_applied[1] = wind.tau[1].clone();
             tau_applied[2] = wind.tau[2].clone();
+
 
             // update actual torque vector with applied torques
             tau_applied[6] = 1.0*ctrl.rw.tau_applied; //yaw

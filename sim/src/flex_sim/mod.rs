@@ -10,6 +10,7 @@ pub use kmat::*;
 
 extern crate nalgebra as na;
 use std::time::{Duration, Instant};
+use adcs::control::flex_control::PassiveControl;
 
 pub type Eta = na::SMatrix<f64, 104, 1>;
 pub type HEta = na::SMatrix<f64, 52, 1>;
@@ -32,8 +33,8 @@ pub struct Flex_model {
     pub flex_enable: bool,
 }
 impl Flex_model{
-    pub fn propogate_flex(&mut self, tau:  &[f64; 3], dt: f64, num_steps: u16){
-        let tau = na::Vector5::from_row_slice(&[tau[0], tau[1]/2.0, tau[1]/2.0, tau[2]/2.0, tau[2]/2.0]);
+    pub fn propogate_flex(&mut self, tau:  &[f64; 3], dt: f64, num_steps: u16, fc: &PassiveControl){
+        let tau = na::Vector5::from_row_slice(&[tau[0] + fc.u[0], (tau[1]/2.0) + fc.u[1], (tau[1]/2.0) + fc.u[2], (tau[2]/2.0) + fc.u[3], (tau[2]/2.0) + fc.u[4]]);
         // println!("{}", self.eta);
         // let now = Instant::now();
         let mut k1 = Eta::zeros();

@@ -118,7 +118,7 @@ pub struct Record {
 
 pub fn push_record(t: &f64, bp: &Params, est: &Estimator, ctrl: &Ctrl, meas: &Meas, sim_st: &State, flex: &fx::Flex_model) -> Result<(), Box<dyn Error>> {
     // let file_path = "/home/brad/sim_data/out.csv";
-    let file_path = "/media/brad/linux_storage/sim_data/out.csv";
+    let file_path = "/home/brad/data/out.csv";
 
     if Path::new(&file_path.clone()).exists() {
         let file = OpenOptions::new()
@@ -309,7 +309,7 @@ pub fn push_record(t: &f64, bp: &Params, est: &Estimator, ctrl: &Ctrl, meas: &Me
 
 #[allow(dead_code)]
 pub fn read_last_state(mut _t: f64, bp: &mut Params, est: &mut Estimator, ctrl: &mut Ctrl, meas: &mut Meas, sim_st: &mut State, flex: &fx::Flex_model) -> () {
-    let file_path = "/media/brad/linux_storage/sim_data/out.csv";
+    let file_path = "/home/brad/data/out.csv";
 
     if Path::new(&file_path.clone()).exists() {
         let file = OpenOptions::new()
