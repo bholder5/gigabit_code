@@ -77,6 +77,7 @@ fn main() {
     //********************************************************************
 
     let mut y_result: [f64; 21] = [0.; 21];
+    let mut flex_result: [f64; 104] = [0.; 104];
 
     js::read_gains(&mut ctrl, &mut bp, &mut est); // read in gains from json file (for tuning)
                                // ctrl.update_gain_matrices();
@@ -101,7 +102,7 @@ fn main() {
 
 
     trace!("START");
-    for _step in 0..1000000 as usize {
+    for _step in 0..100000000 as usize {
         
         ///////// beginning of the simulation loop
         /////////////////////////////////////////
@@ -118,15 +119,19 @@ fn main() {
                 bp._num_steps,
                 bp._tau_piv_max,
                 bp.pitch_nom,
+                flex.eta.as_ptr(),
+                fc.u.as_ptr(),
                 y_result.as_mut_ptr(),
+                flex_result.as_mut_ptr(),
             );
             trace!("bit_one_step end");
         }
         // println!("bit one step {}", now1.elapsed().as_micros());
         // let now2 = Instant::now();
         if flex.flex_enable{
-            flex.propogate_flex(&[tau_applied[6] + fc.u_rigid[0], tau_applied[7]+fc.u_rigid[1], tau_applied[8]+fc.u_rigid[2]], bp._dt, bp._num_steps, &fc);
+            // flex.propogate_flex(&[tau_applied[6] + fc.u_rigid[0], tau_applied[7]+fc.u_rigid[1], tau_applied[8]+fc.u_rigid[2]], bp._dt, bp._num_steps, &fc);
         // flex.propogate_flex(&[1., 1., 1.], bp._dt, bp._num_steps);
+            flex.update_eta(flex_result.as_ref());
         }
         
         // println!("flex {}", now2.elapsed().as_micros());
@@ -166,7 +171,7 @@ fn main() {
         est.propogate();
 
         if fc.enable{
-            fc.propogate_control_state(flex.c_out.as_slice(), bp._dt, bp._num_steps)
+            // fc.propogate_control_state(flex.c_out.as_slice(), bp._dt, bp._num_steps)
         }
 
         if (step % 1000) < 1 {
@@ -210,10 +215,10 @@ fn main() {
             ctrl.rw.omega = bp.omega_rw;
             
 
-            ctrl.update_ctrl();
+            // ctrl.update_ctrl();
 
 
-            //Disturbance generation
+            // Disturbance generation
             wind.generate();
             tau_applied[0] = wind.tau[0].clone();
             tau_applied[1] = wind.tau[1].clone();
@@ -221,9 +226,19 @@ fn main() {
 
 
             // update actual torque vector with applied torques
-            tau_applied[6] = 1.0*ctrl.rw.tau_applied; //yaw
-            tau_applied[7] = 1.0*ctrl.fmot_roll.tau_applied; //roll
-            tau_applied[8] = 1.0*ctrl.fmot_pitch.tau_applied; //pitch
+
+            // if step < 1500{
+                ctrl.update_ctrl();
+                tau_applied[6] = 1.0*ctrl.rw.tau_applied; //yaw
+                tau_applied[7] = 1.0*ctrl.fmot_roll.tau_applied; //roll
+                tau_applied[8] = 1.0*ctrl.fmot_pitch.tau_applied; //pitch
+            // } else {
+            //     ctrl.rw.tau_applied = 0.0;
+            //     tau_applied[6] = 0.0*ctrl.rw.tau_applied; //yaw
+            //     tau_applied[7] = 0.0*ctrl.fmot_roll.tau_applied; //roll
+            //     tau_applied[8] = 0.0*ctrl.fmot_pitch.tau_applied; 
+            // }
+            
 
             // if (step % 1000) < 1{
             //     println!("step: {:}", step);

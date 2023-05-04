@@ -2,11 +2,10 @@
  * Academic License - for use in teaching, academic research, and meeting
  * course requirements at degree granting institutions only.  Not for
  * government, commercial, or other organizational use.
+ * File: main.h
  *
- * main.h
- *
- * Code generation for function 'main'
- *
+ * MATLAB Coder version            : 5.3
+ * C/C++ source code generated on  : 16-Aug-2022 11:56:01
  */
 
 /*************************************************************************/
@@ -37,7 +36,7 @@
 #ifndef MAIN_H
 #define MAIN_H
 
-/* Include files */
+/* Include Files */
 #include "rtwtypes.h"
 #include <stddef.h>
 #include <stdlib.h>
@@ -49,17 +48,13 @@ extern "C" {
 /* Function Declarations */
 extern int32_T main(int32_T argc, char **argv);
 
-extern void main_bit_one_step(void);
-
-extern void main_compute_angular_velocity_C(void);
-
-extern void main_compute_rotation_mat_C(void);
-
-extern void main_rot2axis_C(void);
-
 #ifdef __cplusplus
 }
 #endif
 
 #endif
-/* End of code generation (main.h) */
+/*
+ * File trailer for main.h
+ *
+ * [EOF]
+ */

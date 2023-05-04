@@ -2,11 +2,10 @@
  * Academic License - for use in teaching, academic research, and meeting
  * course requirements at degree granting institutions only.  Not for
  * government, commercial, or other organizational use.
+ * File: rtwtypes.h
  *
- * rtwtypes.h
- *
- * Code generation for function 'bit_one_step'
- *
+ * MATLAB Coder version            : 5.3
+ * C/C++ source code generated on  : 17-Mar-2022 12:37:13
  */
 
 #ifndef RTWTYPES_H
@@ -38,8 +37,12 @@
 #endif
 #endif
 
-/* Include files */
+/* Include Files */
 #include "tmwtypes.h"
 
 #endif
-/* End of code generation (rtwtypes.h) */
+/*
+ * File trailer for rtwtypes.h
+ *
+ * [EOF]
+ */

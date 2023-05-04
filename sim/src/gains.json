@@ -14,7 +14,7 @@
     "pitch_des": -0.3,
     "yaw_des": 1.0,
     "new_targ": false,
-    "latency": true,
-    "ctrl_from_est": true,
+    "latency": false,
+    "ctrl_from_est": false,
     "est_reset": false
 }

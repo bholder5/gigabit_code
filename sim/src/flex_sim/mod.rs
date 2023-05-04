@@ -33,7 +33,7 @@ pub struct Flex_model {
     pub flex_enable: bool,
 }
 impl Flex_model{
-    pub fn propogate_flex(&mut self, tau:  &[f64; 3], dt: f64, num_steps: u16, fc: &PassiveControl){
+    pub fn _propogate_flex(&mut self, tau:  &[f64; 3], dt: f64, num_steps: u16, fc: &PassiveControl){
         let tau = na::Vector5::from_row_slice(&[tau[0] + fc.u[0], (tau[1]/2.0) + fc.u[1], (tau[1]/2.0) + fc.u[2], (tau[2]/2.0) + fc.u[3], (tau[2]/2.0) + fc.u[4]]);
         // println!("{}", self.eta);
         // let now = Instant::now();
@@ -78,6 +78,12 @@ impl Flex_model{
         self.c_out  = self.b_mat.transpose() * self.eta;
         self.g1_pos_out = self.g1_pos_mat * self.eta;
         self.c_pos_out = self.c_pos_mat * self.eta;
+    }
+
+    pub fn update_eta(&mut self, eta1: &[f64]){
+        self.eta = Eta::from_row_slice(eta1.as_ref());
+        self.update_gyro_outputs();
+
     }
 } 
 

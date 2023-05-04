@@ -2755,7 +2755,10 @@ extern "C" {
         num_steps: uint16_T,
         tau_max_piv: real_T,
         thet_pit_nom: real_T,
+        x_flex0: *const real_T,
+        tau_flex: *const real_T,
         y_true: *mut real_T,
+        y_flex: *mut real_T,
     );
 }
 extern "C" {

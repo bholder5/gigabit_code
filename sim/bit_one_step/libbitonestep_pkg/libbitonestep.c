@@ -2,13 +2,14 @@
  * Academic License - for use in teaching, academic research, and meeting
  * course requirements at degree granting institutions only.  Not for
  * government, commercial, or other organizational use.
- * File: libbitonestep.c
  *
- * MATLAB Coder version            : 5.3
- * C/C++ source code generated on  : 17-Mar-2022 12:37:13
+ * libbitonestep.c
+ *
+ * Code generation for function 'libbitonestep'
+ *
  */
 
-/* Include Files */
+/* Include files */
 #include "libbitonestep.h"
 #include "libbitonestep_internal_types.h"
 #include <math.h>
@@ -32,46 +33,29 @@ typedef struct {
 
 #endif                                 /* typedef_rtBoundsCheckInfo */
 
-/* Variable Definitions */
-static rtRunTimeErrorInfo emlrtRTEI = { 88,/* lineNo */
-  9,                                   /* colNo */
-  "check_forloop_overflow_error",      /* fName */
-  "/usr/local/MATLAB/R2021b/toolbox/eml/lib/matlab/eml/eml_int_forloop_overflow_check.m"/* pName */
-};
-
 /* Function Declarations */
 static void axis2rot(const real_T v[3], real_T phi, real_T rot[3][3]);
-static void b_check_forloop_overflow_error(void);
-static void b_rtErrorWithMessageID(const char_T *aFcnName, int32_T aLineNum);
 static void bit_one_step_anonFcn1(const real_T unlock[9], real_T w_piv,
   boolean_T piv_flag, real_T tau_max_piv, real_T thet_pit_nom, const real_T
   y_true[21], const real_T tau_applied[9], real_T dw_piv, real_T varargout_1[21]);
+static void c_rtErrorWithMessageID(const char_T *r, const char_T *aFcnName,
+  int32_T aLineNum);
 static void check_forloop_overflow_error(void);
 static void d_rtErrorWithMessageID(const char_T *r, const char_T *aFcnName,
   int32_T aLineNum);
 static int32_T div_nde_s32_floor(int32_T numerator);
 static void ft_2(const real_T ct[671], real_T mass_mat[9][9]);
 static void mass_mat_func(const real_T in1[9], real_T mass_mat[9][9]);
-static void mldivide(real_T c_A[9][9], real_T b_B[9]);
+static void mldivide(real_T A[9][9], real_T B[9]);
 static void rtDynamicBoundsError(int32_T aIndexValue, int32_T aLoBound, int32_T
   aHiBound, const rtBoundsCheckInfo *aInfo);
-static void rtErrorWithMessageID(const int32_T b_i, const char_T *r, const
-  char_T *aFcnName, int32_T aLineNum);
+static void rtErrorWithMessageID(const char_T *aFcnName, int32_T aLineNum);
 static boolean_T rtIsNullOrEmptyString(const char_T *aString);
 static void rtReportErrorLocation(const char_T *aFcnName, int32_T aLineNo);
 
 /* Function Definitions */
 /*
  * function rot = axis2rot( v, phi)
- *
- * This function gives the rotation matric applied to other rotation
- *  matricies, not the vector (it is transpose of the rot mat applied to the
- *  vector.
- *
- * Arguments    : const real_T v[3]
- *                real_T phi
- *                real_T rot[3][3]
- * Return Type  : void
  */
 static void axis2rot(const real_T v[3], real_T phi, real_T rot[3][3])
 {
@@ -97,15 +81,14 @@ static void axis2rot(const real_T v[3], real_T phi, real_T rot[3][3])
 
   real_T b_sign;
   real_T cosa;
-  real_T mij;
-  real_T rot_tmp;
   real_T sina;
-  int32_T b_i;
-  int32_T b_j;
-  int32_T i1;
+  int32_T i;
   int32_T j;
   int32_T k;
 
+  /*  This function gives the rotation matric applied to other rotation */
+  /*  matricies, not the vector (it is transpose of the rot mat applied to the */
+  /*  vector. */
   /* 'axis2rot:5' cosa = cos(phi); */
   cosa = cos(phi);
 
@@ -116,25 +99,27 @@ static void axis2rot(const real_T v[3], real_T phi, real_T rot[3][3])
   b_sign = 1.0;
 
   /* 'axis2rot:9' rot = (zeros(3,3)); */
-  for (b_i = 0; b_i < 3; b_i++) {
-    rot[b_i][0] = 0.0;
-    rot[b_i][1] = 0.0;
-    rot[b_i][2] = 0.0;
+  for (i = 0; i < 3; i++) {
+    rot[i][0] = 0.0;
+    rot[i][1] = 0.0;
+    rot[i][2] = 0.0;
   }
 
   /* 'axis2rot:11' for k = 1:3 */
   for (k = 0; k < 3; k++) {
     /* 'axis2rot:12' for j = k:3 */
-    b_i = 2 - k;
-    for (j = 0; j <= b_i; j++) {
+    i = 2 - k;
+    for (j = 0; j <= i; j++) {
+      real_T mij;
+      int32_T b_j;
       b_j = k + j;
 
       /* 'axis2rot:13' mij = (1-cosa)*v(k)*v(j); */
-      if ((b_j + 1) > 3) {
+      if (b_j + 1 > 3) {
         rtDynamicBoundsError(b_j + 1, 1, 3, &emlrtBCI);
       }
 
-      mij = ((1.0 - cosa) * v[k]) * v[b_j];
+      mij = (1.0 - cosa) * v[k] * v[b_j];
 
       /* 'axis2rot:14' if (k == j) */
       if (k == b_j) {
@@ -143,6 +128,9 @@ static void axis2rot(const real_T v[3], real_T phi, real_T rot[3][3])
 
         /* 'axis2rot:16' rot(k,j) = mij; */
       } else {
+        real_T rot_tmp;
+        int32_T i1;
+
         /* 'axis2rot:17' else */
         /* index is 3 - j - k for 0 indexed programming languages */
         /* 'axis2rot:19' rot(k,j) = mij + (sign*sina*v((5-k-j)+1)); */
@@ -151,7 +139,7 @@ static void axis2rot(const real_T v[3], real_T phi, real_T rot[3][3])
           rtDynamicBoundsError(i1, 1, 3, &b_emlrtBCI);
         }
 
-        rot_tmp = (b_sign * sina) * v[i1 - 1];
+        rot_tmp = b_sign * sina * v[i1 - 1];
         rot[b_j][k] = mij + rot_tmp;
 
         /* 'axis2rot:20' rot(j,k) = mij - (sign*sina*v((5-k-j)+1)); */
@@ -165,42 +153,7 @@ static void axis2rot(const real_T v[3], real_T phi, real_T rot[3][3])
 }
 
 /*
- * Arguments    : void
- * Return Type  : void
- */
-static void b_check_forloop_overflow_error(void)
-{
-  rtErrorWithMessageID(5, "int32", emlrtRTEI.fName, emlrtRTEI.lineNo);
-}
-
-/*
- * Arguments    : const char_T *aFcnName
- *                int32_T aLineNum
- * Return Type  : void
- */
-static void b_rtErrorWithMessageID(const char_T *aFcnName, int32_T aLineNum)
-{
-  (void)fprintf(stderr, "Matrix must be positive definite.");
-  (void)fprintf(stderr, "\n");
-  (void)fprintf(stderr, "Error in %s (line %d)", aFcnName, aLineNum);
-  (void)fprintf(stderr, "\n");
-  (void)fflush(stderr);
-  abort();
-}
-
-/*
  * @(y_true, tau_applied, dw_piv)
- *
- * Arguments    : const real_T unlock[9]
- *                real_T w_piv
- *                boolean_T piv_flag
- *                real_T tau_max_piv
- *                real_T thet_pit_nom
- *                const real_T y_true[21]
- *                const real_T tau_applied[9]
- *                real_T dw_piv
- *                real_T varargout_1[21]
- * Return Type  : void
  */
 static void bit_one_step_anonFcn1(const real_T unlock[9], real_T w_piv,
   boolean_T piv_flag, real_T tau_max_piv, real_T thet_pit_nom, const real_T
@@ -216,74 +169,70 @@ static void bit_one_step_anonFcn1(const real_T unlock[9], real_T w_piv,
     0                                  /* checkKind */
   };
 
-  static rtRunTimeErrorInfo b_emlrtRTEI = { 80,/* lineNo */
-    23,                                /* colNo */
-    "cholesky",                        /* fName */
-    "/usr/local/MATLAB/R2021b/toolbox/eml/lib/matlab/matfun/chol.m"/* pName */
+  static rtRunTimeErrorInfo emlrtRTEI = { 109,/* lineNo */
+    "chol"                             /* fName */
   };
 
-  static const real_T b_r_n1_n[9][3] = { { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 }, {
+  static const real_T c_n[9][3] = { { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 }, { 0.0,
+      0.0, -30.5 }, { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 }, { 0.0, 0.0, -1.4 }, {
+      0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } };
+
+  static const real_T r_n1_n[9][3] = { { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 }, {
       0.0, 0.0, 0.0 }, { 0.0, 0.0, -61.0 }, { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 },
     { 0.0, 0.0, 0.0 }, { 0.0, 0.0, -1.4 }, { 0.0, 0.0, 0.0 } };
 
-  static const real_T c_c_n[9][3] = { { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 }, {
-      0.0, 0.0, -30.5 }, { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 }, { 0.0, 0.0, -1.4
-    }, { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0 } };
-
   static const real_T k_d[9] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0017453292519943296,
-    0.0, 12.281626381649737, 12.281626381649737 };
+    0.0, 0.0, 0.0 };
 
   static const real_T g0[3] = { 0.0, 0.0, -9.72 };
 
-  static const int16_T iv[9] = { 0, 0, 10, 0, 0, 1, 350, 73, 150 };
+  static const int32_T iv[9] = { 0, 0, 100000, 0, 0, 1, 350, 73, 150 };
 
-  static const int8_T z_n[9][3] = { { 0, 0, 1 }, { 1, 0, 0 }, { 0, 1, 0 }, { 1,
+  static const int8_T b_z_n[9][3] = { { 0, 0, 1 }, { 1, 0, 0 }, { 0, 1, 0 }, { 1,
       0, 0 }, { 0, 1, 0 }, { 0, 0, 1 }, { 0, 0, 1 }, { 1, 0, 0 }, { 0, 1, 0 } };
 
+  real_T C_n[9][3][3];
   real_T C_n_rate[9][3][3];
-  real_T b_C_n[9][3][3];
-  real_T c_r_tmp[9][9];
-  real_T b_dVdtheta_i[9][3];
+  real_T d_r_tmp[9][9];
   real_T b_r_tmp[3][9];
-  real_T d_r_tmp[3][9];
+  real_T c_r_tmp[3][9];
   real_T r_tmp[3][9];
   real_T s7[9][3];
-  real_T C_n[3][3];
   real_T Pot[9];
+  real_T b_C_n[3][3];
   real_T b_tau_applied[9];
   real_T dC_10[3][3];
   real_T dVdtheta_i[9];
   real_T dtheta[9];
   real_T t1[9];
-  real_T b_z_n[3];
+  real_T z_n[3];
   real_T d;
   real_T d1;
+  real_T d2;
+  real_T d3;
   real_T int_err;
   real_T m_i;
-  real_T tau_piv;
+  real_T ssq;
   real_T vec_idx_2;
-  int32_T b;
-  int32_T b_i;
   int32_T b_z_n_tmp;
-  int32_T c_z_n_tmp;
+  int32_T i;
+  int32_T i1;
   int32_T idxA1j;
-  int32_T idxAjj;
-  int32_T idxAjjp1;
   int32_T info;
   int32_T j;
-  int32_T n;
+  int32_T jmax;
   int32_T z_n_tmp;
   boolean_T x[3];
   boolean_T exitg1;
   boolean_T y;
 
-  /* 'bit_one_step:14' @(y_true, tau_applied, dw_piv) bit_propagator(y_true, c_n, z_n, m_n, r_n1_n, m_w_n, p_n, ...  */
-  /* 'bit_one_step:15'     k_d, b_d, g0, unlock, hs_rw_max, tau_applied, w_piv, piv_flag, dw_piv, tau_max_piv, thet_pit_nom) */
+  /* 'bit_one_step:16' @(y_true, tau_applied, dw_piv) bit_propagator(y_true, c_n, z_n, m_n, r_n1_n, m_w_n, p_n, ...  */
+  /* 'bit_one_step:17'     k_d, b_d, g0, unlock, hs_rw_max, tau_applied, w_piv, piv_flag, dw_piv, tau_max_piv, thet_pit_nom) */
   /* split the state */
   /* 'bit_propagator:6' theta = X(10:18); */
   /* 'bit_propagator:7' dtheta = X(1:9); */
-  (void)memcpy(&b_tau_applied[0], &tau_applied[0], 9U * (sizeof(real_T)));
-  (void)memcpy(&dtheta[0], &y_true[0], 9U * (sizeof(real_T)));
+  memcpy(&b_tau_applied[0], &tau_applied[0], 9U * sizeof(real_T));
+  memcpy(&dtheta[0], &y_true[0], 9U * sizeof(real_T));
 
   /* 'bit_propagator:8' hs = X(19:21); */
   /* extract RW torque. */
@@ -311,41 +260,41 @@ static void bit_one_step_anonFcn1(const real_T unlock[9], real_T w_piv,
   /* 'compute_potential_energy_term:12' C_n_rate = C_n; */
   /*  Potential energy */
   /* 'compute_potential_energy_term:14' Pot = zeros(ndof,1); */
-  (void)memset(&Pot[0], 0, 9U * (sizeof(real_T)));
+  memset(&Pot[0], 0, 9U * sizeof(real_T));
 
   /* 'compute_potential_energy_term:16' for n = 1:ndof */
-  C_n[0][0] = 0.0;
-  C_n[1][1] = 0.0;
-  C_n[2][2] = 0.0;
-  for (n = 0; n < 9; n++) {
+  b_C_n[0][0] = 0.0;
+  b_C_n[1][1] = 0.0;
+  b_C_n[2][2] = 0.0;
+  for (idxA1j = 0; idxA1j < 9; idxA1j++) {
     /* 'compute_potential_energy_term:17' C_n(:,:,n) = axis2rot(z_n(:,n), theta(n)); */
-    z_n_tmp = (int32_T)z_n[n][0];
-    b_z_n[0] = (real_T)z_n_tmp;
-    b_z_n_tmp = (int32_T)z_n[n][1];
-    b_z_n[1] = (real_T)b_z_n_tmp;
-    c_z_n_tmp = (int32_T)z_n[n][2];
-    b_z_n[2] = (real_T)c_z_n_tmp;
-    axis2rot(b_z_n, y_true[n + 9], *((real_T (*)[3][3])(&b_C_n[n][0][0])));
+    jmax = b_z_n[idxA1j][0];
+    z_n[0] = jmax;
+    z_n_tmp = b_z_n[idxA1j][1];
+    z_n[1] = z_n_tmp;
+    b_z_n_tmp = b_z_n[idxA1j][2];
+    z_n[2] = b_z_n_tmp;
+    axis2rot(z_n, y_true[idxA1j + 9], *(real_T (*)[3][3])&C_n[idxA1j][0][0]);
 
     /* Partial of Rot_n with respect to theta_n */
     /* 'compute_potential_energy_term:19' C_n_rate(:,:,n) = -1 * xmat(z_n(:,n)) * C_n(:,:,n); */
     /* 'xmat:2' mat = [        0, -vec(3),  vec(2); */
     /* 'xmat:3'             vec(3),         0, -vec(1); */
     /* 'xmat:4'            -vec(2),  vec(1),         0]; */
-    C_n[1][0] = (real_T)c_z_n_tmp;
-    C_n[2][0] = -((real_T)b_z_n_tmp);
-    C_n[0][1] = -((real_T)c_z_n_tmp);
-    C_n[2][1] = (real_T)z_n_tmp;
-    C_n[0][2] = (real_T)b_z_n_tmp;
-    C_n[1][2] = -((real_T)z_n_tmp);
-    for (b_i = 0; b_i < 3; b_i++) {
-      info = (int32_T)C_n[0][b_i];
-      z_n_tmp = (int32_T)C_n[1][b_i];
-      b_z_n_tmp = (int32_T)C_n[2][b_i];
-      for (c_z_n_tmp = 0; c_z_n_tmp < 3; c_z_n_tmp++) {
-        C_n_rate[n][c_z_n_tmp][b_i] = ((((real_T)info) * b_C_n[n][c_z_n_tmp][0])
-          + (((real_T)z_n_tmp) * b_C_n[n][c_z_n_tmp][1])) + (((real_T)b_z_n_tmp)
-          * b_C_n[n][c_z_n_tmp][2]);
+    b_C_n[1][0] = b_z_n_tmp;
+    b_C_n[2][0] = -(real_T)z_n_tmp;
+    b_C_n[0][1] = -(real_T)b_z_n_tmp;
+    b_C_n[2][1] = jmax;
+    b_C_n[0][2] = z_n_tmp;
+    b_C_n[1][2] = -(real_T)jmax;
+    for (i = 0; i < 3; i++) {
+      i1 = (int32_T)b_C_n[0][i];
+      z_n_tmp = (int32_T)b_C_n[1][i];
+      b_z_n_tmp = (int32_T)b_C_n[2][i];
+      for (jmax = 0; jmax < 3; jmax++) {
+        C_n_rate[idxA1j][jmax][i] = ((real_T)i1 * C_n[idxA1j][jmax][0] + (real_T)
+          z_n_tmp * C_n[idxA1j][jmax][1]) + (real_T)b_z_n_tmp * C_n[idxA1j][jmax]
+          [2];
       }
     }
   }
@@ -353,30 +302,30 @@ static void bit_one_step_anonFcn1(const real_T unlock[9], real_T w_piv,
   /*  Compute potential energy term. First loop is cycling through each */
   /*  koints contribution. */
   /* 'compute_potential_energy_term:24' for n = 1:ndof */
-  for (n = 0; n < 9; n++) {
+  for (idxA1j = 0; idxA1j < 9; idxA1j++) {
     /* 'compute_potential_energy_term:25' m_i = 0; */
     m_i = 0.0;
 
     /* 'compute_potential_energy_term:26' dVdtheta_i = zeros(ndof,1); */
-    (void)memset(&dVdtheta_i[0], 0, 9U * (sizeof(real_T)));
+    memset(&dVdtheta_i[0], 0, 9U * sizeof(real_T));
 
     /*  mass of remaining link (ex. 7 + 8 + 9) is totla mass at OF joint */
     /* 'compute_potential_energy_term:29' for q = n:ndof */
-    b_i = 8 - n;
-    for (z_n_tmp = 0; z_n_tmp <= b_i; z_n_tmp++) {
+    i = 8 - idxA1j;
+    for (jmax = 0; jmax <= i; jmax++) {
       /* 'compute_potential_energy_term:30' m_i = m_i + m_n(q); */
-      info = (n + z_n_tmp) + 1;
-      if (info > 9) {
-        rtDynamicBoundsError(info, 1, 9, &emlrtBCI);
+      i1 = (idxA1j + jmax) + 1;
+      if (i1 > 9) {
+        rtDynamicBoundsError(i1, 1, 9, &emlrtBCI);
       }
 
-      m_i += (real_T)iv[info - 1];
+      m_i += (real_T)iv[i1 - 1];
     }
 
     /* 'compute_potential_energy_term:33' if (m_i ~= 0) */
     if (m_i != 0.0) {
       /* 'compute_potential_energy_term:34' t1 = zeros(ndof,1); */
-      (void)memset(&t1[0], 0, 9U * (sizeof(real_T)));
+      memset(&t1[0], 0, 9U * sizeof(real_T));
 
       /* 'compute_potential_energy_term:35' t2 = t1; */
       /* Cycling through all joints up to joint n, the jint we are */
@@ -384,12 +333,12 @@ static void bit_one_step_anonFcn1(const real_T unlock[9], real_T w_piv,
       /*  */
       /* terms up to n-1 links.  */
       /* 'compute_potential_energy_term:41' for j = 1:n-1 */
-      for (j = 0; j < n; j++) {
+      for (j = 0; j < idxA1j; j++) {
         /* 'compute_potential_energy_term:42' dC_10 = eye(3); */
-        for (b_i = 0; b_i < 3; b_i++) {
-          dC_10[b_i][0] = 0.0;
-          dC_10[b_i][1] = 0.0;
-          dC_10[b_i][2] = 0.0;
+        for (i = 0; i < 3; i++) {
+          dC_10[i][0] = 0.0;
+          dC_10[i][1] = 0.0;
+          dC_10[i][2] = 0.0;
         }
 
         dC_10[0][0] = 1.0;
@@ -397,69 +346,72 @@ static void bit_one_step_anonFcn1(const real_T unlock[9], real_T w_piv,
         dC_10[2][2] = 1.0;
 
         /* 'compute_potential_energy_term:44' for k = 1:n-1 */
-        for (z_n_tmp = 0; z_n_tmp < n; z_n_tmp++) {
+        for (z_n_tmp = 0; z_n_tmp < idxA1j; z_n_tmp++) {
           /* This multiplies the rotation matricies successively */
           /*  until the link j where the rate is inserted instead */
           /* 'compute_potential_energy_term:47' if (k == j) */
           if (z_n_tmp == j) {
             /* 'compute_potential_energy_term:48' dC_10 = C_n_rate(:,:,k) * dC_10; */
-            for (b_i = 0; b_i < 3; b_i++) {
-              tau_piv = C_n_rate[z_n_tmp][0][b_i];
-              d = C_n_rate[z_n_tmp][1][b_i];
-              d1 = C_n_rate[z_n_tmp][2][b_i];
-              for (info = 0; info < 3; info++) {
-                C_n[info][b_i] = ((tau_piv * dC_10[info][0]) + (d * dC_10[info]
-                  [1])) + (d1 * dC_10[info][2]);
+            for (i = 0; i < 3; i++) {
+              d = C_n_rate[z_n_tmp][0][i];
+              d1 = C_n_rate[z_n_tmp][1][i];
+              d2 = C_n_rate[z_n_tmp][2][i];
+              for (i1 = 0; i1 < 3; i1++) {
+                b_C_n[i1][i] = (d * dC_10[i1][0] + d1 * dC_10[i1][1]) + d2 *
+                  dC_10[i1][2];
               }
             }
 
-            for (b_i = 0; b_i < 3; b_i++) {
-              dC_10[b_i][0] = C_n[b_i][0];
-              dC_10[b_i][1] = C_n[b_i][1];
-              dC_10[b_i][2] = C_n[b_i][2];
+            for (i = 0; i < 3; i++) {
+              dC_10[i][0] = b_C_n[i][0];
+              dC_10[i][1] = b_C_n[i][1];
+              dC_10[i][2] = b_C_n[i][2];
             }
           } else {
             /* 'compute_potential_energy_term:49' else */
             /* 'compute_potential_energy_term:50' dC_10 = C_n(:,:,k) * dC_10; */
-            for (b_i = 0; b_i < 3; b_i++) {
-              tau_piv = b_C_n[z_n_tmp][0][b_i];
-              d = b_C_n[z_n_tmp][1][b_i];
-              d1 = b_C_n[z_n_tmp][2][b_i];
-              for (info = 0; info < 3; info++) {
-                C_n[info][b_i] = ((tau_piv * dC_10[info][0]) + (d * dC_10[info]
-                  [1])) + (d1 * dC_10[info][2]);
+            for (i = 0; i < 3; i++) {
+              d = C_n[z_n_tmp][0][i];
+              d1 = C_n[z_n_tmp][1][i];
+              d2 = C_n[z_n_tmp][2][i];
+              for (i1 = 0; i1 < 3; i1++) {
+                b_C_n[i1][i] = (d * dC_10[i1][0] + d1 * dC_10[i1][1]) + d2 *
+                  dC_10[i1][2];
               }
             }
 
-            for (b_i = 0; b_i < 3; b_i++) {
-              dC_10[b_i][0] = C_n[b_i][0];
-              dC_10[b_i][1] = C_n[b_i][1];
-              dC_10[b_i][2] = C_n[b_i][2];
+            for (i = 0; i < 3; i++) {
+              dC_10[i][0] = b_C_n[i][0];
+              dC_10[i][1] = b_C_n[i][1];
+              dC_10[i][2] = b_C_n[i][2];
             }
           }
         }
 
         /* 'compute_potential_energy_term:53' t1(j) = r_n1_n(:,n)' * dC_10 * g0; */
-        int_err = 0.0;
-        tau_piv = b_r_n1_n[n][0];
-        d = b_r_n1_n[n][1];
-        d1 = b_r_n1_n[n][2];
-        for (b_i = 0; b_i < 3; b_i++) {
-          int_err += (((tau_piv * dC_10[b_i][0]) + (d * dC_10[b_i][1])) + (d1 *
-            dC_10[b_i][2])) * g0[b_i];
+        ssq = 0.0;
+        d = r_n1_n[idxA1j][0];
+        d1 = r_n1_n[idxA1j][1];
+        d2 = r_n1_n[idxA1j][2];
+        for (i = 0; i < 3; i++) {
+          ssq += ((d * dC_10[i][0] + d1 * dC_10[i][1]) + d2 * dC_10[i][2]) *
+            g0[i];
         }
 
-        t1[j] = int_err;
+        t1[j] = ssq;
       }
 
       /* %% PE terms that go from 1:n */
       /* 'compute_potential_energy_term:56' for j = 1:n */
-      for (j = 0; j <= n; j++) {
+      d = c_n[idxA1j][0];
+      d1 = c_n[idxA1j][1];
+      d2 = c_n[idxA1j][2];
+      for (j = 0; j <= idxA1j; j++) {
         /* 'compute_potential_energy_term:57' dC_10 = eye(3); */
-        for (b_i = 0; b_i < 3; b_i++) {
-          dC_10[b_i][0] = 0.0;
-          dC_10[b_i][1] = 0.0;
-          dC_10[b_i][2] = 0.0;
+        for (i = 0; i < 3; i++) {
+          dC_10[i][0] = 0.0;
+          dC_10[i][1] = 0.0;
+          dC_10[i][2] = 0.0;
         }
 
         dC_10[0][0] = 1.0;
@@ -467,45 +419,45 @@ static void bit_one_step_anonFcn1(const real_T unlock[9], real_T w_piv,
         dC_10[2][2] = 1.0;
 
         /* 'compute_potential_energy_term:59' for k = 1:n */
-        for (z_n_tmp = 0; z_n_tmp <= n; z_n_tmp++) {
+        for (z_n_tmp = 0; z_n_tmp <= idxA1j; z_n_tmp++) {
           /* This multiplies the rotation matricies successively */
           /*  until the link j is reached in which case the rate */
           /*  is multiplied by the overall rotation */
           /* 'compute_potential_energy_term:63' if (k == j) */
           if (z_n_tmp == j) {
             /* 'compute_potential_energy_term:64' dC_10 = C_n_rate(:,:,k) * dC_10; */
-            for (b_i = 0; b_i < 3; b_i++) {
-              tau_piv = C_n_rate[z_n_tmp][0][b_i];
-              d = C_n_rate[z_n_tmp][1][b_i];
-              d1 = C_n_rate[z_n_tmp][2][b_i];
-              for (info = 0; info < 3; info++) {
-                C_n[info][b_i] = ((tau_piv * dC_10[info][0]) + (d * dC_10[info]
-                  [1])) + (d1 * dC_10[info][2]);
+            for (i = 0; i < 3; i++) {
+              d3 = C_n_rate[z_n_tmp][0][i];
+              ssq = C_n_rate[z_n_tmp][1][i];
+              int_err = C_n_rate[z_n_tmp][2][i];
+              for (i1 = 0; i1 < 3; i1++) {
+                b_C_n[i1][i] = (d3 * dC_10[i1][0] + ssq * dC_10[i1][1]) +
+                  int_err * dC_10[i1][2];
               }
             }
 
-            for (b_i = 0; b_i < 3; b_i++) {
-              dC_10[b_i][0] = C_n[b_i][0];
-              dC_10[b_i][1] = C_n[b_i][1];
-              dC_10[b_i][2] = C_n[b_i][2];
+            for (i = 0; i < 3; i++) {
+              dC_10[i][0] = b_C_n[i][0];
+              dC_10[i][1] = b_C_n[i][1];
+              dC_10[i][2] = b_C_n[i][2];
             }
           } else {
             /* 'compute_potential_energy_term:65' else */
             /* 'compute_potential_energy_term:66' dC_10 = C_n(:,:,k) * dC_10; */
-            for (b_i = 0; b_i < 3; b_i++) {
-              tau_piv = b_C_n[z_n_tmp][0][b_i];
-              d = b_C_n[z_n_tmp][1][b_i];
-              d1 = b_C_n[z_n_tmp][2][b_i];
-              for (info = 0; info < 3; info++) {
-                C_n[info][b_i] = ((tau_piv * dC_10[info][0]) + (d * dC_10[info]
-                  [1])) + (d1 * dC_10[info][2]);
+            for (i = 0; i < 3; i++) {
+              d3 = C_n[z_n_tmp][0][i];
+              ssq = C_n[z_n_tmp][1][i];
+              int_err = C_n[z_n_tmp][2][i];
+              for (i1 = 0; i1 < 3; i1++) {
+                b_C_n[i1][i] = (d3 * dC_10[i1][0] + ssq * dC_10[i1][1]) +
+                  int_err * dC_10[i1][2];
               }
             }
 
-            for (b_i = 0; b_i < 3; b_i++) {
-              dC_10[b_i][0] = C_n[b_i][0];
-              dC_10[b_i][1] = C_n[b_i][1];
-              dC_10[b_i][2] = C_n[b_i][2];
+            for (i = 0; i < 3; i++) {
+              dC_10[i][0] = b_C_n[i][0];
+              dC_10[i][1] = b_C_n[i][1];
+              dC_10[i][2] = b_C_n[i][2];
             }
           }
         }
@@ -514,27 +466,24 @@ static void bit_one_step_anonFcn1(const real_T unlock[9], real_T w_piv,
         /* %%% made change here c_n(n) -> c_n(:,n) */
         /* 'compute_potential_energy_term:71' t2 = c_n(:,n)' * dC_10 * g0; */
         /* 'compute_potential_energy_term:73' dVdtheta_i(j) = -m_i*t1(j)-t2; */
-        int_err = 0.0;
-        tau_piv = c_c_n[n][0];
-        d = c_c_n[n][1];
-        d1 = c_c_n[n][2];
-        for (b_i = 0; b_i < 3; b_i++) {
-          int_err += (((tau_piv * dC_10[b_i][0]) + (d * dC_10[b_i][1])) + (d1 *
-            dC_10[b_i][2])) * g0[b_i];
+        ssq = 0.0;
+        for (i = 0; i < 3; i++) {
+          ssq += ((d * dC_10[i][0] + d1 * dC_10[i][1]) + d2 * dC_10[i][2]) *
+            g0[i];
         }
 
-        dVdtheta_i[j] = ((-m_i) * t1[j]) - int_err;
+        dVdtheta_i[j] = -m_i * t1[j] - ssq;
       }
     }
 
     /* 'compute_potential_energy_term:76' Pot = Pot + dVdtheta_i; */
-    for (b_i = 0; b_i < 9; b_i++) {
-      Pot[b_i] += dVdtheta_i[b_i];
+    for (i = 0; i < 9; i++) {
+      Pot[i] += dVdtheta_i[i];
     }
   }
 
   /* 'bit_propagator:22' theta_spring = theta; */
-  (void)memcpy(&t1[0], &y_true[9], 9U * (sizeof(real_T)));
+  memcpy(&t1[0], &y_true[9], 9U * sizeof(real_T));
 
   /* 'bit_propagator:23' theta_spring(9) = theta(9) - thet_pit_nom; */
   t1[8] = y_true[17] - thet_pit_nom;
@@ -547,46 +496,44 @@ static void bit_one_step_anonFcn1(const real_T unlock[9], real_T w_piv,
   /*    Detailed explanation goes here */
   /* calculate the mapping matrix from dtheta to omega */
   /* 'RW_terms:7' s7 = zeros(3,9); */
-  for (b_i = 0; b_i < 9; b_i++) {
-    s7[b_i][0] = 0.0;
-    s7[b_i][1] = 0.0;
-    s7[b_i][2] = 0.0;
+  for (i = 0; i < 9; i++) {
+    s7[i][0] = 0.0;
+    s7[i][1] = 0.0;
+    s7[i][2] = 0.0;
   }
 
   /* 'RW_terms:8' for i = 1:7 */
-  for (n = 0; n < 7; n++) {
+  for (idxA1j = 0; idxA1j < 7; idxA1j++) {
+    real_T b_dVdtheta_i[9][3];
+
     /* 'RW_terms:9' Cn = axis2rot(z_n(:,i), theta(i)); */
-    z_n_tmp = (int32_T)z_n[n][0];
-    b_z_n[0] = (real_T)z_n_tmp;
-    b_z_n_tmp = (int32_T)z_n[n][1];
-    b_z_n[1] = (real_T)b_z_n_tmp;
-    c_z_n_tmp = (int32_T)z_n[n][2];
-    b_z_n[2] = (real_T)c_z_n_tmp;
-    axis2rot(b_z_n, y_true[n + 9], C_n);
-    for (b_i = 0; b_i < 9; b_i++) {
-      dVdtheta_i[b_i] = (&C_n[0][0])[b_i];
-    }
+    jmax = b_z_n[idxA1j][0];
+    z_n[0] = jmax;
+    z_n_tmp = b_z_n[idxA1j][1];
+    z_n[1] = z_n_tmp;
+    b_z_n_tmp = b_z_n[idxA1j][2];
+    z_n[2] = b_z_n_tmp;
+    axis2rot(z_n, y_true[idxA1j + 9], *(real_T (*)[3][3])&dVdtheta_i[0]);
 
     /* 'RW_terms:10' s7(:,i) = z_n(:,i); */
-    s7[n][0] = (real_T)z_n_tmp;
-    s7[n][1] = (real_T)b_z_n_tmp;
-    s7[n][2] = (real_T)c_z_n_tmp;
+    s7[idxA1j][0] = jmax;
+    s7[idxA1j][1] = z_n_tmp;
+    s7[idxA1j][2] = b_z_n_tmp;
 
     /* 'RW_terms:11' s7 = Cn*s7; */
-    for (b_i = 0; b_i < 3; b_i++) {
-      tau_piv = dVdtheta_i[b_i];
-      d = dVdtheta_i[b_i + 3];
-      d1 = dVdtheta_i[b_i + 6];
-      for (info = 0; info < 9; info++) {
-        b_dVdtheta_i[info][b_i] = ((tau_piv * s7[info][0]) + (d * s7[info][1]))
-          + (d1 * s7[info][2]);
+    for (i = 0; i < 3; i++) {
+      d = dVdtheta_i[i];
+      d1 = dVdtheta_i[i + 3];
+      d2 = dVdtheta_i[i + 6];
+      for (i1 = 0; i1 < 9; i1++) {
+        b_dVdtheta_i[i1][i] = (d * s7[i1][0] + d1 * s7[i1][1]) + d2 * s7[i1][2];
       }
     }
 
-    for (b_i = 0; b_i < 9; b_i++) {
-      s7[b_i][0] = b_dVdtheta_i[b_i][0];
-      s7[b_i][1] = b_dVdtheta_i[b_i][1];
-      s7[b_i][2] = b_dVdtheta_i[b_i][2];
+    for (i = 0; i < 9; i++) {
+      s7[i][0] = b_dVdtheta_i[i][0];
+      s7[i][1] = b_dVdtheta_i[i][1];
+      s7[i][2] = b_dVdtheta_i[i][2];
     }
   }
 
@@ -649,142 +596,137 @@ static void bit_one_step_anonFcn1(const real_T unlock[9], real_T w_piv,
   /* calculate joint torques from gravity elasticity and damnping according */
   /* to eq 3.37 */
   /* 'bit_propagator:33' torques = tau_applied - (Pot + spring + damp + R + r); */
-  for (b_i = 0; b_i < 3; b_i++) {
-    for (info = 0; info < 9; info++) {
-      tau_piv = s7[info][b_i];
-      r_tmp[b_i][info] = tau_piv;
-      b_r_tmp[b_i][info] = -tau_piv;
+  for (i = 0; i < 3; i++) {
+    for (i1 = 0; i1 < 9; i1++) {
+      d = s7[i1][i];
+      r_tmp[i][i1] = d;
+      b_r_tmp[i][i1] = -d;
     }
   }
 
-  C_n[0][0] = 0.0;
-  C_n[1][0] = -y_true[20];
-  C_n[2][0] = y_true[19];
-  C_n[0][1] = y_true[20];
-  C_n[1][1] = 0.0;
-  C_n[2][1] = -y_true[18];
-  C_n[0][2] = -y_true[19];
-  C_n[1][2] = y_true[18];
-  C_n[2][2] = 0.0;
-  for (b_i = 0; b_i < 9; b_i++) {
-    tau_piv = b_r_tmp[0][b_i];
-    d = b_r_tmp[1][b_i];
-    d1 = b_r_tmp[2][b_i];
-    for (info = 0; info < 3; info++) {
-      d_r_tmp[info][b_i] = ((tau_piv * C_n[info][0]) + (d * C_n[info][1])) + (d1
-        * C_n[info][2]);
+  b_C_n[0][0] = 0.0;
+  b_C_n[1][0] = -y_true[20];
+  b_C_n[2][0] = y_true[19];
+  b_C_n[0][1] = y_true[20];
+  b_C_n[1][1] = 0.0;
+  b_C_n[2][1] = -y_true[18];
+  b_C_n[0][2] = -y_true[19];
+  b_C_n[1][2] = y_true[18];
+  b_C_n[2][2] = 0.0;
+  for (i = 0; i < 9; i++) {
+    d = b_r_tmp[0][i];
+    d1 = b_r_tmp[1][i];
+    d2 = b_r_tmp[2][i];
+    for (i1 = 0; i1 < 3; i1++) {
+      c_r_tmp[i1][i] = (d * b_C_n[i1][0] + d1 * b_C_n[i1][1]) + d2 * b_C_n[i1][2];
     }
 
-    tau_piv = 0.0;
-    d = d_r_tmp[0][b_i];
-    d1 = d_r_tmp[1][b_i];
-    int_err = d_r_tmp[2][b_i];
-    for (info = 0; info < 9; info++) {
-      tau_piv += (((d * s7[info][0]) + (d1 * s7[info][1])) + (int_err * s7[info]
-        [2])) * dtheta[info];
+    d = 0.0;
+    d1 = c_r_tmp[0][i];
+    d2 = c_r_tmp[1][i];
+    d3 = c_r_tmp[2][i];
+    for (i1 = 0; i1 < 9; i1++) {
+      d += ((d1 * s7[i1][0] + d2 * s7[i1][1]) + d3 * s7[i1][2]) * dtheta[i1];
     }
 
-    b_tau_applied[b_i] -= ((Pot[b_i] + (k_d[b_i] * t1[b_i])) + tau_piv) +
-      (r_tmp[2][b_i] * vec_idx_2);
+    b_tau_applied[i] -= ((Pot[i] + k_d[i] * t1[i]) + d) + r_tmp[2][i] *
+      vec_idx_2;
   }
 
-  for (b_i = 0; b_i < 3; b_i++) {
-    dC_10[b_i][0] = b_tau_applied[3 * b_i];
-    dC_10[b_i][1] = b_tau_applied[(3 * b_i) + 1];
-    dC_10[b_i][2] = b_tau_applied[(3 * b_i) + 2];
+  for (i = 0; i < 3; i++) {
+    dC_10[i][0] = b_tau_applied[3 * i];
+    dC_10[i][1] = b_tau_applied[3 * i + 1];
+    dC_10[i][2] = b_tau_applied[3 * i + 2];
   }
 
   /*      M = compute_mass_matrix(theta, z_n, r_n1_n, m_w_n, p_n); */
   /* 'bit_propagator:37' M = mass_mat_func(theta); */
   /* 'bit_propagator:39' M_decomp = chol(M); */
-  mass_mat_func(*((real_T (*)[9])(&y_true[9])), c_r_tmp);
-  for (b_i = 0; b_i < 9; b_i++) {
-    for (info = 0; info < 3; info++) {
-      b_C_n[b_i][info][0] = (*((real_T (*)[9][3][3])(&c_r_tmp[0][0])))[b_i][info]
-        [0];
-      b_C_n[b_i][info][1] = (*((real_T (*)[9][3][3])(&c_r_tmp[0][0])))[b_i][info]
-        [1];
-      b_C_n[b_i][info][2] = (*((real_T (*)[9][3][3])(&c_r_tmp[0][0])))[b_i][info]
-        [2];
-    }
-  }
-
-  info = -2;
+  mass_mat_func(&y_true[9], *(real_T (*)[9][9])&C_n[0][0][0]);
+  info = 0;
   j = 0;
   exitg1 = false;
   while ((!exitg1) && (j < 9)) {
+    int32_T idxAjj;
     idxA1j = j * 9;
     idxAjj = idxA1j + j;
-    m_i = 0.0;
+    ssq = 0.0;
     if (j >= 1) {
       for (z_n_tmp = 0; z_n_tmp < j; z_n_tmp++) {
-        int_err = (&b_C_n[0][0][0])[idxA1j + z_n_tmp];
-        m_i += int_err * int_err;
+        int_err = (&C_n[0][0][0])[idxA1j + z_n_tmp];
+        ssq += int_err * int_err;
       }
     }
 
-    m_i = (&b_C_n[0][0][0])[idxAjj] - m_i;
-    if (m_i > 0.0) {
-      m_i = sqrt(m_i);
-      (&b_C_n[0][0][0])[idxAjj] = m_i;
-      if ((j + 1) < 9) {
-        c_z_n_tmp = idxA1j + 10;
+    ssq = (&C_n[0][0][0])[idxAjj] - ssq;
+    if (ssq > 0.0) {
+      ssq = sqrt(ssq);
+      (&C_n[0][0][0])[idxAjj] = ssq;
+      if (j + 1 < 9) {
+        int32_T idxAjjp1;
+        z_n_tmp = idxA1j + 10;
         idxAjjp1 = idxAjj + 10;
         if (j != 0) {
-          b = (idxA1j + (9 * (7 - j))) + 10;
-          for (n = c_z_n_tmp; n <= b; n += 9) {
+          i = (idxA1j + 9 * (7 - j)) + 10;
+          for (b_z_n_tmp = z_n_tmp; b_z_n_tmp <= i; b_z_n_tmp += 9) {
             int_err = 0.0;
-            z_n_tmp = (n + j) - 1;
-            for (b_z_n_tmp = n; b_z_n_tmp <= z_n_tmp; b_z_n_tmp++) {
-              int_err += (&b_C_n[0][0][0])[b_z_n_tmp - 1] * (&b_C_n[0][0][0])
-                [(idxA1j + b_z_n_tmp) - n];
+            i1 = (b_z_n_tmp + j) - 1;
+            for (jmax = b_z_n_tmp; jmax <= i1; jmax++) {
+              int_err += (&C_n[0][0][0])[jmax - 1] * (&C_n[0][0][0])[(idxA1j +
+                jmax) - b_z_n_tmp];
             }
 
-            b_i = (idxAjj + (div_nde_s32_floor((n - idxA1j) - 10) * 9)) + 9;
-            (&b_C_n[0][0][0])[b_i] += -int_err;
+            i1 = (idxAjj + div_nde_s32_floor((b_z_n_tmp - idxA1j) - 10) * 9) + 9;
+            (&C_n[0][0][0])[i1] -= int_err;
           }
         }
 
-        m_i = 1.0 / m_i;
-        b = (idxAjj + (9 * (7 - j))) + 10;
-        for (z_n_tmp = idxAjjp1; z_n_tmp <= b; z_n_tmp += 9) {
-          (&b_C_n[0][0][0])[z_n_tmp - 1] *= m_i;
+        ssq = 1.0 / ssq;
+        i = (idxAjj + 9 * (7 - j)) + 10;
+        for (z_n_tmp = idxAjjp1; z_n_tmp <= i; z_n_tmp += 9) {
+          (&C_n[0][0][0])[z_n_tmp - 1] *= ssq;
         }
       }
 
       j++;
     } else {
-      (&b_C_n[0][0][0])[idxAjj] = m_i;
-      info = j - 1;
+      (&C_n[0][0][0])[idxAjj] = ssq;
+      info = j + 1;
       exitg1 = true;
     }
   }
 
-  if ((info + 2) != 0) {
-    b_rtErrorWithMessageID(b_emlrtRTEI.fName, b_emlrtRTEI.lineNo);
+  if (info == 0) {
+    jmax = 7;
+  } else {
+    jmax = info - 3;
   }
 
-  for (j = 0; j < 9; j++) {
-    z_n_tmp = j + 2;
-    for (n = z_n_tmp; n < 10; n++) {
-      (*((real_T (*)[9][9])(&b_C_n[0][0][0])))[j][n - 1] = 0.0;
+  for (j = 0; j <= jmax; j++) {
+    i = j + 2;
+    for (idxA1j = i; idxA1j <= jmax + 2; idxA1j++) {
+      (*(real_T (*)[9][9])&C_n[0][0][0])[j][idxA1j - 1] = 0.0;
     }
+  }
+
+  if (info != 0) {
+    rtErrorWithMessageID(emlrtRTEI.fName, emlrtRTEI.lineNo);
   }
 
   /* 'bit_propagator:43' ddtheta = M_decomp\((M_decomp')\torques); */
-  for (b_i = 0; b_i < 9; b_i++) {
-    dVdtheta_i[b_i] = (&dC_10[0][0])[b_i];
-    for (info = 0; info < 9; info++) {
-      c_r_tmp[b_i][info] = (*((real_T (*)[9][9])(&b_C_n[0][0][0])))[info][b_i];
+  for (i = 0; i < 9; i++) {
+    dVdtheta_i[i] = (&dC_10[0][0])[i];
+    for (i1 = 0; i1 < 9; i1++) {
+      d_r_tmp[i][i1] = (*(real_T (*)[9][9])&C_n[0][0][0])[i1][i];
     }
   }
 
-  mldivide(c_r_tmp, dVdtheta_i);
-  mldivide(*((real_T (*)[9][9])(&b_C_n[0][0][0])), dVdtheta_i);
+  mldivide(d_r_tmp, dVdtheta_i);
+  mldivide(*(real_T (*)[9][9])&C_n[0][0][0], dVdtheta_i);
 
   /* 'bit_propagator:44' ddtheta = ddtheta.*unlock; */
-  for (b_i = 0; b_i < 9; b_i++) {
-    dVdtheta_i[b_i] *= unlock[b_i];
+  for (i = 0; i < 9; i++) {
+    dVdtheta_i[i] *= unlock[i];
   }
 
   /* 'bit_propagator:46' if piv_flag == true */
@@ -794,78 +736,74 @@ static void bit_one_step_anonFcn1(const real_T unlock[9], real_T w_piv,
     /* 'bit_propagator:49' kp = 1; */
     /* 'bit_propagator:50' ki = 0.5; */
     /* 'bit_propagator:51' prop_err = dw_piv - ddtheta(6); */
-    m_i = dw_piv - dVdtheta_i[5];
+    ssq = dw_piv - dVdtheta_i[5];
 
     /* 'bit_propagator:52' int_err = int_err + prop_err; */
-    int_err = m_i;
+    int_err = ssq;
 
     /* 'bit_propagator:53' tau_piv = torques(6); */
-    tau_piv = (&dC_10[0][0])[5];
+    m_i = (&dC_10[0][0])[5];
 
     /* 'bit_propagator:55' while abs(prop_err) > 1e-9 */
     exitg1 = false;
-    while ((!exitg1) && (fabs(m_i) > 1.0E-9)) {
+    while ((!exitg1) && (fabs(ssq) > 1.0E-9)) {
       /* 'bit_propagator:57' tau_piv = tau_piv + ((kp*prop_err) + (ki*int_err)); */
-      tau_piv += m_i + (0.5 * int_err);
+      m_i += ssq + 0.5 * int_err;
 
       /* 'bit_propagator:58' if abs(tau_piv) > tau_max_piv */
-      if (fabs(tau_piv) > tau_max_piv) {
+      if (fabs(m_i) > tau_max_piv) {
         /* 'bit_propagator:59' tau_piv = sign(tau_piv) * tau_max_piv; */
-        if (tau_piv < 0.0) {
-          tau_piv = -1.0;
-        } else if (tau_piv > 0.0) {
-          tau_piv = 1.0;
+        if (m_i < 0.0) {
+          i = -1;
         } else {
-          /* no actions */
+          i = (m_i > 0.0);
         }
 
-        (&dC_10[0][0])[5] = tau_piv * tau_max_piv;
+        (&dC_10[0][0])[5] = (real_T)i * tau_max_piv;
 
         /* 'bit_propagator:60' torques(6) = tau_piv; */
         /* 'bit_propagator:62' ddtheta = M_decomp\((M_decomp')\torques); */
-        for (b_i = 0; b_i < 9; b_i++) {
-          for (info = 0; info < 9; info++) {
-            c_r_tmp[b_i][info] = (*((real_T (*)[9][9])(&b_C_n[0][0][0])))[info]
-              [b_i];
+        for (i = 0; i < 9; i++) {
+          for (i1 = 0; i1 < 9; i1++) {
+            d_r_tmp[i][i1] = (*(real_T (*)[9][9])&C_n[0][0][0])[i1][i];
           }
         }
 
-        mldivide(c_r_tmp, &dC_10[0][0]);
-        for (b_i = 0; b_i < 9; b_i++) {
-          dVdtheta_i[b_i] = (&dC_10[0][0])[b_i];
+        mldivide(d_r_tmp, &dC_10[0][0]);
+        for (i = 0; i < 9; i++) {
+          dVdtheta_i[i] = (&dC_10[0][0])[i];
         }
 
-        mldivide(*((real_T (*)[9][9])(&b_C_n[0][0][0])), dVdtheta_i);
+        mldivide(*(real_T (*)[9][9])&C_n[0][0][0], dVdtheta_i);
         exitg1 = true;
       } else {
         /* 'bit_propagator:65' torques(6) = tau_piv; */
-        (&dC_10[0][0])[5] = tau_piv;
+        (&dC_10[0][0])[5] = m_i;
 
         /* 'bit_propagator:67' ddtheta = M_decomp\((M_decomp')\torques); */
-        for (b_i = 0; b_i < 9; b_i++) {
-          dVdtheta_i[b_i] = (&dC_10[0][0])[b_i];
-          for (info = 0; info < 9; info++) {
-            c_r_tmp[b_i][info] = (*((real_T (*)[9][9])(&b_C_n[0][0][0])))[info]
-              [b_i];
+        for (i = 0; i < 9; i++) {
+          dVdtheta_i[i] = (&dC_10[0][0])[i];
+          for (i1 = 0; i1 < 9; i1++) {
+            d_r_tmp[i][i1] = (*(real_T (*)[9][9])&C_n[0][0][0])[i1][i];
           }
         }
 
-        mldivide(c_r_tmp, dVdtheta_i);
-        mldivide(*((real_T (*)[9][9])(&b_C_n[0][0][0])), dVdtheta_i);
+        mldivide(d_r_tmp, dVdtheta_i);
+        mldivide(*(real_T (*)[9][9])&C_n[0][0][0], dVdtheta_i);
 
         /* 'bit_propagator:68' prop_err = dw_piv - ddtheta(6); */
-        m_i = dw_piv - dVdtheta_i[5];
+        ssq = dw_piv - dVdtheta_i[5];
 
         /* 'bit_propagator:69' int_err = int_err + prop_err; */
-        int_err += m_i;
+        int_err += ssq;
       }
     }
   }
 
   /* 'bit_propagator:73' Xdot = [ddtheta; dtheta; d_hs;]; */
-  for (n = 0; n < 9; n++) {
-    varargout_1[n] = dVdtheta_i[n];
-    varargout_1[n + 9] = dtheta[n];
+  for (idxA1j = 0; idxA1j < 9; idxA1j++) {
+    varargout_1[idxA1j] = dVdtheta_i[idxA1j];
+    varargout_1[idxA1j + 9] = dtheta[idxA1j];
   }
 
   varargout_1[18] = 0.0;
@@ -873,56 +811,58 @@ static void bit_one_step_anonFcn1(const real_T unlock[9], real_T w_piv,
   varargout_1[20] = vec_idx_2;
 }
 
-/*
- * Arguments    : void
- * Return Type  : void
- */
-static void check_forloop_overflow_error(void)
-{
-  rtErrorWithMessageID(6, "uint16", emlrtRTEI.fName, emlrtRTEI.lineNo);
-}
-
-/*
- * Arguments    : const char_T *r
- *                const char_T *aFcnName
- *                int32_T aLineNum
- * Return Type  : void
- */
-static void d_rtErrorWithMessageID(const char_T *r, const char_T *aFcnName,
+static void c_rtErrorWithMessageID(const char_T *r, const char_T *aFcnName,
   int32_T aLineNum)
 {
-  (void)fprintf(stderr,
-                "Domain error. To compute complex results from real x, use \'%.*s(complex(x))\'.",
-                4, r);
-  (void)fprintf(stderr, "\n");
-  (void)fprintf(stderr, "Error in %s (line %d)", aFcnName, aLineNum);
-  (void)fprintf(stderr, "\n");
-  (void)fflush(stderr);
+  fprintf(stderr,
+          "The loop variable of class %.*s might overflow on the last iteration of the for loop. This could lead to an infinite loop.",
+          5, r);
+  fprintf(stderr, "\n");
+  fprintf(stderr, "Error in %s (line %d)", aFcnName, aLineNum);
+  fprintf(stderr, "\n");
+  fflush(stderr);
   abort();
 }
 
 /*
- * Arguments    : int32_T numerator
- * Return Type  : int32_T
+ *
  */
+static void check_forloop_overflow_error(void)
+{
+  static rtRunTimeErrorInfo emlrtRTEI = { 87,/* lineNo */
+    "check_forloop_overflow_error"     /* fName */
+  };
+
+  c_rtErrorWithMessageID("int32", emlrtRTEI.fName, emlrtRTEI.lineNo);
+}
+
+static void d_rtErrorWithMessageID(const char_T *r, const char_T *aFcnName,
+  int32_T aLineNum)
+{
+  fprintf(stderr,
+          "Domain error. To compute complex results from real x, use \'%.*s(complex(x))\'.",
+          4, r);
+  fprintf(stderr, "\n");
+  fprintf(stderr, "Error in %s (line %d)", aFcnName, aLineNum);
+  fprintf(stderr, "\n");
+  fflush(stderr);
+  abort();
+}
+
 static int32_T div_nde_s32_floor(int32_T numerator)
 {
-  int32_T b_numerator;
-  if ((numerator < 0) && ((numerator % 9) != 0)) {
-    b_numerator = -1;
+  int32_T i;
+  if ((numerator < 0) && (numerator % 9 != 0)) {
+    i = -1;
   } else {
-    b_numerator = 0;
+    i = 0;
   }
 
-  return (numerator / 9) + b_numerator;
+  return numerator / 9 + i;
 }
 
 /*
  * function mass_mat = ft_2(ct)
- *
- * Arguments    : const real_T ct[671]
- *                real_T mass_mat[9][9]
- * Return Type  : void
  */
 static void ft_2(const real_T ct[671], real_T mass_mat[9][9])
 {
@@ -1187,7 +1127,7 @@ static void ft_2(const real_T ct[671], real_T mass_mat[9][9])
   real_T t922;
   real_T t924;
   real_T t955;
-  int32_T b_i;
+  int32_T i;
   int32_T i1;
 
   /* 'mass_mat_func:1391' t10 = ct{1}; */
@@ -1996,7 +1936,7 @@ static void ft_2(const real_T ct[671], real_T mass_mat[9][9])
   /* 'mass_mat_func:2162' t995 = t20.*t42.*t790.*6.1e+1; */
   /* 'mass_mat_func:2163' t1002 = t985.*(-7.0./5.0); */
   /* 'mass_mat_func:2164' t1003 = t27.*t823.*(9.9e+1./5.0); */
-  t1003 = (ct[187] * ct[578]) * 19.8;
+  t1003 = ct[187] * ct[578] * 19.8;
 
   /* 'mass_mat_func:2165' t1013 = -t999; */
   /* 'mass_mat_func:2166' t1015 = t985.*(7.0./5.0); */
@@ -2023,7 +1963,7 @@ static void ft_2(const real_T ct[671], real_T mass_mat[9][9])
   /* 'mass_mat_func:2178' t1054 = t36.*t828.*2.317e+1; */
   /* 'mass_mat_func:2179' t1055 = t36.*t828.*2.553e+1; */
   /* 'mass_mat_func:2180' t1057 = t26.*t35.*t823.*(9.9e+1./5.0); */
-  t1057 = (t713_tmp * ct[578]) * 19.8;
+  t1057 = t713_tmp * ct[578] * 19.8;
 
   /* 'mass_mat_func:2181' t1059 = t27.*t36.*t828.*9.15e+3; */
   /* 'mass_mat_func:2182' t1063 = -t1046; */
@@ -2449,22 +2389,22 @@ static void ft_2(const real_T ct[671], real_T mass_mat[9][9])
   ct_idx_85 = ct[224] * t1047;
   ct_idx_90 = ct[382] + ct[393];
   ct_idx_91 = ct[240] * ct[618];
-  ct_idx_94 = (ct[298] * t955) * 33.71;
+  ct_idx_94 = ct[298] * t955 * 33.71;
   ct_idx_98 = ct[285] * t1064;
   ct_idx_99 = ct[237] * t1106;
   t2257 = ct[237] * t1107;
   ct_idx_101 = ct[298] * t1106;
   ct_idx_102 = ct[298] * t1107;
   ct_idx_103 = ct[381] + ct[418];
-  ct_idx_111 = ct[400] + (ct[378] * 1.4);
-  ct_idx_117 = ct[408] + (ct[285] * ct[358]);
+  ct_idx_111 = ct[400] + ct[378] * 1.4;
+  ct_idx_117 = ct[408] + ct[285] * ct[358];
   ct_idx_119 = ct[17] * t1106;
   ct_idx_126_tmp = ct[187] * ct[196];
-  ct_idx_126 = (ct_idx_126_tmp * t1036) * 9150.0;
+  ct_idx_126 = ct_idx_126_tmp * t1036 * 9150.0;
   t814_tmp = ct[244] * t1106;
   ct_idx_127 = t814_tmp * 0.32;
   ct_idx_129 = t814_tmp * 0.07;
-  ct_idx_132 = (ct[196] * t1036) * 33.71;
+  ct_idx_132 = ct[196] * t1036 * 33.71;
   t2250 = ct[346] - ct[368];
   t2253 = ct[233] * t2250;
   ct_idx_135 = t2253 * 10.5;
@@ -2474,21 +2414,21 @@ static void ft_2(const real_T ct[671], real_T mass_mat[9][9])
   ct_idx_144 = ct_idx_143_tmp * 0.85;
   ct_idx_146 = t814_tmp * 30.09;
   t1620 = ct[255] * ct[261];
-  ct_idx_148 = (t1620 * t1036) * 33.71;
-  ct_idx_152_tmp = (ct[182] * ct[196]) * ct[255];
-  ct_idx_152 = (ct_idx_152_tmp * t1036) * 9150.0;
-  ct_idx_156 = (ct[196] * t1168) * 150.0;
-  ct_idx_159 = ct[448] + (ct[378] * 33.71);
+  ct_idx_148 = t1620 * t1036 * 33.71;
+  ct_idx_152_tmp = ct[182] * ct[196] * ct[255];
+  ct_idx_152 = ct_idx_152_tmp * t1036 * 9150.0;
+  ct_idx_156 = ct[196] * t1168 * 150.0;
+  ct_idx_159 = ct[448] + ct[378] * 33.71;
   t814_tmp = ct[390] - ct[422];
-  ct_idx_171 = (ct[196] * t814_tmp) * 150.0;
+  ct_idx_171 = ct[196] * t814_tmp * 150.0;
   ct_idx_172 = t2253 * 25.53;
-  ct_idx_173 = (t1620 * t1168) * 150.0;
+  ct_idx_173 = t1620 * t1168 * 150.0;
   ct_idx_174 = ct_idx_143_tmp * 79.89;
-  ct_idx_192 = (t1620 * t814_tmp) * 150.0;
-  ct_idx_202 = ct[112] + ((-ct[293]) * t2250);
+  ct_idx_192 = t1620 * t814_tmp * 150.0;
+  ct_idx_202 = ct[112] + -ct[293] * t2250;
   ct_idx_203_tmp = ct[293] * ct[439];
-  ct_idx_203 = ct[516] + (ct_idx_203_tmp * 1.4);
-  ct_idx_205 = ct[526] + ((ct[293] * ct[443]) * 1.4);
+  ct_idx_203 = ct[516] + ct_idx_203_tmp * 1.4;
+  ct_idx_205 = ct[526] + ct[293] * ct[443] * 1.4;
   ct_idx_206 = ct[439] + t922;
   ct_idx_214 = ct[224] * t1346;
   ct_idx_215 = ct[285] * t1346;
@@ -2496,23 +2436,23 @@ static void ft_2(const real_T ct[671], real_T mass_mat[9][9])
   ct_idx_223 = (ct[217] + ct[291]) + (ct[162] + ct[366]);
   ct_idx_224 = ct[224] * t1364;
   ct_idx_225 = ct[285] * t1364;
-  ct_idx_226 = (ct[288] * t1036) * 33.71;
+  ct_idx_226 = ct[288] * t1036 * 33.71;
   ct_idx_231 = (ct[5] + ct[353]) + ct[664];
-  ct_idx_238 = (ct[288] * t1168) * 150.0;
+  ct_idx_238 = ct[288] * t1168 * 150.0;
   ct_idx_239_tmp = ct[244] * (ct[123] + t2253);
   ct_idx_239 = ct_idx_239_tmp * -10.5;
-  ct_idx_242 = ct[216] + ((ct[293] * t2250) * -19.8);
-  ct_idx_243 = (ct[288] * t814_tmp) * -150.0;
+  ct_idx_242 = ct[216] + ct[293] * t2250 * -19.8;
+  ct_idx_243 = ct[288] * t814_tmp * -150.0;
   ct_idx_254 = t921 + ct[656];
-  ct_idx_262 = (ct[413] + ct[420]) + (ct[368] * 1.4);
-  ct_idx_271 = (ct[361] + (ct[370] * -10.5)) + ct[484];
-  ct_idx_292 = ct[646] + (ct[59] * ct[177]);
+  ct_idx_262 = (ct[413] + ct[420]) + ct[368] * 1.4;
+  ct_idx_271 = (ct[361] + ct[370] * -10.5) + ct[484];
+  ct_idx_292 = ct[646] + ct[59] * ct[177];
   ct_idx_316 = t1165 + ct[76];
-  ct_idx_318 = (ct[58] * ct[117]) + ct[80];
-  ct_idx_337 = ((ct[480] * 1.4) + ct[593]) + ct[65];
-  ct_idx_338 = (ct[290] + (ct[477] * 1.4)) + t1364;
+  ct_idx_318 = ct[58] * ct[117] + ct[80];
+  ct_idx_337 = (ct[480] * 1.4 + ct[593]) + ct[65];
+  ct_idx_338 = (ct[290] + ct[477] * 1.4) + t1364;
   ct_idx_607 = ct[368] * 0.85;
-  ct_idx_687 = (ct[244] * ct[420]) * 350.0;
+  ct_idx_687 = ct[244] * ct[420] * 350.0;
   ct_idx_690 = t712 * 73.0;
   ct_idx_776 = ct[224] * t888;
   ct_idx_779 = ct[285] * t888;
@@ -3364,10 +3304,10 @@ static void ft_2(const real_T ct[671], real_T mass_mat[9][9])
   /* 'mass_mat_func:3409' t1179 = t32.*t1132; */
   /* 'mass_mat_func:3410' t1181 = t40.*t1132; */
   /* 'mass_mat_func:3411' t1193 = t560+t634; */
-  t1193 = ct[403] + (-(ct[370] * 1.4));
+  t1193 = ct[403] - ct[370] * 1.4;
 
   /* 'mass_mat_func:3412' t1194 = t538+t639; */
-  t1194 = ct[387] + (-(ct[376] * 1.4));
+  t1194 = ct[387] - ct[376] * 1.4;
 
   /* 'mass_mat_func:3413' t1197 = t28.*t1071.*(2.1e+1./2.0); */
   t814_tmp = t2256 * ct[196];
@@ -3417,13 +3357,13 @@ static void ft_2(const real_T ct[671], real_T mass_mat[9][9])
   /* 'mass_mat_func:3444' t1356 = t136+t521+t692; */
   /* 'mass_mat_func:3445' t1358 = t736+t852; */
   t1358_tmp = ct[293] * ct[435];
-  t1358 = ct[520] + (-(t1358_tmp * 1.4));
+  t1358 = ct[520] - t1358_tmp * 1.4;
 
   /* 'mass_mat_func:3446' t1361 = t747+t859; */
-  t1361 = ct[529] + (-((ct[293] * ct[442]) * 1.4));
+  t1361 = ct[529] - ct[293] * ct[442] * 1.4;
 
   /* 'mass_mat_func:3447' t1373 = t613+t962; */
-  t1373 = ct[435] + (-t924);
+  t1373 = ct[435] - t924;
 
   /* 'mass_mat_func:3448' t1376 = t33.*t1349; */
   t1376 = ct_idx_202 * ct[237];
@@ -3498,11 +3438,11 @@ static void ft_2(const real_T ct[671], real_T mass_mat[9][9])
   /* 'mass_mat_func:3493' t1517 = t32.*t1389.*2.553e+1; */
   /* 'mass_mat_func:3494' t1518 = t40.*t1482; */
   /* 'mass_mat_func:3495' t1519 = t361+t1339; */
-  t1519 = (ct[171] * t1276) + ct[263];
+  t1519 = ct[171] * t1276 + ct[263];
 
   /* 'mass_mat_func:3496' t1520 = t27.*t441.*t1195.*3.5e+2; */
   /* 'mass_mat_func:3497' t1524 = t963+t990; */
-  t1036 = ct_idx_779 + ((-ct[224]) * t1023_tmp);
+  t1036 = ct_idx_779 + -ct[224] * t1023_tmp;
 
   /* 'mass_mat_func:3498' t1531 = t16.*t1494; */
   /* 'mass_mat_func:3499' t1536 = -t1514; */
@@ -3515,7 +3455,7 @@ static void ft_2(const real_T ct[671], real_T mass_mat[9][9])
   /* 'mass_mat_func:3504' t1545 = -t1535; */
   /* 'mass_mat_func:3505' t1556 = t24.*t1526; */
   /* 'mass_mat_func:3506' t1559 = t557+t629+t793; */
-  t1559 = (ct[399] + ct[449]) + (-(ct[370] * 22.79));
+  t1559 = (ct[399] + ct[449]) - ct[370] * 22.79;
 
   /* 'mass_mat_func:3507' t1562 = t26.*t1482.*(8.0./2.5e+1); */
   /* 'mass_mat_func:3508' t1563 = t26.*t1482.*(1.7e+1./2.0e+1); */
@@ -3531,7 +3471,7 @@ static void ft_2(const real_T ct[671], real_T mass_mat[9][9])
   /* 'mass_mat_func:3518' t1614 = t16.*t25.*t1573; */
   /* 'mass_mat_func:3519' t1620 = t120+t670+t1192; */
   t1620_tmp = ct[293] * t1106;
-  t1620 = (ct[77] + ct[470]) + (t1620_tmp * 1.4);
+  t1620 = (ct[77] + ct[470]) + t1620_tmp * 1.4;
 
   /* 'mass_mat_func:3520' t1621 = t1184.*(t140-t513).*-1.5e+2; */
   /* 'mass_mat_func:3521' t1624 = t180+t666+t1191; */
@@ -3542,12 +3482,12 @@ static void ft_2(const real_T ct[671], real_T mass_mat[9][9])
   /* 'mass_mat_func:3524' t1634 = -t1629; */
   /* 'mass_mat_func:3525' t1649 = t767+t1371; */
   /* 'mass_mat_func:3526' t1652 = t1135+t1151; */
-  t1652 = (ct[285] * t1047) + (ct[224] * t1064);
+  t1652 = ct[285] * t1047 + ct[224] * t1064;
 
   /* 'mass_mat_func:3527' t1660 = t29.*t1184.*(t439-t474).*-1.5e+2; */
   /* 'mass_mat_func:3528' t1662 = t216+t708+t1265; */
-  t1662_tmp = ct[416] - (ct[224] * ct[358]);
-  t1662 = (ct[160] + ct[501]) + ((-ct[293]) * t1662_tmp);
+  t1662_tmp = ct[416] - ct[224] * ct[358];
+  t1662 = (ct[160] + ct[501]) + -ct[293] * t1662_tmp;
 
   /* 'mass_mat_func:3529' t1664 = -t1656; */
   /* 'mass_mat_func:3530' t1665 = t29.*t1184.*(t439-t474).*1.5e+2; */
@@ -3566,7 +3506,7 @@ static void ft_2(const real_T ct[671], real_T mass_mat[9][9])
   /* 'mass_mat_func:3543' t1736 = t14.*t1721; */
   /* 'mass_mat_func:3544' t1744 = t13.*t14.*t1703.*6.1e+1; */
   /* 'mass_mat_func:3545' t1754 = t203+t703+t867+t1048; */
-  t1754 = ((ct[156] + (-ct[464])) + t867) + (t922 * 22.79);
+  t1754 = ((ct[156] - ct[464]) + t867) + t922 * 22.79;
 
   /* 'mass_mat_func:3546' t1755 = t340+t737+t840+t986; */
   /* 'mass_mat_func:3547' t1758 = t368.*t1672; */
@@ -3583,7 +3523,7 @@ static void ft_2(const real_T ct[671], real_T mass_mat[9][9])
   /* 'mass_mat_func:3558' t1797 = t16.*t274.*t1712; */
   /* 'mass_mat_func:3559' t1798 = t24.*t1784; */
   /* 'mass_mat_func:3560' t1815 = t190+t1201+t1387; */
-  t1815 = (ct[79] + ct[148]) + ((ct[171] * t1314) * 1.4);
+  t1815 = (ct[79] + ct[148]) + ct[171] * t1314 * 1.4;
 
   /* 'mass_mat_func:3561' t1817 = t16.*t17.*t1800; */
   /* 'mass_mat_func:3562' t1820 = t238+t1200+t1386; */
@@ -3600,7 +3540,7 @@ static void ft_2(const real_T ct[671], real_T mass_mat[9][9])
   /* 'mass_mat_func:3571' t1844 = t1697.*(t56-t414); */
   /* 'mass_mat_func:3572' t1846 = -t40.*(t1375-t1389); */
   /* 'mass_mat_func:3573' t1849 = t976+t1006+t1368; */
-  t1849 = (ct[3] + (t921 * 1.4)) + t1368;
+  t1849 = (ct[3] + t921 * 1.4) + t1368;
 
   /* 'mass_mat_func:3574' t1854 = t32.*(t1375-t1389).*(-2.1e+1./2.0); */
   /* 'mass_mat_func:3575' t1855 = t863.*t1700; */
@@ -3666,10 +3606,10 @@ static void ft_2(const real_T ct[671], real_T mass_mat[9][9])
   /* 'mass_mat_func:3635' t1332 = t36.*t37.*t1193.*1.5e+2; */
   /* 'mass_mat_func:3636' t1337 = t26.*t27.*t1194.*7.3e+1; */
   /* 'mass_mat_func:3637' t1347 = t146+t1179; */
-  t1347 = ct[111] + (ct_idx_84 * ct[233]);
+  t1347 = ct[111] + ct_idx_84 * ct[233];
 
   /* 'mass_mat_func:3638' t1365 = t207+t1181; */
-  t1365 = ct[157] + (ct_idx_84 * ct[293]);
+  t1365 = ct[157] + ct_idx_84 * ct[293];
 
   /* 'mass_mat_func:3639' t1370 = -t1353; */
   /* 'mass_mat_func:3640' t1394 = -t1376; */
@@ -3702,10 +3642,10 @@ static void ft_2(const real_T ct[671], real_T mass_mat[9][9])
   /* 'mass_mat_func:3665' t1529 = -t1517; */
   /* 'mass_mat_func:3666' t1532 = -t1511; */
   /* 'mass_mat_func:3667' t1533 = t26.*t35.*t1373.*3.371e+1; */
-  t1533 = (t713_tmp * t1373) * 33.71;
+  t1533 = t713_tmp * t1373 * 33.71;
 
   /* 'mass_mat_func:3668' t1534 = t866+t1068; */
-  t1534 = t866 + (-(t924 * 33.71));
+  t1534 = t866 - t924 * 33.71;
 
   /* 'mass_mat_func:3669' t1537 = -t1515; */
   /* 'mass_mat_func:3670' t1548 = t33.*t1513; */
@@ -3733,7 +3673,7 @@ static void ft_2(const real_T ct[671], real_T mass_mat[9][9])
   /* 'mass_mat_func:3690' t1619 = t32.*t1524.*2.553e+1; */
   /* 'mass_mat_func:3691' t1628 = t1193.*(t140-t513).*-1.5e+2; */
   /* 'mass_mat_func:3692' t1630 = t33.*t1544.*3.371e+1; */
-  t1630 = (ct[237] * t1544) * 33.71;
+  t1630 = ct[237] * t1544 * 33.71;
 
   /* 'mass_mat_func:3693' t1631 = t41.*t1544.*2.279e+1; */
   /* 'mass_mat_func:3694' t1633 = t1193.*(t140-t513).*1.5e+2; */
@@ -3744,10 +3684,10 @@ static void ft_2(const real_T ct[671], real_T mass_mat[9][9])
 
   /* 'mass_mat_func:3698' t1645 = t802+t1340; */
   /* 'mass_mat_func:3699' t1651 = t34.*t1620.*7.3e+1; */
-  t1651 = (ct[244] * t1620) * 73.0;
+  t1651 = ct[244] * t1620 * 73.0;
 
   /* 'mass_mat_func:3700' t1653 = t34.*t1624.*7.3e+1; */
-  t814_tmp = ct[244] * ((ct[140] + ct[465]) + (t1624_tmp * 1.4));
+  t814_tmp = ct[244] * ((ct[140] + ct[465]) + t1624_tmp * 1.4);
   t1653 = t814_tmp * 73.0;
 
   /* 'mass_mat_func:3701' t1654 = t34.*t1624.*1.5e+2; */
@@ -3756,7 +3696,7 @@ static void ft_2(const real_T ct[671], real_T mass_mat[9][9])
   /* 'mass_mat_func:3702' t1661 = t29.*t982.*t1193.*1.5e+2; */
   /* 'mass_mat_func:3703' t1669 = t40.*t1652; */
   /* 'mass_mat_func:3704' t1677 = t512+t1518; */
-  t1677 = ct[364] + (ct_idx_254 * ct[293]);
+  t1677 = ct[364] + ct_idx_254 * ct[293];
 
   /* 'mass_mat_func:3705' t1679 = t33.*t1662; */
   /* 'mass_mat_func:3706' t1681 = t41.*t1662; */
@@ -3923,63 +3863,60 @@ static void ft_2(const real_T ct[671], real_T mass_mat[9][9])
   /* 'mass_mat_func:3867' mass_mat = ft_4({t10,t1003,t1005,t1016,t1020,t1021,t1023,t1024,t1027,t1028,t103,t1042,t1047,t1049,t1051,t1056,t1057,t1064,t1069,t1072,t1076,t1077,t1081,t1086,t1087,t1090,t1091,t1092,t1093,t1097,t1099,t11,t1106,t1113,t1115,t1116,t1117,t1118,t1120,t1128,t113,t1134,t1138,t1139,t1140,t1142,t1143,t1144,t1145,t1153,t1155,t1157,t1158,t1159,t1162,t1176,t1185,t1190,t1196,t1198,t1203,t1204,t1208,t1209,t1210,t1211,t1216,t1217,t1226,t1227,t1229,t1236,t1237,t1239,t1245,t1246,t1247,t1248,t1249,t1254,t1255,t1258,t1260,t1262,t1266,t1268,t1273,t1274,t1276,t1278,t1279,t1291,t1297,t1299,t13,t1300,t1309,t1310,t1311,t1314,t1315,t1316,t1317,t1322,t1323,t1324,t1331,t1336,t1337,t1341,t1351,t1359,t1370,t1372,t1374,t1375,t138,t1383,t1385,t1386,t1388,t1389,t1390,t1392,t1393,t1397,t1398,t14,t140,t1401,t1404,t1405,t1406,t1408,t1409,t1412,t1414,t1417,t1418,t1419,t1420,t1423,t1424,t1425,t1427,t1428,t1429,t1430,t1431,t1432,t1433,t1435,t1436,t1437,t1438,t1439,t1441,t1442,t1443,t1444,t1445,t1447,t1449,t1450,t1451,t1453,t1455,t1456,t1457,t1458,t1460,t1461,t1462,t1466,t1469,t147,t1470,t1471,t1474,t1476,t1479,t148,t1480,t1481,t1484,t1485,t1486,t1487,t1489,t149,t1490,t1491,t1495,t1496,t1497,t1498,t1499,t15,t1500,t1508,t1509,t1510,t1519,t1520,t1523,t1525,t1526,t1527,t1528,t1529,t1530,t1532,t1533,t1534,t1536,t1538,t1539,t1540,t1543,t1544,t1546,t1548,t1549,t155,t1550,t1553,t1554,t1555,t1556,t1559,t156,t1565,t1566,t1568,t1569,t1576,t1577,t1579,t158,t1580,t1581,t1583,t1586,t1588,t159,t1590,t1591,t1593,t1594,t1595,t1596,t1597,t16,t160,t1603,t1605,t1607,t1608,t1609,t1610,t1613,t1617,t1622,t1623,t1630,t1631,t1633,t1634,t1635,t1636,t1638,t1639,t1640,t1642,t1647,t1648,t165,t1650,t1651,t1652,t1653,t1654,t1655,t1658,t1659,t166,t1664,t1665,t1666,t1667,t1669,t1673,t1674,t1680,t1681,t1682,t1683,t1686,t1688,t1689,t169,t1690,t1699,t17,t170,t1702,t1708,t1711,t1714,t1715,t1716,t1717,t1718,t1719,t1721,t1723,t1730,t1731,t1733,t1734,t1736,t1737,t174,t1744,t1745,t175,t1754,t1755,t1757,t176,t1760,t1762,t1769,t1771,t1772,t1773,t1774,t1779,t1780,t1781,t1785,t1787,t1788,t1791,t1792,t1793,t1794,t1797,t1798,t1799,t18,t1803,t1813,t1814,t1815,t1817,t1819,t1824,t1825,t1828,t1829,t1831,t1834,t1836,t1838,t184,t1842,t1843,t1844,t1847,t1848,t185,t1851,t1852,t1855,t1857,t1858,t186,t1860,t1861,t1863,t1864,t1866,t1869,t187,t1871,t1872,t1873,t1877,t1878,t188,t1880,t1881,t1882,t1884,t1885,t1886,t189,t1891,t1893,t1896,t1899,t19,t1900,t1904,t1907,t1909,t1912,t1915,t1919,t1920,t1921,t1923,t1924,t1925,t1926,t1928,t1929,t1934,t1936,t1937,t1938,t1942,t1945,t195,t1954,t1956,t196,t1961,t1962,t1967,t197,t1971,t1972,t1975,t1979,t198,t1987,t1989,t199,t1990,t1991,t1998,t20,t2010,t2012,t2013,t2014,t2018,t2030,t2035,t2037,t2038,t2039,t2041,t2045,t2046,t2047,t2049,t2052,t2054,t2056,t2058,t2062,t2070,t2075,t2076,t2077,t2086,t2087,t2093,t2094,t21,t2106,t2114,t2115,t2136,t2137,t2139,t2156,t2167,t2171,t2176,t2177,t2180,t2183,t2198,t22,t2230,t23,t235,t239,t24,t240,t241,t242,t249,t25,t256,t257,t26,t262,t264,t27,t271,t273,t274,t275,t276,t277,t278,t279,t280,t282,t284,t285,t287,t288,t29,t290,t294,t297,t298,t299,t30,t300,t305,t306,t307,t309,t31,t310,t311,t312,t313,t318,t32,t33,t333,t334,t337,t338,t339,t34,t341,t342,t343,t344,t345,t35,t350,t36,t360,t363,t365,t367,t368,t37,t373,t374,t378,t38,t380,t382,t391,t392,t393,t40,t400,t409,t41,t413,t414,t416,t42,t422,t425,t427,t429,t438,t439,t441,t442,t445,t452,t457,t458,t459,t466,t468,t470,t474,t477,t478,t480,t482,t484,t487,t489,t491,t499,t501,t504,t511,t513,t514,t516,t519,t523,t529,t536,t544,t549,t550,t553,t56,t565,t569,t570,t577,t58,t581,t582,t587,t589,t590,t592,t597,t608,t613,t614,t617,t620,t631,t632,t637,t641,t649,t650,t651,t652,t653,t656,t662,t664,t666,t67,t670,t683,t687,t69,t693,t694,t695,t697,t70,t704,t705,t71,t712,t715,t72,t726,t730,t736,t75,t750,t757,t762,t763,t766,t768,t77,t779,t782,t783,t788,t790,t791,t797,t798,t80,t800,t804,t806,t81,t821,t825,t829,t834,t841,t849,t850,t862,t863,t874,t877,t883,t896,t898,t90,t91,t910,t917,t918,t923,t94,t958,t963,t965,t980,t981,t982,t987,t995}); */
   ct_idx_13 = -(ct_idx_776 * 0.07);
   ct_idx_14 = -(ct_idx_779 * 0.85);
-  ct_idx_68 = (ct_idx_126_tmp * t2256) * 9150.0;
-  b_ct_idx_91 = (ct_idx_152_tmp * t2256) * 9150.0;
-  ct_idx_141 = (ct_idx_202 * ct[244]) * 19.8;
+  ct_idx_68 = ct_idx_126_tmp * t2256 * 9150.0;
+  b_ct_idx_91 = ct_idx_152_tmp * t2256 * 9150.0;
+  ct_idx_141 = ct_idx_202 * ct[244] * 19.8;
   ct_idx_157 = ct_idx_224 * 0.85;
-  b_ct_idx_192 = (ct[187] * t1373) * 33.71;
+  b_ct_idx_192 = ct[187] * t1373 * 33.71;
   ct_idx_204 = -(ct_idx_143_tmp * 22.79);
   ct_idx_216 = ct_idx_262 * ct[237];
-  b_ct_idx_231 = (ct_idx_262 * ct[244]) * 73.0;
+  b_ct_idx_231 = ct_idx_262 * ct[244] * 73.0;
   ct_idx_143_tmp = ct[233] * t1036;
   t2256 = -(ct_idx_143_tmp * 10.5);
   b_ct_idx_254 = ct[17] * t1544;
-  ct_idx_255 = (-(ct[59] * ct[134])) + ct[648];
+  ct_idx_255 = -(ct[59] * ct[134]) + ct[648];
   ct_idx_263 = -(ct_idx_143_tmp * 25.53);
-  t2252 = (ct[298] * t1544) * 22.79;
+  t2252 = ct[298] * t1544 * 22.79;
   ct_idx_290 = ct[293] * t1652;
   ct_idx_152_tmp = ct[340] + t1557;
-  ct_idx_313 = ((t2257 * ct[293]) * 1.4) + (ct[298] * t1194);
-  ct_idx_327 = ((ct[245] + ct[521]) + (-ct[559])) + (t922 * 10.5);
-  ct_idx_351 = (ct[244] * (ct_idx_99 + t1168)) * 33.71;
-  ct_idx_356 = t1244 + (t1168 * 33.71);
-  ct_idx_357 = ct[473] + (ct[124] * ct_idx_316);
-  ct_idx_362 = ct[100] + (ct[134] * t1398);
-  ct_idx_363 = ct[467] + (-(ct_idx_316 * ct[171]));
+  ct_idx_313 = t2257 * ct[293] * 1.4 + ct[298] * t1194;
+  ct_idx_327 = ((ct[245] + ct[521]) - ct[559]) + t922 * 10.5;
+  ct_idx_351 = ct[244] * (ct_idx_99 + t1168) * 33.71;
+  ct_idx_356 = t1244 + t1168 * 33.71;
+  ct_idx_357 = ct[473] + ct[124] * ct_idx_316;
+  ct_idx_362 = ct[100] + ct[134] * t1398;
+  ct_idx_363 = ct[467] - ct_idx_316 * ct[171];
   ct_idx_370 = ct[17] * t1831;
   ct_idx_376_tmp_tmp = ct_idx_215 - ct_idx_224;
   t921 = ct[233] * ct_idx_376_tmp_tmp;
   ct_idx_376 = t921 * 10.5;
-  ct_idx_380 = (ct[177] * t1314) + (ct[134] * t1519);
-  ct_idx_381 = (ct[237] * t1831) * 33.71;
-  ct_idx_382 = ((ct[549] + ct[579]) + (ct_idx_779 * 1.4)) + (ct_idx_52_tmp *
-    -1.4);
+  ct_idx_380 = ct[177] * t1314 + ct[134] * t1519;
+  ct_idx_381 = ct[237] * t1831 * 33.71;
+  ct_idx_382 = ((ct[549] + ct[579]) + ct_idx_779 * 1.4) + ct_idx_52_tmp * -1.4;
   ct_idx_383_tmp = ct[298] * t1831;
   ct_idx_383 = -(ct_idx_383_tmp * 22.79);
   ct_idx_391 = t921 * 25.53;
   ct_idx_411_tmp = ct[550] - ct[576];
   b_ct_idx_411_tmp = ct[293] * t1544;
-  ct_idx_411 = (((-ct[293]) * ct_idx_411_tmp) + ct[234]) + (b_ct_idx_411_tmp *
-    1.4);
-  ct_idx_415 = (ct_idx_262 * ct[298]) + (ct[237] * t1620);
-  t1036 = t955 + ((-ct[293]) * ct_idx_376_tmp_tmp);
-  ct_idx_425 = ct_idx_21 + ((ct[293] * ct_idx_376_tmp_tmp) * -19.8);
-  ct_idx_433 = t1091 + (t921 * 23.17);
-  ct_idx_447 = ((ct[171] * t1469) + ct[360]) + ((ct_idx_318 * ct[171]) * 1.4);
-  ct_idx_448 = ((ct[124] * t1469) + ct[397]) + ((ct[124] * ct_idx_318) * 1.4);
+  ct_idx_411 = (-ct[293] * ct_idx_411_tmp + ct[234]) + b_ct_idx_411_tmp * 1.4;
+  ct_idx_415 = ct_idx_262 * ct[298] + ct[237] * t1620;
+  t1036 = t955 + -ct[293] * ct_idx_376_tmp_tmp;
+  ct_idx_425 = ct_idx_21 + ct[293] * ct_idx_376_tmp_tmp * -19.8;
+  ct_idx_433 = t1091 + t921 * 23.17;
+  ct_idx_447 = (ct[171] * t1469 + ct[360]) + ct_idx_318 * ct[171] * 1.4;
+  ct_idx_448 = (ct[124] * t1469 + ct[397]) + ct[124] * ct_idx_318 * 1.4;
   ct_idx_481_tmp = ct[124] * ct[177];
   b_ct_idx_481_tmp = ct[124] * ct[134];
   t814_tmp = ((ct[168] + ct[193]) + ct[194]) + ct[195];
-  ct_idx_481 = ((((t814_tmp + (-ct[625])) + ct[669]) + (-(ct_idx_481_tmp * (ct
-    [491] + ct[537])))) + (ct[171] * (((ct[274] + ct[307]) + ct[415]) + ct[452])))
-    + (b_ct_idx_481_tmp * (((ct[198] + ct[222]) + ct[492]) + ct[534]));
+  ct_idx_481 = ((((t814_tmp - ct[625]) + ct[669]) - ct_idx_481_tmp * (ct[491] +
+    ct[537])) + ct[171] * (((ct[274] + ct[307]) + ct[415]) + ct[452])) +
+    b_ct_idx_481_tmp * (((ct[198] + ct[222]) + ct[492]) + ct[534]);
   t1168 = ct[200] + ct[245];
   t1106 = ct[156] + ct[276];
   ct_idx_488 = ((((((((ct[228] + ct[478]) + ct[246]) + ct[248]) + ct[249]) + ct
-                   [72]) + (-ct[91])) + (ct_idx_481_tmp * ((ct[280] + ct[569]) +
-    (-ct[606])))) + (((((t1168 + ct[351]) + ct[352]) + ct[468]) + (-ct[527])) *
-                     ct[171])) + (b_ct_idx_481_tmp * ((((t1106 + ct[283]) + ct
-    [284]) + ct[562]) + (-ct[607])));
+                   [72]) - ct[91]) + ct_idx_481_tmp * ((ct[280] + ct[569]) - ct
+    [606])) + ((((t1168 + ct[351]) + ct[352]) + ct[468]) - ct[527]) * ct[171]) +
+    b_ct_idx_481_tmp * ((((t1106 + ct[283]) + ct[284]) + ct[562]) - ct[607]);
 
   /* 'mass_mat_func:3870' t10 = ct{1}; */
   /* 'mass_mat_func:3871' t1003 = ct{2}; */
@@ -4698,10 +4635,10 @@ static void ft_2(const real_T ct[671], real_T mass_mat[9][9])
   /* 'mass_mat_func:4584' t995 = ct{715}; */
   /* 'mass_mat_func:4585' t1933 = t337+t338+t1324+t1579; */
   t1933_tmp = ct[241] + ct[242];
-  t1933 = (t1933_tmp + (ct_idx_159 * ct[134])) + (ct[177] * t1559);
+  t1933 = (t1933_tmp + ct_idx_159 * ct[134]) + ct[177] * t1559;
 
   /* 'mass_mat_func:4586' t1946 = t1548+t1681; */
-  t1946 = (ct[237] * t1513) + (ct[298] * t1662);
+  t1946 = ct[237] * t1513 + ct[298] * t1662;
 
   /* 'mass_mat_func:4587' t1950 = t33.*t1934.*(2.1e+1./2.0); */
   ct_idx_202 = t1036 * ct[237];
@@ -4728,13 +4665,12 @@ static void ft_2(const real_T ct[671], real_T mass_mat[9][9])
   /* 'mass_mat_func:4606' t2044 = t1565+t1882; */
   /* 'mass_mat_func:4607' t2048 = -t2045; */
   /* 'mass_mat_func:4608' t2051 = t1134+t1176+t1406+t1417; */
-  t2051 = ((ct_idx_85 + (-ct_idx_98)) + (-(ct_idx_215 * 1.4))) + (ct_idx_224 *
-    1.4);
+  t2051 = ((ct_idx_85 - ct_idx_98) - ct_idx_215 * 1.4) + ct_idx_224 * 1.4;
 
   /* 'mass_mat_func:4609' t2060 = -t2058; */
   /* 'mass_mat_func:4610' t2061 = t1401+t1533+t1647; */
   /* 'mass_mat_func:4611' t2064 = t1733+t1828; */
-  t2064 = (ct[134] * ct_idx_337) + (ct[177] * t1815);
+  t2064 = ct[134] * ct_idx_337 + ct[177] * t1815;
 
   /* 'mass_mat_func:4612' t2068 = -t1989.*(t452-t614); */
   /* 'mass_mat_func:4613' t2072 = t1158.*t1998; */
@@ -4743,7 +4679,7 @@ static void ft_2(const real_T ct[671], real_T mass_mat[9][9])
   /* 'mass_mat_func:4616' t2088 = t499+t1226+t1260+t1317+t1484; */
   /* 'mass_mat_func:4617' t2089 = t712+t1669+t1847; */
   t2089_tmp = ct[293] * t1831;
-  t2089 = (ct_idx_290 + t712) + (t2089_tmp * 1.4);
+  t2089 = (ct_idx_290 + t712) + t2089_tmp * 1.4;
 
   /* 'mass_mat_func:4618' t2096 = t16.*t274.*t2077; */
   /* 'mass_mat_func:4619' t2097 = t565+t797+t1099+t1128+t1309+t1372; */
@@ -4759,8 +4695,8 @@ static void ft_2(const real_T ct[671], real_T mass_mat[9][9])
   /* 'mass_mat_func:4629' t2140 = t310+t651+t1208+t1299+t1580+t1590; */
   /* 'mass_mat_func:4630' t2148 = t1216+t1316+t1427+t1445+t1525; */
   /* 'mass_mat_func:4631' t2155 = t235+t277+t278+t279+t683+t750+t1370+t1556+t1595; */
-  t2155 = ((((t814_tmp + ct[482]) + ct[531]) + (-(ct_idx_481_tmp * ct_idx_159)))
-           + (ct_idx_271 * ct[171])) + (b_ct_idx_481_tmp * t1559);
+  t2155 = ((((t814_tmp + ct[482]) + ct[531]) - ct_idx_481_tmp * ct_idx_159) +
+           ct_idx_271 * ct[171]) + b_ct_idx_481_tmp * t1559;
 
   /* 'mass_mat_func:4632' t2157 = t1145+t1864+t1885; */
   /* 'mass_mat_func:4633' t2166 = t570.*t2137; */
@@ -4779,11 +4715,10 @@ static void ft_2(const real_T ct[671], real_T mass_mat[9][9])
   /* 'mass_mat_func:4646' t2202 = t1258+t1439+t1441+t1466+t1555+t1586; */
   /* 'mass_mat_func:4647' t2218 = t67+t313+t341+t343+t344+t1081+t1203+t1636+t1798+t1817; */
   t2218_tmp = ct[243] - ct[558];
-  t2218 = ((((((((ct[228] + ct[469]) + ct[246]) + ct[248]) + ct[249]) + (ct[124]
-    * t1024)) + (ct[171] * t2218_tmp)) + (ct_idx_481_tmp * ((ct[280] + (-t866))
-              + ct[632]))) + ((((t1168 + ct[521]) + ct[548]) + (-ct[559])) * ct
-            [171])) + (b_ct_idx_481_tmp * (((t1106 + (-ct[464])) + t867) + ct
-    [628]));
+  t2218 = ((((((((ct[228] + ct[469]) + ct[246]) + ct[248]) + ct[249]) + ct[124] *
+              t1024) + ct[171] * t2218_tmp) + ct_idx_481_tmp * ((ct[280] - t866)
+             + ct[632])) + (((t1168 + ct[521]) + ct[548]) - ct[559]) * ct[171])
+    + b_ct_idx_481_tmp * (((t1106 - ct[464]) + t867) + ct[628]);
 
   /* 'mass_mat_func:4648' t2223 = t1076+t1092+t1852+t1872+t1880; */
   /* 'mass_mat_func:4649' t1407 = -t1392; */
@@ -4793,7 +4728,7 @@ static void ft_2(const real_T ct[671], real_T mass_mat[9][9])
   /* 'mass_mat_func:4653' t1722 = t26.*t1683.*(2.1e+1./2.0); */
   /* 'mass_mat_func:4654' t1726 = t33.*t1686.*(2.1e+1./2.0); */
   /* 'mass_mat_func:4655' t1732 = t589+t1593; */
-  t1732 = (t1557 * 19.8) + ct[426];
+  t1732 = t1557 * 19.8 + ct[426];
 
   /* 'mass_mat_func:4656' t1739 = t26.*t1683.*2.317e+1; */
   /* 'mass_mat_func:4657' t1740 = t26.*t1683.*2.553e+1; */
@@ -4801,15 +4736,15 @@ static void ft_2(const real_T ct[671], real_T mass_mat[9][9])
   /* 'mass_mat_func:4659' t1743 = t41.*t1686.*3.371e+1; */
   /* 'mass_mat_func:4660' t1752 = -t1737; */
   /* 'mass_mat_func:4661' t1756 = t1155+t1393; */
-  t1756 = t2257 + (ct[298] * t1365);
+  t1756 = t2257 + ct[298] * t1365;
 
   /* 'mass_mat_func:4662' t1761 = t35.*t1719.*1.5e+2; */
   /* 'mass_mat_func:4663' t1777 = t693+t1622; */
-  t1777 = (-(ct_idx_143_tmp * 23.17)) + ct[488];
+  t1777 = -(ct_idx_143_tmp * 23.17) + ct[488];
 
   /* 'mass_mat_func:4664' t1782 = t26.*t27.*t1719.*1.5e+2; */
   /* 'mass_mat_func:4665' t1795 = t34.*t1757.*(2.1e+1./2.0); */
-  t814_tmp = (ct_idx_101 + (-t1376)) * ct[244];
+  t814_tmp = (ct_idx_101 - t1376) * ct[244];
   t1795 = t814_tmp * 10.5;
 
   /* 'mass_mat_func:4666' t1809 = t34.*t1757.*2.279e+1; */
@@ -4819,20 +4754,20 @@ static void ft_2(const real_T ct[671], real_T mass_mat[9][9])
   /* 'mass_mat_func:4668' t1856 = t1279+t1576; */
   /* 'mass_mat_func:4669' t1870 = -t1860; */
   /* 'mass_mat_func:4670' t1875 = t1359+t1566; */
-  t1875 = (ct[134] * t1314) + (-(ct[177] * t1519));
+  t1875 = ct[134] * t1314 - ct[177] * t1519;
 
   /* 'mass_mat_func:4671' t1913 = (t1113+t1461).*(t58+t16.*(t365-t416)); */
   /* 'mass_mat_func:4672' t1932 = t1539+t1648; */
   /* 'mass_mat_func:4673' t1940 = t34.*t1926.*1.5e+2; */
-  t1940 = (ct_idx_415 * ct[244]) * 150.0;
+  t1940 = ct_idx_415 * ct[244] * 150.0;
 
   /* 'mass_mat_func:4674' t1941 = t1423+t1714; */
   /* 'mass_mat_func:4675' t1949 = t305+t1190+t1262+t1351; */
   /* 'mass_mat_func:4676' t1951 = t1540+t1689; */
-  t1951_tmp = (ct[285] * ct[577]) + (ct[224] * (ct[120] - ct[339]));
+  t1951_tmp = ct[285] * ct[577] + ct[224] * (ct[120] - ct[339]);
 
   /* 'mass_mat_func:4677' t1952 = t1549+t1688; */
-  t1952 = (ct[298] * t1513) + (-(ct[237] * t1662));
+  t1952 = ct[298] * t1513 - ct[237] * t1662;
 
   /* 'mass_mat_func:4678' t1953 = -t1950; */
   /* 'mass_mat_func:4679' t1960 = t1057+t1423+t1491; */
@@ -4846,7 +4781,7 @@ static void ft_2(const real_T ct[671], real_T mass_mat[9][9])
   /* 'mass_mat_func:4687' t1994 = t26.*(t1690+t33.*(t923+t31.*(t155-t478))).*(-3.371e+1); */
   /* 'mass_mat_func:4688' t1995 = t307+t1217+t1249+t1474; */
   /* 'mass_mat_func:4689' t1996 = t425+t1198+t1278+t1420; */
-  t1996 = ((ct_idx_119 + ct[306]) + (t2253 * -25.53)) + (-t1409);
+  t1996 = ((ct_idx_119 + ct[306]) + t2253 * -25.53) - t1409;
 
   /* 'mass_mat_func:4690' t1999 = t26.*(t1690+t33.*(t923+t31.*(t155-t478))).*3.371e+1; */
   /* 'mass_mat_func:4691' t2003 = t24.*t1997; */
@@ -4856,11 +4791,11 @@ static void ft_2(const real_T ct[671], real_T mass_mat[9][9])
   /* 'mass_mat_func:4695' t2043 = t1398.*t1904; */
   /* 'mass_mat_func:4696' t2053 = t378+t427+t1554+t1772; */
   t2053_tmp = ct[275] + ct[308];
-  t2053 = (t2053_tmp + (ct[134] * t1534)) + (ct[177] * t1754);
+  t2053 = (t2053_tmp + ct[134] * t1534) + ct[177] * t1754;
 
   /* 'mass_mat_func:4697' t2066 = (t58+t16.*(t365-t416)).*(-t1497+t34.*(t159+t32.*(t487-t516)).*2.317e+1+t26.*t35.*(t90-t544).*2.317e+1); */
   /* 'mass_mat_func:4698' t2071 = t1734+t1838; */
-  t2071 = (ct_idx_337 * ct[177]) + (-(ct[134] * t1815));
+  t2071 = ct_idx_337 * ct[177] - ct[134] * t1815;
 
   /* 'mass_mat_func:4699' t2079 = t1117.*t2026; */
   /* 'mass_mat_func:4700' t2083 = t1311+t1651+t1711; */
@@ -4878,7 +4813,7 @@ static void ft_2(const real_T ct[671], real_T mass_mat[9][9])
   /* 'mass_mat_func:4712' t2138 = t565+t797+t1591+t1631+t1638; */
   /* 'mass_mat_func:4713' t2143 = t271.*t2127; */
   /* 'mass_mat_func:4714' t2147 = t1864+t1959; */
-  t2147 = ct_idx_381 + ((t1036 * ct[298]) * 33.71);
+  t2147 = ct_idx_381 + t1036 * ct[298] * 33.71;
 
   /* 'mass_mat_func:4715' t2149 = t1404.*t2082; */
   /* 'mass_mat_func:4716' t2150 = t1226+t1317+t1428+t1476+t1508; */
@@ -4901,13 +4836,12 @@ static void ft_2(const real_T ct[671], real_T mass_mat[9][9])
   t814_tmp = ct[233] * ct[368];
   t2257 = ct[271] + ct[279];
   t2243_tmp = ct[202] + ct[328];
-  t2243 = ((((((((ct[153] + (-ct[431])) + (-ct[434])) + ct_idx_607) + (-t662)) +
-              (-(((ct[216] + (-ct[509])) + ((ct[293] * ct[368]) * 19.8)) * ct
-                 [124]))) + (-(ct[171] * ((ct[278] + ct[564]) + (-(t814_tmp *
-    23.17)))))) + (-(ct_idx_481_tmp * ((ct[43] + ct[329]) + ct[44])))) + ((-ct
-             [171]) * ((((t2257 + ct[566]) - (t814_tmp * 25.53)) - ct[668]) -
-                       ct[26]))) + (((-ct[124]) * ct[134]) * ((((t2243_tmp + ct
-    [475]) - (t814_tmp * 10.5)) - ct[27]) - ct[60]));
+  t2243 = ((((((((ct[153] - ct[431]) - ct[434]) + ct_idx_607) - t662) - ((ct[216]
+    - ct[509]) + ct[293] * ct[368] * 19.8) * ct[124]) - ct[171] * ((ct[278] +
+    ct[564]) - t814_tmp * 23.17)) - ct_idx_481_tmp * ((ct[43] + ct[329]) + ct[44]))
+           + -ct[171] * ((((t2257 + ct[566]) - t814_tmp * 25.53) - ct[668]) -
+            ct[26])) + -ct[124] * ct[134] * ((((t2243_tmp + ct[475]) - t814_tmp *
+    10.5) - ct[27]) - ct[60]);
 
   /* 'mass_mat_func:4733' t2246 = t113+t187+t980+t1042+t1056+t1097+t1229+t1315+t1451+t1510+t1665+t1666+t1699+t1793+t1855; */
   t2246_tmp = ct[124] * ct[190];
@@ -4915,11 +4849,11 @@ static void ft_2(const real_T ct[671], real_T mass_mat[9][9])
   b_t2246_tmp = ct[316] - ct[337];
   t867 = ct[206] * t1070;
   t2246 = (((((((((((((ct[62] + ct[144]) + ct[662]) + ct[23]) + ct[28]) + ct[46])
-                  + (-ct[81])) + (t2246_tmp * ct[45])) + (ct[98] * ct[141])) + (
-    -(ct[103] * ct[190]))) + (((ct_idx_111 * ct[206]) * b_t2246_tmp) * 150.0)) +
-             (-(((ct[206] * ct[663]) * t1193) * 150.0))) + ((-ct[555]) * (ct[280]
-              - (t867 * 33.71)))) + (t2246_tmp * ((t1168 + ct[513]) + (t866 *
-              10.5)))) + (((t1106 + ct[425]) + (t866 * 22.79)) * ct[604]);
+                  - ct[81]) + t2246_tmp * ct[45]) + ct[98] * ct[141]) - ct[103] *
+               ct[190]) + ct_idx_111 * ct[206] * b_t2246_tmp * 150.0) - ct[206] *
+             ct[663] * t1193 * 150.0) + -ct[555] * (ct[280] - t867 * 33.71)) +
+           t2246_tmp * ((t1168 + ct[513]) + t866 * 10.5)) + ((t1106 + ct[425]) +
+    t866 * 22.79) * ct[604];
 
   /* 'mass_mat_func:4734' t1728 = -t1722; */
   /* 'mass_mat_func:4735' t1738 = t1003+t1459; */
@@ -4929,7 +4863,7 @@ static void ft_2(const real_T ct[671], real_T mass_mat[9][9])
   /* 'mass_mat_func:4739' t1751 = -t1743; */
   /* 'mass_mat_func:4740' t1768 = -t1761; */
   /* 'mass_mat_func:4741' t1770 = t1157+t1407; */
-  t1770 = ct_idx_102 + (-(ct[237] * t1365));
+  t1770 = ct_idx_102 - ct[237] * t1365;
 
   /* 'mass_mat_func:4742' t1776 = t1086+t1475; */
   /* 'mass_mat_func:4743' t1790 = t24.*t1777; */
@@ -4938,7 +4872,7 @@ static void ft_2(const real_T ct[671], real_T mass_mat[9][9])
   /* 'mass_mat_func:4746' t1922 = -t1913; */
   /* 'mass_mat_func:4747' t1943 = -t1940; */
   /* 'mass_mat_func:4748' t1944 = t34.*t1932.*1.5e+2; */
-  t1944 = (ct[244] * (ct_idx_216 + (-t1642))) * 150.0;
+  t1944 = ct[244] * (ct_idx_216 - t1642) * 150.0;
 
   /* 'mass_mat_func:4749' t1955 = t1538+t1698; */
   /* 'mass_mat_func:4750' t1969 = t27.*t1952.*1.5e+2; */
@@ -4960,10 +4894,10 @@ static void ft_2(const real_T ct[671], real_T mass_mat[9][9])
   /* 'mass_mat_func:4766' t2119 = t1774+t1964; */
   /* 'mass_mat_func:4767' t2125 = t565+t1591+t1631+t1742; */
   t814_tmp = ct_idx_152_tmp * ct[237];
-  t2125 = ((t2256 + ct[406]) + t2252) + (t814_tmp * 22.79);
+  t2125 = ((t2256 + ct[406]) + t2252) + t814_tmp * 22.79;
 
   /* 'mass_mat_func:4768' t2126 = t694+t1603+t1623+t1726; */
-  t2126 = ((b_ct_idx_254 + ct[489]) + ct_idx_263) + (t814_tmp * 10.5);
+  t2126 = ((b_ct_idx_254 + ct[489]) + ct_idx_263) + t814_tmp * 10.5;
 
   /* 'mass_mat_func:4769' t2134 = t24.*t2130; */
   /* 'mass_mat_func:4770' t2141 = t1803+t1999; */
@@ -4975,15 +4909,15 @@ static void ft_2(const real_T ct[671], real_T mass_mat[9][9])
   /* 'mass_mat_func:4776' t2165 = -t2161; */
   /* 'mass_mat_func:4777' t2179 = t1140.*t2150; */
   /* 'mass_mat_func:4778' t2184 = t695+t757+t1826+t2002; */
-  t2184_tmp = ((ct_idx_135 + ct[202]) + (-t1249)) + (t1376 * 22.79);
-  b_t2184_tmp = ct[490] + (ct[375] * 30.09);
-  t2184 = (b_t2184_tmp + (ct[134] * ct_idx_356)) + ((-ct[177]) * t2184_tmp);
+  t2184_tmp = ((ct_idx_135 + ct[202]) - t1249) + t1376 * 22.79;
+  b_t2184_tmp = ct[490] + ct[375] * 30.09;
+  t2184 = (b_t2184_tmp + ct[134] * ct_idx_356) + -ct[177] * t2184_tmp;
 
   /* 'mass_mat_func:4779' t2196 = -t2195; */
   /* 'mass_mat_func:4780' t2208 = t1140.*t2201; */
   /* 'mass_mat_func:4781' t2211 = -t2210; */
   /* 'mass_mat_func:4782' t2220 = t1116+t1848+t1877+t1953; */
-  t2220 = (((t1091_tmp * -25.53) + ct_idx_370) + (t921 * -25.53)) + (-t1950);
+  t2220 = ((t1091_tmp * -25.53 + ct_idx_370) + t921 * -25.53) - t1950;
 
   /* 'mass_mat_func:4783' t2222 = -t2221; */
   /* 'mass_mat_func:4784' t2228 = -t2226; */
@@ -4991,56 +4925,55 @@ static void ft_2(const real_T ct[671], real_T mass_mat[9][9])
   /* 'mass_mat_func:4786' t2242 = -t2071.*(t1940+t26.*(t1873+t33.*(t40.*(t923+t31.*(t155-t478)).*(7.0./5.0)-t35.*t147.*6.1e+1+t40.*(t788-t834))).*1.5e+2); */
   /* 'mass_mat_func:4787' t2247 = t175+t257+t1049+t1051+t1072+t1090+t1785+t1829+t1900+t2103+t2104; */
   t814_tmp = ct[233] * ct_idx_779;
-  ct_idx_143_tmp = (ct[224] * ct[233]) * t1023_tmp;
+  ct_idx_143_tmp = ct[224] * ct[233] * t1023_tmp;
   t1036 = ct[295] * t888;
   t1168 = ct[323] * t1023_tmp;
   t1376 = ct[463] + ct[489];
   t921 = ct[406] + ct[557];
   t2247 = (((((((((ct[137] + ct[181]) + ct_idx_13) + ct_idx_14) + ct_idx_43) +
-               ct_idx_52) + (ct[124] * ((ct[426] + ((ct[293] * ct_idx_779) *
-    19.8)) + (((ct[224] * ct[293]) * t1023_tmp) * -19.8)))) + (ct[171] * ((ct
-    [488] - (t814_tmp * 23.17)) + (ct_idx_143_tmp * 23.17)))) + (((-ct[124]) *
-              ct[177]) * ((((ct[322] * t888) * 33.71) + (-ct[563])) + ((ct[296] *
-    t1023_tmp) * 33.71)))) + (ct[171] * ((((t1376 + (-(t814_tmp * 25.53))) +
-    (ct_idx_143_tmp * 25.53)) + (t1036 * 10.5)) + (t1168 * 10.5)))) +
-    (b_ct_idx_481_tmp * ((((t921 + (-(t814_tmp * 10.5))) + (ct_idx_143_tmp *
-         10.5)) + (t1036 * 22.79)) + (t1168 * 22.79)));
+               ct_idx_52) + ct[124] * ((ct[426] + ct[293] * ct_idx_779 * 19.8) +
+    ct[224] * ct[293] * t1023_tmp * -19.8)) + ct[171] * ((ct[488] - t814_tmp *
+    23.17) + ct_idx_143_tmp * 23.17)) + -ct[124] * ct[177] * ((ct[322] * t888 *
+              33.71 - ct[563]) + ct[296] * t1023_tmp * 33.71)) + ct[171] *
+           ((((t1376 - t814_tmp * 25.53) + ct_idx_143_tmp * 25.53) + t1036 *
+             10.5) + t1168 * 10.5)) + b_ct_idx_481_tmp * ((((t921 - t814_tmp *
+    10.5) + ct_idx_143_tmp * 10.5) + t1036 * 22.79) + t1168 * 22.79);
 
   /* 'mass_mat_func:4788' t2254 = t1730+t1731+t1736+t1899+t1923+t1971+t2035+t2037+t2038+t2054+t2070+t2075+t2167+t2169+t2170+t2176; */
   ct_idx_143_tmp = ct[108] - ct[365];
+  t955 = ct[124] * ct[141];
   t814_tmp = ct[233] * ct[267];
   t1036 = t814_tmp * ct_idx_143_tmp;
-  t955 = ct[124] * ct[141];
   t1168 = ct[21] * ct_idx_143_tmp;
   t2254_tmp = t814_tmp * ct[288];
-  t1023_tmp = (ct[149] * ct[618]) + ct_idx_54;
-  t1106 = (t1091_tmp * -10.5) - ct_idx_91;
+  t1023_tmp = ct[149] * ct[618] + ct_idx_54;
+  t1106 = t1091_tmp * -10.5 - ct_idx_91;
   t1620 = ct[171] * ct[190];
   ct_idx_262 = ct[141] * ct[171];
-  ct_idx_126_tmp = (-ct[124]) * ct[190];
+  ct_idx_126_tmp = -ct[124] * ct[190];
   b_t2254_tmp = ct[223] + ct[458];
   c_t2254_tmp = ct[226] + ct[459];
   d_t2254_tmp = t2254_tmp * 25.53;
   t2254_tmp *= 10.5;
   e_t2254_tmp = ct[214] * ct_idx_143_tmp;
-  f_t2254_tmp = ((ct[287] - ct[341]) - (ct[481] * 1.4)) + e_t2254_tmp;
-  t2254 = (((((((((((((((ct[141] * (ct[8] + ct[95])) + ((-ct[161]) * f_t2254_tmp))
-                       + (ct[107] * ct_idx_338)) + (t1620 * ((ct_idx_21 + ct[18])
-    + ct[92]))) + (t2246_tmp * ((ct[38] - t1091) + (((ct[220] * ct[233]) *
-    ct_idx_143_tmp) * 23.17)))) + ((((ct[24] + ct[471]) + ct[35]) + ct[94]) *
-    ct[297])) + ((t955 * ((((t815 + ct[617]) - ct[661]) - ct[52]) + (t1036 *
-    210.0))) * -1.4)) + ((ct_idx_262 * ((((ct_idx_690 + ct[619]) + ct[4]) + ct
-    [54]) + ct[97])) * 1.4)) + ((t955 * ((((t814 + ct[599]) - ct[2]) - ct[51]) +
-    (t1036 * 102.2))) * -1.4)) + (ct[555] * ((ct_idx_94 + ct_idx_226) + ((t1070 *
-    ct_idx_143_tmp) * -33.71)))) + (ct[141] * ((((c_t2254_tmp + ct[1]) + ct[6])
-    + ct[83]) + ct[89]))) + (-(((((b_t2254_tmp + ct[659]) + ct[31]) + ct[84]) +
-    ct[86]) * ct[190]))) + (ct_idx_126_tmp * ((((t1023_tmp + ct[102]) - t1383) +
-    (t1168 * 10.5)) - d_t2254_tmp))) + (ct[663] * ((((b_ct_idx_91 + ((ct[237] *
-    t712) * 150.0)) + ((ct[21] * ct[398]) * 150.0)) + ct_idx_238) + ((t1193 *
-    ct_idx_143_tmp) * 150.0)))) + ((-(((((-((ct[298] * t712) * 150.0)) +
-    ct_idx_152) + ct_idx_243) + ((ct[398] * t1070) * 150.0)) + ((ct_idx_111 *
-    ct_idx_143_tmp) * 150.0))) * b_t2246_tmp)) + (ct[604] * ((((t1106 + ct[87])
-    + t1414) + (t1168 * -22.79)) + t2254_tmp));
+  f_t2254_tmp = ((ct[287] - ct[341]) - ct[481] * 1.4) + e_t2254_tmp;
+  t2254 = ((((((((((((((ct[141] * (ct[8] + ct[95]) + -ct[161] * f_t2254_tmp) +
+                       ct[107] * ct_idx_338) + t1620 * ((ct_idx_21 + ct[18]) +
+    ct[92])) + t2246_tmp * ((ct[38] - t1091) + ct[220] * ct[233] *
+    ct_idx_143_tmp * 23.17)) + (((ct[24] + ct[471]) + ct[35]) + ct[94]) * ct[297])
+                   + t955 * ((((t815 + ct[617]) - ct[661]) - ct[52]) + t1036 *
+    210.0) * -1.4) + ct_idx_262 * ((((ct_idx_690 + ct[619]) + ct[4]) + ct[54]) +
+    ct[97]) * 1.4) + t955 * ((((t814 + ct[599]) - ct[2]) - ct[51]) + t1036 *
+    102.2) * -1.4) + ct[555] * ((ct_idx_94 + ct_idx_226) + t1070 *
+    ct_idx_143_tmp * -33.71)) + ct[141] * ((((c_t2254_tmp + ct[1]) + ct[6]) +
+    ct[83]) + ct[89])) - ((((b_t2254_tmp + ct[659]) + ct[31]) + ct[84]) + ct[86])
+              * ct[190]) + ct_idx_126_tmp * ((((t1023_tmp + ct[102]) - t1383) +
+    t1168 * 10.5) - d_t2254_tmp)) + ct[663] * ((((b_ct_idx_91 + ct[237] * t712 *
+    150.0) + ct[21] * ct[398] * 150.0) + ct_idx_238) + t1193 * ct_idx_143_tmp *
+             150.0)) + -((((-(ct[298] * t712 * 150.0) + ct_idx_152) + ct_idx_243)
+             + ct[398] * t1070 * 150.0) + ct_idx_111 * ct_idx_143_tmp * 150.0) *
+           b_t2246_tmp) + ct[604] * ((((t1106 + ct[87]) + t1414) + t1168 *
+    -22.79) + t2254_tmp);
 
   /* 'mass_mat_func:4789' t1802 = t35.*t1770.*(2.1e+1./2.0); */
   /* 'mass_mat_func:4790' t1810 = t26.*t27.*t1770.*(2.1e+1./2.0); */
@@ -5052,7 +4985,7 @@ static void ft_2(const real_T ct[671], real_T mass_mat[9][9])
   /* 'mass_mat_func:4796' t1988 = -t1985; */
   /* 'mass_mat_func:4797' t2009 = t1495+t1808; */
   /* 'mass_mat_func:4798' t2016 = t1630+t1751; */
-  t2016 = t1630 + (-((ct_idx_152_tmp * ct[298]) * 33.71));
+  t2016 = t1630 - ct_idx_152_tmp * ct[298] * 33.71;
 
   /* 'mass_mat_func:4799' t2073 = -t2065; */
   /* 'mass_mat_func:4800' t2080 = -t2078; */
@@ -5073,65 +5006,63 @@ static void ft_2(const real_T ct[671], real_T mass_mat[9][9])
   /* 'mass_mat_func:4815' t2231 = -t2229; */
   /* 'mass_mat_func:4816' t2244 = t197+t637+t641+t656+t697+t1509+t1546+t1870+t2019+t2027; */
   t712 = ct[293] * ct[298];
-  t2244_tmp = (-ct[237]) * ct[11];
+  t2244_tmp = -ct[237] * ct[11];
   t888 = ct[237] * ct[293];
-  b_t2244_tmp = ct[278] + (t2253 * 23.17);
-  t2244 = ((((((((ct[152] + (-ct[431])) + (-ct[434])) + ct_idx_607) + (-t662)) +
-              (-(ct_idx_242 * ct[124]))) + ((-ct[171]) * b_t2244_tmp)) +
-            (-(ct_idx_481_tmp * ((ct[329] + t1244) + ((t712 * t2250) * -33.71)))))
-           + (-((((t2257 + (ct_idx_101 * -10.5)) + (t2244_tmp * t2250)) +
-                 ct_idx_172) * ct[171]))) + (-(b_ct_idx_481_tmp * (((t2243_tmp +
-    ct_idx_135) + (-t1249)) + ((t888 * t2250) * -22.79))));
+  b_t2244_tmp = ct[278] + t2253 * 23.17;
+  t2244 = ((((((((ct[152] - ct[431]) - ct[434]) + ct_idx_607) - t662) -
+              ct_idx_242 * ct[124]) + -ct[171] * b_t2244_tmp) - ct_idx_481_tmp *
+            ((ct[329] + t1244) + t712 * t2250 * -33.71)) - (((t2257 + ct_idx_101
+              * -10.5) + t2244_tmp * t2250) + ct_idx_172) * ct[171]) -
+    b_ct_idx_481_tmp * (((t2243_tmp + ct_idx_135) - t1249) + t888 * t2250 *
+                        -22.79);
 
   /* 'mass_mat_func:4817' t2245 = t1457+t1485+t2151+t2222; */
-  t2245_tmp = (ct_idx_214 * 30.09) + (ct_idx_225 * 30.09);
-  b_t2245_tmp = ((ct_idx_376 + ct_idx_383) + (ct_idx_202 * 22.79)) + (t1091_tmp *
-    10.5);
-  t2245 = (t2245_tmp + (ct[134] * t2147)) + (-(ct[177] * b_t2245_tmp));
+  t2245_tmp = ct_idx_214 * 30.09 + ct_idx_225 * 30.09;
+  b_t2245_tmp = ((ct_idx_376 + ct_idx_383) + ct_idx_202 * 22.79) + t1091_tmp *
+    10.5;
+  t2245 = (t2245_tmp + ct[134] * t2147) - ct[177] * b_t2245_tmp;
 
   /* 'mass_mat_func:4818' t2248 = t174+t256+t1049+t1051+t1072+t1090+t1747+t1790+t2031+t2134+t2142; */
   t814_tmp = ct[237] * t1557;
   t2248_tmp = ct[136] + ct[180];
   t2248 = ((((((((t2248_tmp + ct_idx_13) + ct_idx_14) + ct_idx_43) + ct_idx_52)
-              + (ct[124] * t1732)) + (ct[171] * t1777)) + (ct_idx_481_tmp *
-             (((-t1630) + ct[563]) + ((ct[298] * t1557) * 33.71)))) + (ct[171] *
-            (((t1376 + b_ct_idx_254) + (t814_tmp * 10.5)) + ct_idx_263))) +
-    (b_ct_idx_481_tmp * (((t921 + t2256) + t2252) + (t814_tmp * 22.79)));
+              + ct[124] * t1732) + ct[171] * t1777) + ct_idx_481_tmp * ((-t1630
+              + ct[563]) + ct[298] * t1557 * 33.71)) + ct[171] * (((t1376 +
+              b_ct_idx_254) + t814_tmp * 10.5) + ct_idx_263)) + b_ct_idx_481_tmp
+    * (((t921 + t2256) + t2252) + t814_tmp * 22.79);
 
   /* 'mass_mat_func:4819' t2249 = t288+t632+t1431+t1432+t1442+t1458+t1983+t2011+t2048+t2196+t2198; */
   t814_tmp = ct_idx_215 * ct[233];
   ct_idx_143_tmp = ct_idx_224 * ct[233];
   t1036 = ct[295] * t1346;
   t1168 = ct[323] * t1364;
-  t1091 = (((((((((ct[204] + (-ct[428])) + (-t1418)) + (-t1419)) + ct_idx_157) +
-               (-t1443)) + (-(ct[124] * ((ct_idx_21 + (-((ct_idx_215 * ct[293]) *
-    19.8))) + ((ct_idx_224 * ct[293]) * 19.8))))) + (-(ct[171] * ((t1091 +
-    (t814_tmp * 23.17)) + (-(ct_idx_143_tmp * 23.17)))))) + (-(ct_idx_481_tmp *
-              ((ct_idx_94 + ((ct[296] * t1364) * 33.71)) + ((ct[322] * t1346) *
-    33.71))))) + (-(ct[171] * ((((t1023_tmp + (t814_tmp * 25.53)) +
-    (-(ct_idx_143_tmp * 25.53))) + (-(t1036 * 10.5))) + (-(t1168 * 10.5)))))) +
-    (b_ct_idx_481_tmp * ((((t1106 - (t814_tmp * 10.5)) + (ct_idx_143_tmp * 10.5))
-       + (t1036 * 22.79)) + (t1168 * 22.79)));
+  t1091 = (((((((((ct[204] - ct[428]) - t1418) - t1419) + ct_idx_157) - t1443) -
+              ct[124] * ((ct_idx_21 - ct_idx_215 * ct[293] * 19.8) + ct_idx_224 *
+    ct[293] * 19.8)) - ct[171] * ((t1091 + t814_tmp * 23.17) - ct_idx_143_tmp *
+              23.17)) - ct_idx_481_tmp * ((ct_idx_94 + ct[296] * t1364 * 33.71)
+             + ct[322] * t1346 * 33.71)) - ct[171] * ((((t1023_tmp + t814_tmp *
+    25.53) - ct_idx_143_tmp * 25.53) - t1036 * 10.5) - t1168 * 10.5)) +
+    b_ct_idx_481_tmp * ((((t1106 - t814_tmp * 10.5) + ct_idx_143_tmp * 10.5) +
+    t1036 * 22.79) + t1168 * 22.79);
 
   /* 'mass_mat_func:4820' t2250 = t829+t877+t1405+t1613+t1664+t1674+t1702+t1708+t1715+t1814+t1842+t1907+t2030+t2034+t2039+t2056; */
   t814_tmp = ct[261] * ct[270];
   ct_idx_143_tmp = t814_tmp * ct[21];
-  t1036 = (ct[196] * ct[233]) * ct[267];
+  t1036 = ct[196] * ct[233] * ct[267];
   ct_idx_99 = ct[172] + ct[383];
   t2256 = ct[174] + ct[423];
-  t2250 = ((((((((((((((ct[582] + (ct[107] * ct[542])) + (ct[85] * ct[141])) +
-                      (t1620 * ct[114])) + (-(t2246_tmp * ((ct[278] + ct[556]) +
-    ct[565])))) + (ct[297] * ((ct[401] + ct[483]) + ct[536]))) + ((t955 * ct[126])
-    * 1.4)) + ((ct_idx_262 * ct[127]) * 1.4)) + ((t955 * ct[128]) * 1.4)) + (ct
-    [141] * (((t2256 + ct[433]) + ct[445]) + ct[515]))) + (-(ct[190] *
-    (((ct_idx_99 + ct[461]) + ct[496]) + ct[512])))) + (ct[555] * ((ct_idx_132 +
-    ct[329]) + ((t814_tmp * t1070) * 33.71)))) + (ct_idx_126_tmp * ((((t2257 +
-    ct[568]) - t1197) - (ct_idx_143_tmp * 10.5)) - (t1036 * 25.53)))) + (ct[663]
-             * ((((t866 * 9150.0) + ct[219]) + ct_idx_156) + (-((t814_tmp *
-    t1193) * 150.0))))) + (b_t2246_tmp * (((ct[230] - (t867 * 9150.0)) +
-              ct_idx_171) + ((t814_tmp * ct_idx_111) * 150.0)))) + ((-ct[604]) *
-    ((((t2243_tmp + ct[476]) - t1241) - (ct_idx_143_tmp * 22.79)) - (t1036 *
-    10.5)));
+  t2250 = ((((((((((((((ct[582] + ct[107] * ct[542]) + ct[85] * ct[141]) + t1620
+                      * ct[114]) - t2246_tmp * ((ct[278] + ct[556]) + ct[565]))
+                    + ct[297] * ((ct[401] + ct[483]) + ct[536])) + t955 * ct[126]
+                   * 1.4) + ct_idx_262 * ct[127] * 1.4) + t955 * ct[128] * 1.4)
+                + ct[141] * (((t2256 + ct[433]) + ct[445]) + ct[515])) - ct[190]
+               * (((ct_idx_99 + ct[461]) + ct[496]) + ct[512])) + ct[555] *
+              ((ct_idx_132 + ct[329]) + t814_tmp * t1070 * 33.71)) +
+             ct_idx_126_tmp * ((((t2257 + ct[568]) - t1197) - ct_idx_143_tmp *
+    10.5) - t1036 * 25.53)) + ct[663] * (((t866 * 9150.0 + ct[219]) + ct_idx_156)
+             - t814_tmp * t1193 * 150.0)) + b_t2246_tmp * (((ct[230] - t867 *
+              9150.0) + ct_idx_171) + t814_tmp * ct_idx_111 * 150.0)) + -ct[604]
+    * ((((t2243_tmp + ct[476]) - t1241) - ct_idx_143_tmp * 22.79) - t1036 * 10.5);
 
   /* 'mass_mat_func:4821' t2253 = t1412+t1447+t1583+t1762+t1797+t1886+t1909+t1912+t1915+t1942+t1945+t1975+t2096+t2112+t2118+t2120; */
   t814_tmp = ct[21] * ct[320];
@@ -5140,54 +5071,51 @@ static void ft_2(const real_T ct[671], real_T mass_mat[9][9])
   t921 = (ct_idx_135 + ct[460]) + ct[493];
   t1091_tmp = ct[170] + ct[211];
   ct_idx_126_tmp = (t1091_tmp + ct[453]) + ct[538];
-  t2253 = (((((((((((((((ct_idx_220 * ct[161]) + (-(ct_idx_223 * ct[107]))) +
-                       (ct[141] * (ct[37] + ct[495]))) + (-(t1620 * ((ct[426] +
-    ct[571]) + ct[19])))) + (t2246_tmp * ((ct[488] + ct[608]) + (-ct[39])))) + (
-    -((((ct[404] + ct[528]) + (-ct[535])) + ct[29]) * ct[297]))) + ((ct_idx_262 *
-    ((((ct[272] + ct[511]) + ct[523]) + ct[588]) + ct[33])) * 1.4)) + ((t955 *
-    ((((ct[312] + ct[456]) + ct[541]) + ct[601]) + ct[16])) * 1.4)) + ((t955 *
-    ((((ct[292] + ct[506]) + ct[519]) + ct[580]) + ct[32])) * 1.4)) + (-(ct[141]
-    * ((t921 + (-ct[670])) + (-ct[30]))))) + (((ct_idx_126_tmp + (-ct[14])) +
-    (-ct[25])) * ct[190])) + (ct[555] * ((ct_idx_148 + (-ct[563])) + ((ct[320] *
-    t1070) * 33.71)))) + (t2246_tmp * ((((t1376 + ct[609]) + (-ct[42])) + t1219)
-    + (t814_tmp * 10.5)))) + ((((((ct[406] + ct[525]) + ct[557]) + (-ct[10])) +
-    t1280) + (t814_tmp * 22.79)) * ct[604])) + (-(ct[663] * ((((ct_idx_68 + ct
-    [356]) + ((ct_idx_143_tmp * ct[21]) * 9150.0)) + (-ct_idx_173)) + ((ct[320] *
-    t1193) * 150.0))))) + (((((ct_idx_126 + ct[331]) + ((ct_idx_143_tmp * t1070)
-    * 9150.0)) + ct_idx_192) + ((ct_idx_111 * ct[320]) * 150.0)) * b_t2246_tmp);
+  t2253 = ((((((((((((((ct_idx_220 * ct[161] - ct_idx_223 * ct[107]) + ct[141] *
+                       (ct[37] + ct[495])) - t1620 * ((ct[426] + ct[571]) + ct
+    [19])) + t2246_tmp * ((ct[488] + ct[608]) - ct[39])) - (((ct[404] + ct[528])
+    - ct[535]) + ct[29]) * ct[297]) + ct_idx_262 * ((((ct[272] + ct[511]) + ct
+    [523]) + ct[588]) + ct[33]) * 1.4) + t955 * ((((ct[312] + ct[456]) + ct[541])
+    + ct[601]) + ct[16]) * 1.4) + t955 * ((((ct[292] + ct[506]) + ct[519]) + ct
+    [580]) + ct[32]) * 1.4) - ct[141] * ((t921 - ct[670]) - ct[30])) +
+               ((ct_idx_126_tmp - ct[14]) - ct[25]) * ct[190]) + ct[555] *
+              ((ct_idx_148 - ct[563]) + ct[320] * t1070 * 33.71)) + t2246_tmp *
+             ((((t1376 + ct[609]) - ct[42]) + t1219) + t814_tmp * 10.5)) +
+            (((((ct[406] + ct[525]) + ct[557]) - ct[10]) + t1280) + t814_tmp *
+             22.79) * ct[604]) - ct[663] * ((((ct_idx_68 + ct[356]) +
+              ct_idx_143_tmp * ct[21] * 9150.0) - ct_idx_173) + ct[320] * t1193 *
+            150.0)) + ((((ct_idx_126 + ct[331]) + ct_idx_143_tmp * t1070 *
+    9150.0) + ct_idx_192) + ct_idx_111 * ct[320] * 150.0) * b_t2246_tmp;
 
   /* 'mass_mat_func:4822' t2255 = t468+t1453+t1471+t1771+t1861+t1891+t1937+t1970+t1982+t1987+t2013+t2041+t2047+t2081+t2166+t2172+t2179+t2183; */
   t814_tmp = ct[196] * ct[255];
+  ct_idx_152_tmp = ct[124] * ct[268];
   ct_idx_143_tmp = ct[187] * ct[261];
   t1036 = ct_idx_143_tmp * ct[581];
-  ct_idx_152_tmp = ct[124] * ct[268];
   ct_idx_202 = ct[503] - ct[395];
   t1168 = t814_tmp * ct[581];
   t1106 = t814_tmp * t1369;
-  t955 = ct[442] + (ct[298] * ct_idx_202);
+  t955 = ct[442] + ct[298] * ct_idx_202;
   t866 = ct[171] * ct[268];
   ct_idx_101 = ct[325] - ct[436];
-  t1630 = ((((((((((((((((ct[110] + ct[332]) + ct[113]) + (-(((ct[495] + ct[605])
-    + (-ct[650])) * ct[268]))) + (ct[371] * ((ct[571] + t1003) + ((t814_tmp *
-    ct_idx_202) * 19.8)))) + (((ct[56] + ct[608]) + (t1168 * 23.17)) * ct[410]))
-                     + (((((ct[404] + (-ct[535])) + ct[590]) + ct[602]) + (-ct
-    [641])) * ct[327])) + (-((ct_idx_152_tmp * ((((ct[456] + ct[541]) + ct[573])
-    + (-ct[635])) + (-(t1036 * 9150.0)))) * 1.4))) + (-((ct_idx_152_tmp *
-    ((((ct[506] + ct[519]) + ct[612]) + (-ct[653])) + (-(t1036 * 4453.0)))) *
-    1.4))) + (-((t866 * ((((ct[511] + ct[523]) + ct[615]) + (-ct[654])) + ct[53]))
-                * 1.4))) + (ct[158] * ((((((t2248_tmp + ct[454]) + ct[462]) +
-    ct[518]) + (-ct[540])) + ct[584]) + ct[621]))) + (ct[268] * ((((t921 + ct
-    [517]) + ct[583]) + (-ct[591])) + ct[642]))) + (-(ct[231] *
-    ((((ct_idx_126_tmp + (-ct[539])) + ct[592]) + ct[620]) + ct[633])))) +
-              (-(ct_idx_72 * ((ct_idx_148 + b_ct_idx_192) + ((t814_tmp * t955) *
-    -33.71))))) + ((((((ct[57] + ct[609]) + (t1168 * 25.53)) + t1219) + t1425) +
-                    (-(t1106 * 10.5))) * ct[410])) + ((-(((((ct[15] + ct[525]) +
-    (t1168 * 10.5)) + t1280) + t1479) + (-(t1106 * 22.79)))) * ct_idx_101)) +
-           (ct_idx_90 * ((((ct_idx_68 + (-ct_idx_173)) + ((ct[187] * t1358) *
-    150.0)) + (-((t814_tmp * t1361) * 150.0))) + ((ct_idx_143_tmp * t1369) *
-              9150.0)))) + (ct_idx_103 * ((((ct_idx_126 + ct_idx_192) +
-    ((ct_idx_203 * ct[187]) * 150.0)) - ((t814_tmp * ct_idx_205) * 150.0)) +
-    ((ct_idx_143_tmp * t955) * 9150.0)));
+  t1630 = ((((((((((((((((ct[110] + ct[332]) + ct[113]) - ((ct[495] + ct[605]) -
+    ct[650]) * ct[268]) + ct[371] * ((ct[571] + t1003) + t814_tmp * ct_idx_202 *
+    19.8)) + ((ct[56] + ct[608]) + t1168 * 23.17) * ct[410]) + ((((ct[404] - ct
+    [535]) + ct[590]) + ct[602]) - ct[641]) * ct[327]) - ct_idx_152_tmp *
+                    ((((ct[456] + ct[541]) + ct[573]) - ct[635]) - t1036 *
+                     9150.0) * 1.4) - ct_idx_152_tmp * ((((ct[506] + ct[519]) +
+    ct[612]) - ct[653]) - t1036 * 4453.0) * 1.4) - t866 * ((((ct[511] + ct[523])
+    + ct[615]) - ct[654]) + ct[53]) * 1.4) + ct[158] * ((((((t2248_tmp + ct[454])
+    + ct[462]) + ct[518]) - ct[540]) + ct[584]) + ct[621])) + ct[268] * ((((t921
+    + ct[517]) + ct[583]) - ct[591]) + ct[642])) - ct[231] * ((((ct_idx_126_tmp
+    - ct[539]) + ct[592]) + ct[620]) + ct[633])) - ct_idx_72 * ((ct_idx_148 +
+    b_ct_idx_192) + t814_tmp * t955 * -33.71)) + (((((ct[57] + ct[609]) + t1168 *
+    25.53) + t1219) + t1425) - t1106 * 10.5) * ct[410]) + -(((((ct[15] + ct[525])
+    + t1168 * 10.5) + t1280) + t1479) - t1106 * 22.79) * ct_idx_101) + ct_idx_90
+           * ((((ct_idx_68 - ct_idx_173) + ct[187] * t1358 * 150.0) - t814_tmp *
+               t1361 * 150.0) + ct_idx_143_tmp * t1369 * 9150.0)) + ct_idx_103 *
+    ((((ct_idx_126 + ct_idx_192) + ct_idx_203 * ct[187] * 150.0) - t814_tmp *
+      ct_idx_205 * 150.0) + ct_idx_143_tmp * t955 * 9150.0);
 
   /* 'mass_mat_func:4823' t1905 = -t1901; */
   /* 'mass_mat_func:4824' t2021 = t17.*t2016; */
@@ -5205,35 +5133,34 @@ static void ft_2(const real_T ct[671], real_T mass_mat[9][9])
   /* 'mass_mat_func:4836' t2238 = -t2213.*(t1436+t17.*(t438+t441-t470)); */
   /* 'mass_mat_func:4837' t2240 = t2064.*t2214; */
   /* 'mass_mat_func:4838' t2251 = t287+t631+t1431+t1432+t1442+t1458+t1966+t1986+t2165+t2228+t2231; */
-  t1244 = (((((((((ct[203] + (-ct[427])) + (-t1418)) + (-t1419)) + ct_idx_157) +
-               (-t1443)) + (-(ct[124] * ct_idx_425))) + (-(ct_idx_433 * ct[171])))
-            + (-(ct_idx_481_tmp * ((ct_idx_94 + ct_idx_381) + ((t712 *
-    ct_idx_376_tmp_tmp) * -33.71))))) + (-(ct[171] * (((t1023_tmp +
-    (ct_idx_383_tmp * -10.5)) + (t2244_tmp * ct_idx_376_tmp_tmp)) + ct_idx_391))))
-    + (-(b_ct_idx_481_tmp * (((((ct[11] * ct[618]) + ct_idx_91) + ct_idx_376) +
-          ct_idx_383) + ((t888 * ct_idx_376_tmp_tmp) * -22.79))));
+  t1244 = (((((((((ct[203] - ct[427]) - t1418) - t1419) + ct_idx_157) - t1443) -
+              ct[124] * ct_idx_425) - ct_idx_433 * ct[171]) - ct_idx_481_tmp *
+            ((ct_idx_94 + ct_idx_381) + t712 * ct_idx_376_tmp_tmp * -33.71)) -
+           ct[171] * (((t1023_tmp + ct_idx_383_tmp * -10.5) + t2244_tmp *
+                       ct_idx_376_tmp_tmp) + ct_idx_391)) - b_ct_idx_481_tmp *
+    ((((ct[11] * ct[618] + ct_idx_91) + ct_idx_376) + ct_idx_383) + t888 *
+     ct_idx_376_tmp_tmp * -22.79);
 
   /* 'mass_mat_func:4839' t2252 = t188+t874+t965+t1536+t1650+t1682+t1723+t1781+t1788+t1792+t1794+t1851+t1857+t1936+t2033+t2068+t2072+t2073; */
   t814_tmp = ct[261] * ct[581];
   ct_idx_143_tmp = ct[261] * t1369;
   t1249 = ct[90] * ct[161];
   t1557 = ct[199] - ct[207];
-  t2252 = ((((((((((((((((ct[145] + ct[610]) + (-(t1249 * ct[542]))) + (-(ct[268]
-    * (ct[447] + ct[611])))) + ct[130]) + (ct[410] * (ct[532] - (t814_tmp *
-    23.17)))) + ((-ct[327]) * ((t1557 + ct[483]) - ct[595]))) +
-                    (-((ct_idx_152_tmp * (((ct[197] + ct[386]) + ct[500]) + ct
-    [587])) * 1.4))) + (-((t866 * (((ct[154] + ct[432]) + ct[472]) + ct[623])) *
-    1.4))) + (-((ct_idx_152_tmp * (((ct[176] + ct[430]) + ct[466]) + ct[622])) *
-                1.4))) + (-(ct[158] * ((((ct[138] + ct[384]) + ct[446]) + ct[508])
-    + ct[547])))) + (ct[231] * (((ct_idx_99 + ct[512]) + ct[545]) + ct[572]))) +
-               (-(ct[268] * (((t2256 + ct[445]) + ct[507]) + ct[596])))) +
-              ((-ct_idx_72) * (ct_idx_132 + ((ct[261] * t955) * 33.71)))) +
-             (((((-(t814_tmp * 25.53)) + ct[533]) + t1197) + (ct_idx_143_tmp *
-    10.5)) * ct[410])) + ((-((((-(t814_tmp * 10.5)) + ct[451]) + t1241) +
-    (ct_idx_143_tmp * 22.79))) * ct_idx_101)) + (ct_idx_103 * ((((t924 * 9150.0)
-    + (-(ct[435] * 9150.0))) + ct_idx_171) + ((ct_idx_205 * ct[261]) * 150.0))))
-    + (-(ct_idx_90 * ((((t922 * 9150.0) + (ct[439] * 9150.0)) + ct_idx_156) +
-                      (-((ct[261] * t1361) * 150.0)))));
+  t2252 = ((((((((((((((((ct[145] + ct[610]) - t1249 * ct[542]) - ct[268] * (ct
+    [447] + ct[611])) + ct[130]) + ct[410] * (ct[532] - t814_tmp * 23.17)) +
+                     -ct[327] * ((t1557 + ct[483]) - ct[595])) - ct_idx_152_tmp *
+                    (((ct[197] + ct[386]) + ct[500]) + ct[587]) * 1.4) - t866 *
+                   (((ct[154] + ct[432]) + ct[472]) + ct[623]) * 1.4) -
+                  ct_idx_152_tmp * (((ct[176] + ct[430]) + ct[466]) + ct[622]) *
+                  1.4) - ct[158] * ((((ct[138] + ct[384]) + ct[446]) + ct[508])
+    + ct[547])) + ct[231] * (((ct_idx_99 + ct[512]) + ct[545]) + ct[572])) - ct
+               [268] * (((t2256 + ct[445]) + ct[507]) + ct[596])) + -ct_idx_72 *
+              (ct_idx_132 + ct[261] * t955 * 33.71)) + (((-(t814_tmp * 25.53) +
+    ct[533]) + t1197) + ct_idx_143_tmp * 10.5) * ct[410]) + -(((-(t814_tmp *
+    10.5) + ct[451]) + t1241) + ct_idx_143_tmp * 22.79) * ct_idx_101) +
+           ct_idx_103 * (((t924 * 9150.0 - ct[435] * 9150.0) + ct_idx_171) +
+            ct_idx_205 * ct[261] * 150.0)) - ct_idx_90 * (((t922 * 9150.0 + ct
+    [439] * 9150.0) + ct_idx_156) - ct[261] * t1361 * 150.0);
 
   /* 'mass_mat_func:4840' t2257 = t981+t1773+t1779+t1878+t1924+t1938+t2062+t2086+t2093+t2094+t2106+t2109+t2114+t2115+t2192+t2200+t2209+t2211; */
   ct_idx_99 = ct[626] - ct[391];
@@ -5248,116 +5175,112 @@ static void ft_2(const real_T ct[671], real_T mass_mat[9][9])
   ct_idx_262 = t713_tmp * ct_idx_99;
   ct_idx_99 = ct_idx_262 * 23.17;
   t2244_tmp = ct[184] + ct[427];
-  t2257 = (((((((((((((((((t712 * ((((t1620 + ct[311]) + ct[336]) + ct[341]) +
-    ct[437])) + (-(ct[158] * ct[618]))) + (-(t1249 * ((((t2256 + ct[290]) + ct
-    [333]) + ct[338]) + (-ct[441]))))) + (-((((-ct[649]) + ct[8]) + ct[73]) *
-    ct[268]))) + (-(((ct[18] + t1057) + ct[93]) * ct[371]))) + ((-ct[410]) *
-    ((ct[55] + (t1168 * 23.17)) + ct_idx_99))) + (-(ct[327] * (((((ct[471] + ct
-    [522]) + ct[638]) + ct[643]) + ct[24]) + (-ct[70]))))) + ((ct_idx_152_tmp *
-    (((((ct[617] + ct[634]) - ct[661]) - (ct_idx_143_tmp * 9150.0)) - ct[69]) +
-     (t1036 * 9150.0))) * 1.4)) + ((ct_idx_152_tmp * (((((ct[599] + ct[651]) -
-    ct[2]) - (ct_idx_143_tmp * 4453.0)) - ct[74]) + (t1036 * 4453.0))) * 1.4)) +
-                  ((t866 * (((((ct[600] + ct[652]) - ((ct[244] * ct[578]) *
-    4453.0)) - ct[4]) - ct[75]) + ((t814_tmp * ct_idx_202) * 4453.0))) * 1.4)) +
-                 (-(ct[158] * ((((((t2244_tmp + ct[598]) + (-ct[614])) + ct[660])
-    + ct[7]) + ct[49]) + ct[63])))) + ((-ct_idx_72) * ((ct_idx_226 + (-t1533)) +
-    ((ct[319] * t955) * 33.71)))) + (ct[231] * ((((((b_t2254_tmp + (-ct[613])) +
-    ct[640]) + ct[659]) + ct[31]) + ct[61]) + ct[68]))) + (-(ct[268] *
-    ((((((c_t2254_tmp + ct[597]) + (-ct[639])) + ct[1]) + ct[6]) + ct[48]) + ct
-     [71])))) + (ct[410] * (((((ct[67] + (-(t1168 * 25.53))) + t1383) + (-t1470))
-    + (t1106 * 10.5)) + d_t2254_tmp))) + ((-ct_idx_101) * (((((ct[36] + (-(t1168
-    * 10.5))) + t1414) + ct_idx_204) + (t1106 * 22.79)) + t2254_tmp))) +
-           (-(ct_idx_90 * (((((b_ct_idx_91 + ct_idx_238) + ((ct_idx_206 * ct[244])
-    * 9150.0)) + ((t713_tmp * t1358) * 150.0)) + ((t814_tmp * t1369) * 9150.0))
-              + (-((ct[319] * t1361) * 150.0)))))) + (-(ct_idx_103 *
-    (((((ct_idx_152 + ct_idx_243) + ((t713_tmp * ct_idx_203) * 150.0)) + ((ct
-    [244] * t1373) * 9150.0)) + ((t814_tmp * t955) * 9150.0)) + (-((ct_idx_205 *
-    ct[319]) * 150.0)))));
+  t2257 = ((((((((((((((((t712 * ((((t1620 + ct[311]) + ct[336]) + ct[341]) +
+    ct[437]) - ct[158] * ct[618]) - t1249 * ((((t2256 + ct[290]) + ct[333]) +
+    ct[338]) - ct[441])) - ((-ct[649] + ct[8]) + ct[73]) * ct[268]) - ((ct[18] +
+    t1057) + ct[93]) * ct[371]) + -ct[410] * ((ct[55] + t1168 * 23.17) +
+    ct_idx_99)) - ct[327] * (((((ct[471] + ct[522]) + ct[638]) + ct[643]) + ct
+    [24]) - ct[70])) + ct_idx_152_tmp * (((((ct[617] + ct[634]) - ct[661]) -
+    ct_idx_143_tmp * 9150.0) - ct[69]) + t1036 * 9150.0) * 1.4) + ct_idx_152_tmp
+                   * (((((ct[599] + ct[651]) - ct[2]) - ct_idx_143_tmp * 4453.0)
+                       - ct[74]) + t1036 * 4453.0) * 1.4) + t866 * (((((ct[600]
+    + ct[652]) - ct[244] * ct[578] * 4453.0) - ct[4]) - ct[75]) + t814_tmp *
+    ct_idx_202 * 4453.0) * 1.4) - ct[158] * ((((((t2244_tmp + ct[598]) - ct[614])
+    + ct[660]) + ct[7]) + ct[49]) + ct[63])) + -ct_idx_72 * ((ct_idx_226 - t1533)
+    + ct[319] * t955 * 33.71)) + ct[231] * ((((((b_t2254_tmp - ct[613]) + ct[640])
+    + ct[659]) + ct[31]) + ct[61]) + ct[68])) - ct[268] * ((((((c_t2254_tmp +
+    ct[597]) - ct[639]) + ct[1]) + ct[6]) + ct[48]) + ct[71])) + ct[410] *
+             (((((ct[67] - t1168 * 25.53) + t1383) - t1470) + t1106 * 10.5) +
+              d_t2254_tmp)) + -ct_idx_101 * (((((ct[36] - t1168 * 10.5) + t1414)
+    + ct_idx_204) + t1106 * 22.79) + t2254_tmp)) - ct_idx_90 * (((((b_ct_idx_91
+    + ct_idx_238) + ct_idx_206 * ct[244] * 9150.0) + t713_tmp * t1358 * 150.0) +
+             t814_tmp * t1369 * 9150.0) - ct[319] * t1361 * 150.0)) - ct_idx_103
+    * (((((ct_idx_152 + ct_idx_243) + t713_tmp * ct_idx_203 * 150.0) + ct[244] *
+         t1373 * 9150.0) + t814_tmp * t955 * 9150.0) - ct_idx_205 * ct[319] *
+       150.0);
 
   /* 'mass_mat_func:4841' t2168 = -t2123.*(t58+t16.*(t365-t416)); */
   /* 'mass_mat_func:4842' t2189 = t1605.*t2122; */
   /* 'mass_mat_func:4843' t2233 = -t2217.*(t363-t1336); */
   /* 'mass_mat_func:4844' t2234 = t2217.*(t363-t1336); */
   /* 'mass_mat_func:4845' t2236 = t1093+t1139+t2021+t2129; */
-  t1376 = (ct_idx_776 * 30.09) + (t1023 * 30.09);
-  t888 = (t1376 + (ct[134] * t2016)) + (ct[177] * t2125);
+  t1376 = ct_idx_776 * 30.09 + t1023 * 30.09;
+  t888 = (t1376 + ct[134] * t2016) + ct[177] * t2125;
 
   /* 'mass_mat_func:4846' t2239 = t1863.*t2216; */
   /* 'mass_mat_func:4847' t2241 = -t2240; */
   /* 'mass_mat_func:4848' t2258 = t34+t726+t917+t987+t1744+t1745+t1752+t1769+t1780+t1791+t1961+t2050+t2066+t2110+t2145+t2149+t2152+t2156+t2177+t2180+t2199+t2232+t2235+t2237+t2238; */
   t814_tmp = ct[182] * ct[187];
-  ct_idx_143_tmp = (t814_tmp * ct[233]) * t1107;
-  ct_idx_152_tmp = (ct[165] - ct[497]) + (ct[233] * t1662_tmp);
+  ct_idx_143_tmp = t814_tmp * ct[233] * t1107;
+  ct_idx_152_tmp = (ct[165] - ct[497]) + ct[233] * t1662_tmp;
   t1036 = t713_tmp * ct_idx_152_tmp;
-  t1168 = t814_tmp * t1107;
   t1023_tmp = ct[90] * ct[155];
+  t1168 = t814_tmp * t1107;
   t1106 = t814_tmp * ct_idx_84;
   t2243_tmp = ct[265] - ct[302];
+  b_ct_idx_254 = ct[419] + ct[124] * t2243_tmp;
   t921 = t814_tmp * t1347;
-  b_ct_idx_254 = ct[419] + (ct[124] * t2243_tmp);
   ct_idx_126_tmp = t814_tmp * t1770;
   ct_idx_263 = (ct[315] + ct[318]) - ct[334];
-  ct_idx_202 = ((ct_idx_102 * ct[293]) * 1.4) - (ct[237] * t1194);
-  t867 = (ct[177] * t1398) + (ct[134] * ct_idx_263);
+  ct_idx_202 = ct_idx_102 * ct[293] * 1.4 - ct[237] * t1194;
+  t867 = ct[177] * t1398 + ct[134] * ct_idx_263;
   t866 = ct_idx_239_tmp * 23.17;
-  t955 = (((((((((((((((((((((((ct[244] + ((ct[158] * ct[421]) * 61.0)) + ((ct
-    [158] * ct[554]) * 61.0)) + (t1023_tmp * ct[627])) + ((t712 * ((((ct[159] +
-    ct[259]) + t602) + ct[455]) + ct[479])) * 61.0)) + (ct[310] * (((t713_tmp *
-    t1662_tmp) * 350.0) + ct[543]))) + (-(ct[318] * (ct_idx_687 + ((t713_tmp *
-    ct_idx_117) * 350.0))))) + ((t1249 * ((((ct[164] + ct[269]) + ct[389]) +
-    (ct[438] * 1.4)) + (-t713))) * 61.0)) + ((((t2256 + ct[372]) + ct[392]) +
-    (ct[479] * 1.4)) * ct[239])) + (ct[189] * (((t1620 + ct[345]) + ct[438]) + (
-    -(t713 * 1.4))))) + (ct[624] * ((ct_idx_146 + (-ct[649])) + (t1168 * 30.09))))
-                      + (ct[59] * ((t1057 + ct_idx_141) + ((t814_tmp * t1365) *
-    19.8)))) + (b_ct_idx_254 * (((-(t921 * 23.17)) + t866) + ct_idx_99))) +
-                    ((-((((t814_tmp * t1194) * 73.0) + b_ct_idx_231) +
-                        ((t713_tmp * t1513) * 73.0))) * ct_idx_263)) + (t1398 *
-    (((((t814_tmp * ct[293]) * t1107) * 102.2) + t1651) + (-((t713_tmp * t1662) *
-    73.0))))) + (ct_idx_231 * (((ct_idx_143_tmp * 210.0) + t1654) + (t1036 *
-    150.0)))) + (ct_idx_231 * (((ct_idx_143_tmp * 102.2) + t1653) + (t1036 *
-    73.0)))) + (t1023_tmp * (((((((((ct[118] * 117.0) + ct[185]) - ct[257]) +
-    ct[598]) + (-ct[614])) + ct_idx_129) + ct_idx_144) + (t1168 * 0.07)) -
-    (t1106 * 0.85)))) + (ct[624] * ((((((((ct[226] + ct[227]) - ct[282]) + ct
-    [597]) + (-ct[639])) + ct_idx_139) + ct_idx_143) - (t1106 * 0.32)) + (t1168 *
-    150.35)))) + (t2243_tmp * ((((((((ct[223] + ct[225]) - ct[281]) + (-ct[613]))
-    + ct[640]) + ct_idx_127) + (t1168 * 0.32)) + ct_idx_174) - (t1106 * 79.89))))
-             + (ct_idx_292 * (((-t1533) + ct_idx_351) + ((t814_tmp * t1756) *
-    33.71)))) + (b_ct_idx_254 * (((((t1470 - (t921 * 25.53)) - t1795) -
-    (ct_idx_126_tmp * 10.5)) + (ct_idx_239_tmp * 25.53)) + (ct_idx_262 * 25.53))))
-           + (ct_idx_255 * (((((ct_idx_239 + (t921 * 10.5)) + ct_idx_204) +
-    t1809) + (ct_idx_126_tmp * 22.79)) - (ct_idx_262 * 10.5)))) + (ct_idx_362 *
-           ((((t814_tmp * ct_idx_313) * 150.0) + t1940) + ((t713_tmp * t1952) *
-             150.0)))) + ((-((((t814_tmp * ct_idx_202) * -150.0) + t1944) +
-    ((t713_tmp * t1946) * 150.0))) * t867);
+  t955 = (((((((((((((((((((((((ct[244] + ct[158] * ct[421] * 61.0) + ct[158] *
+    ct[554] * 61.0) + t1023_tmp * ct[627]) + t712 * ((((ct[159] + ct[259]) +
+    t602) + ct[455]) + ct[479]) * 61.0) + ct[310] * (t713_tmp * t1662_tmp *
+    350.0 + ct[543])) - ct[318] * (ct_idx_687 + t713_tmp * ct_idx_117 * 350.0))
+    + t1249 * ((((ct[164] + ct[269]) + ct[389]) + ct[438] * 1.4) - t713) * 61.0)
+    + (((t2256 + ct[372]) + ct[392]) + ct[479] * 1.4) * ct[239]) + ct[189] *
+                        (((t1620 + ct[345]) + ct[438]) - t713 * 1.4)) + ct[624] *
+                       ((ct_idx_146 - ct[649]) + t1168 * 30.09)) + ct[59] *
+                      ((t1057 + ct_idx_141) + t814_tmp * t1365 * 19.8)) +
+                     b_ct_idx_254 * ((-(t921 * 23.17) + t866) + ct_idx_99)) +
+                    -((t814_tmp * t1194 * 73.0 + b_ct_idx_231) + t713_tmp *
+                      t1513 * 73.0) * ct_idx_263) + t1398 * ((t814_tmp * ct[293]
+    * t1107 * 102.2 + t1651) - t713_tmp * t1662 * 73.0)) + ct_idx_231 *
+                  ((ct_idx_143_tmp * 210.0 + t1654) + t1036 * 150.0)) +
+                 ct_idx_231 * ((ct_idx_143_tmp * 102.2 + t1653) + t1036 * 73.0))
+                + t1023_tmp * ((((((((ct[118] * 117.0 + ct[185]) - ct[257]) +
+    ct[598]) - ct[614]) + ct_idx_129) + ct_idx_144) + t1168 * 0.07) - t1106 *
+    0.85)) + ct[624] * ((((((((ct[226] + ct[227]) - ct[282]) + ct[597]) - ct[639])
+    + ct_idx_139) + ct_idx_143) - t1106 * 0.32) + t1168 * 150.35)) + t2243_tmp *
+              ((((((((ct[223] + ct[225]) - ct[281]) - ct[613]) + ct[640]) +
+                  ct_idx_127) + t1168 * 0.32) + ct_idx_174) - t1106 * 79.89)) +
+             ct_idx_292 * ((-t1533 + ct_idx_351) + t814_tmp * t1756 * 33.71)) +
+            b_ct_idx_254 * (((((t1470 - t921 * 25.53) - t1795) - ct_idx_126_tmp *
+    10.5) + ct_idx_239_tmp * 25.53) + ct_idx_262 * 25.53)) + ct_idx_255 *
+           (((((ct_idx_239 + t921 * 10.5) + ct_idx_204) + t1809) +
+             ct_idx_126_tmp * 22.79) - ct_idx_262 * 10.5)) + ct_idx_362 *
+          ((t814_tmp * ct_idx_313 * 150.0 + t1940) + t713_tmp * t1952 * 150.0))
+    + -((t814_tmp * ct_idx_202 * -150.0 + t1944) + t713_tmp * t1946 * 150.0) *
+    t867;
 
   /* 'mass_mat_func:4849' t2256 = t422+t553+t1438+t1455+t1500+t1520+t1530+t1532+t1799+t1905+t1922+t1991+t2001+t2043+t2046+t2049+t2052+t2060+t2111+t2168+t2189+t2205+t2206; */
   t1106 = ct[255] * t1107;
-  t921 = (ct[233] * ct[255]) * t1107;
+  t921 = ct[233] * ct[255] * t1107;
   t1168 = ct[187] * ct_idx_152_tmp;
   t1036 = ct_idx_84 * ct[255];
   ct_idx_143_tmp = ct[255] * t1347;
   t814_tmp = ct[255] * t1770;
-  t2256 = (((((((((((((((((((((ct[304] + ct[396]) + (-((t712 * ((ct[179] + ct
-    [407]) + ct[412])) * 61.0))) + ((t1249 * ((ct[178] + t599) + (ct[373] * 1.4)))
-    * 61.0)) + (ct[189] * ((ct[105] + ct[373]) + (t599 * 1.4)))) + (((ct[187] *
-    ct[318]) * ct_idx_117) * 350.0)) + (((ct[187] * ct[310]) * t1662_tmp) *
-    -350.0)) + (-(((ct[109] + ct[374]) + (ct[407] * 1.4)) * ct[239]))) + (ct[624]
-    * ((t1106 * 30.09) + ct[605]))) + (-(ct[59] * (t1003 + (-((ct[255] * t1365) *
-    19.8)))))) + (-((ct[56] + (ct_idx_143_tmp * 23.17)) * b_ct_idx_254))) +
-                     (((-ct[90]) * ct[155]) * ((((t2248_tmp + ct[518]) + (-ct
-    [540])) - (t1106 * 0.07)) + (t1036 * 0.85)))) + ((-(((ct[255] * t1194) *
-    73.0) + (-((ct[187] * t1513) * 73.0)))) * ct_idx_263)) + (t1398 * ((((ct[255]
-    * ct[293]) * t1107) * 102.2) + ((ct[187] * t1662) * 73.0)))) + (ct_idx_231 *
-    ((t921 * 210.0) + (t1168 * -150.0)))) + (ct_idx_231 * ((t921 * 102.2) +
-    (t1168 * -73.0)))) + ((-ct[624]) * ((((ct_idx_135 + ct[517]) + (-ct[591])) +
-    (t1036 * 0.32)) - (t1106 * 150.35)))) + (-(t2243_tmp * ((((t1091_tmp + (-ct
-    [539])) + ct[592]) - (t1106 * 0.32)) + (t1036 * 79.89))))) + (ct_idx_292 *
-    (b_ct_idx_192 + ((ct[255] * t1756) * 33.71)))) + ((-(((ct[57] + t1425) +
-    (ct_idx_143_tmp * 25.53)) + (t814_tmp * 10.5))) * b_ct_idx_254)) +
-            (ct_idx_255 * (((ct[15] + (ct_idx_143_tmp * 10.5)) + t1479) +
-              (t814_tmp * 22.79)))) + (ct_idx_362 * (((ct_idx_313 * ct[255]) *
-              150.0) - ((ct[187] * t1952) * 150.0)))) + ((((ct[255] * ct_idx_202)
-    * 150.0) + ((ct[187] * t1946) * 150.0)) * t867);
+  t2256 = (((((((((((((((((((((ct[304] + ct[396]) - t712 * ((ct[179] + ct[407])
+    + ct[412]) * 61.0) + t1249 * ((ct[178] + t599) + ct[373] * 1.4) * 61.0) +
+    ct[189] * ((ct[105] + ct[373]) + t599 * 1.4)) + ct[187] * ct[318] *
+    ct_idx_117 * 350.0) + ct[187] * ct[310] * t1662_tmp * -350.0) - ((ct[109] +
+    ct[374]) + ct[407] * 1.4) * ct[239]) + ct[624] * (t1106 * 30.09 + ct[605]))
+                       - ct[59] * (t1003 - ct[255] * t1365 * 19.8)) - (ct[56] +
+    ct_idx_143_tmp * 23.17) * b_ct_idx_254) + -ct[90] * ct[155] * ((((t2248_tmp
+    + ct[518]) - ct[540]) - t1106 * 0.07) + t1036 * 0.85)) + -(ct[255] * t1194 *
+    73.0 - ct[187] * t1513 * 73.0) * ct_idx_263) + t1398 * (ct[255] * ct[293] *
+    t1107 * 102.2 + ct[187] * t1662 * 73.0)) + ct_idx_231 * (t921 * 210.0 +
+    t1168 * -150.0)) + ct_idx_231 * (t921 * 102.2 + t1168 * -73.0)) + -ct[624] *
+                ((((ct_idx_135 + ct[517]) - ct[591]) + t1036 * 0.32) - t1106 *
+                 150.35)) - t2243_tmp * ((((t1091_tmp - ct[539]) + ct[592]) -
+    t1106 * 0.32) + t1036 * 79.89)) + ct_idx_292 * (b_ct_idx_192 + ct[255] *
+    t1756 * 33.71)) + -(((ct[57] + t1425) + ct_idx_143_tmp * 25.53) + t814_tmp *
+                        10.5) * b_ct_idx_254) + ct_idx_255 * (((ct[15] +
+    ct_idx_143_tmp * 10.5) + t1479) + t814_tmp * 22.79)) + ct_idx_362 *
+           (ct_idx_313 * ct[255] * 150.0 - ct[187] * t1952 * 150.0)) + (ct[255] *
+    ct_idx_202 * 150.0 + ct[187] * t1946 * 150.0) * t867;
 
   /* 'mass_mat_func:4850' t2259 = t185+t186+t896+t995+t1159+t1813+t1825+t1843+t1844+t1893+t1896+t2012+t2080+t2101+t2144+t2159+t2181+t2182+t2186+t2190+t2191+t2207+t2234+t2239+t2241+t2242; */
   t1168 = ct[155] * ct[303];
@@ -5365,40 +5288,38 @@ static void ft_2(const real_T ct[671], real_T mass_mat[9][9])
   t1106 = ct_idx_254 * ct[182];
   t921 = ct[553] - ct[586];
   ct_idx_99 = ct[380] - ct[394];
-  ct_idx_126_tmp = ct[182] * ((ct[238] + ((ct[233] * t1951_tmp) * 1.4)) + (ct
-    [233] * t921));
-  ct_idx_262 = (ct[150] - ((ct[124] * t1314) * 1.4)) + (ct[124] * ct_idx_99);
-  t814_tmp = (ct[367] + (-(ct_idx_254 * ct[233]))) * ct[182];
-  ct_idx_152_tmp = ct[264] - (ct[124] * t1276);
-  ct_idx_143_tmp = ct[182] * (((-ct[298]) * t1951_tmp) + (ct[237] * t1677));
-  t1036 = (((ct[293] * t1951_tmp) * 1.4) - ((ct[112] * ct[255]) * 61.0)) + (ct
-    [293] * t921);
+  ct_idx_126_tmp = ct[182] * ((ct[238] + ct[233] * t1951_tmp * 1.4) + ct[233] *
+    t921);
+  ct_idx_262 = (ct[150] - ct[124] * t1314 * 1.4) + ct[124] * ct_idx_99;
+  t814_tmp = (ct[367] - ct_idx_254 * ct[233]) * ct[182];
+  ct_idx_152_tmp = ct[264] - ct[124] * t1276;
+  ct_idx_143_tmp = ct[182] * (-ct[298] * t1951_tmp + ct[237] * t1677);
+  t1036 = (ct[293] * t1951_tmp * 1.4 - ct[112] * ct[255] * 61.0) + ct[293] *
+    t921;
   ct_idx_202 = ct[402] - ct[300];
-  t1168 = ((((((((((((((((((((((((ct[142] + ct[143]) + ((t1168 * ct[421]) * 61.0))
-    + ((t1168 * ct[554]) * 61.0)) + (-(ct[188] * (ct[119] + ct[362])))) + (-(ct
-    [326] * (((ct[159] + t602) + ct[551]) + (t920 * 1.4))))) + ((((ct[164] + ct
-    [389]) + (-ct[585])) + (ct[666] * 1.4)) * ct[349])) + (ct[417] * (((ct[229]
-    + ct[345]) + (-(ct[585] * 1.4))) + ct[666]))) + ((((ct[218] + ct[372]) +
-    (ct[551] * 1.4)) + t920) * ct_idx_202)) + (-(ct[65] * (((ct[182] * t1368) *
-    350.0) + ct_idx_687)))) + ((-(ct[543] + ((ct[182] * t921) * 350.0))) *
-    ct_idx_99)) + (t1314 * (ct_idx_146 + (t1620 * 30.09)))) + (-(t1519 *
-    (ct_idx_141 + ((ct[182] * t1677) * 19.8))))) + (-(ct_idx_152_tmp *
-    ((t814_tmp * 23.17) + t866)))) + (-(ct[188] * (((((ct[185] + ct[429]) +
-    ct_idx_129) + ct_idx_144) + (-(t1106 * 0.85))) + (t1620 * 0.07))))) +
-                    (-(ct_idx_337 * (b_ct_idx_231 + ((ct[182] * t1849) * 73.0)))))
-                   + (t1314 * (((((ct[227] + (ct[362] * 0.07)) + ct_idx_139) +
-    ct_idx_143) + (-(t1106 * 0.32))) + (t1620 * 150.35)))) + (t1276 * (((((ct
-    [225] + (ct[362] * 0.85)) + ct_idx_127) + ct_idx_174) + (t1620 * 0.32)) +
-    (-(t1106 * 79.89))))) + (t1815 * (t1651 + ((ct[182] * t1036) * 73.0)))) +
-                (-((t1653 + (ct_idx_126_tmp * 73.0)) * ct_idx_262))) + (-((t1654
-    + (ct_idx_126_tmp * 150.0)) * ct_idx_262))) + (t1875 * (ct_idx_351 + ((ct
-    [182] * ((ct[298] * t1677) + (ct[237] * t1951_tmp))) * 33.71)))) +
-             (((((ct_idx_239_tmp * -25.53) + (-(t814_tmp * 25.53))) + t1795) + (
-    -(ct_idx_143_tmp * 10.5))) * ct_idx_152_tmp)) + (ct_idx_380 * (((ct_idx_239
-    + (-(t814_tmp * 10.5))) + t1809) + (-(ct_idx_143_tmp * 22.79))))) + (-(t2064
-             * (t1944 + ((ct[182] * ((ct[237] * t1849) + ((-ct[298]) * t1036))) *
-    150.0))))) + ((-t2071) * (t1940 + ((ct[182] * ((ct[298] * t1849) + (ct[237] *
-    t1036))) * 150.0)));
+  t1168 = ((((((((((((((((((((((((ct[142] + ct[143]) + t1168 * ct[421] * 61.0) +
+    t1168 * ct[554] * 61.0) - ct[188] * (ct[119] + ct[362])) - ct[326] * (((ct
+    [159] + t602) + ct[551]) + t920 * 1.4)) + (((ct[164] + ct[389]) - ct[585]) +
+    ct[666] * 1.4) * ct[349]) + ct[417] * (((ct[229] + ct[345]) - ct[585] * 1.4)
+    + ct[666])) + (((ct[218] + ct[372]) + ct[551] * 1.4) + t920) * ct_idx_202) -
+    ct[65] * (ct[182] * t1368 * 350.0 + ct_idx_687)) + -(ct[543] + ct[182] *
+    t921 * 350.0) * ct_idx_99) + t1314 * (ct_idx_146 + t1620 * 30.09)) - t1519 *
+                       (ct_idx_141 + ct[182] * t1677 * 19.8)) - ct_idx_152_tmp *
+                      (t814_tmp * 23.17 + t866)) - ct[188] * (((((ct[185] + ct
+    [429]) + ct_idx_129) + ct_idx_144) - t1106 * 0.85) + t1620 * 0.07)) -
+                    ct_idx_337 * (b_ct_idx_231 + ct[182] * t1849 * 73.0)) +
+                   t1314 * (((((ct[227] + ct[362] * 0.07) + ct_idx_139) +
+    ct_idx_143) - t1106 * 0.32) + t1620 * 150.35)) + t1276 * (((((ct[225] + ct
+    [362] * 0.85) + ct_idx_127) + ct_idx_174) + t1620 * 0.32) - t1106 * 79.89))
+                 + t1815 * (t1651 + ct[182] * t1036 * 73.0)) - (t1653 +
+    ct_idx_126_tmp * 73.0) * ct_idx_262) - (t1654 + ct_idx_126_tmp * 150.0) *
+               ct_idx_262) + t1875 * (ct_idx_351 + ct[182] * (ct[298] * t1677 +
+    ct[237] * t1951_tmp) * 33.71)) + (((ct_idx_239_tmp * -25.53 - t814_tmp *
+    25.53) + t1795) - ct_idx_143_tmp * 10.5) * ct_idx_152_tmp) + ct_idx_380 *
+            (((ct_idx_239 - t814_tmp * 10.5) + t1809) - ct_idx_143_tmp * 22.79))
+           - t2064 * (t1944 + ct[182] * (ct[237] * t1849 + -ct[298] * t1036) *
+                      150.0)) + -t2071 * (t1940 + ct[182] * (ct[298] * t1849 +
+    ct[237] * t1036) * 150.0);
 
   /* 'mass_mat_func:4851' et1 = (t25.*(t918-t1196+t15.*(t360+t22.*(t94-t413)).*(7.0./5.0)+t23.*(t189-t501))+t17.*t2014).*(t41.*t2051.*1.5e+2+t33.*t2089.*1.5e+2)+(t17.*(t918-t1196+t15.*(t360+t22.*(t94-t413)).*(7.0./5.0)+t23.*(t189-t501))-t25.*t2014).*(t33.*t2051.*1.5e+2-t41.*t2089.*1.5e+2)+t1680.*(t1457+t1485)+t1721.*(t360+t22.*(t94-t413))-(t189-t501).*(t480.*(7.0./5.0)+t1064-t30.*(t140-t513).*(7.0./5.0))+t2018.*(t850+t32.*t1652.*1.5e+2+t32.*t1831.*2.1e+2)+t2018.*(t849+t32.*t1652.*7.3e+1+t32.*t1831.*(5.11e+2./5.0))+t18.*t34+t445.*t581+t445.*t790+t569.*t883+t1469.*t1652.*3.5e+2; */
   /* 'mass_mat_func:4852' et2 = t1836.*t1954+t1824.*t1972+t569.*(t262+t590+t1418+t1419-t1442+t1443)+t862.*(t477.*(7.0./5.0)+t1020.*(7.0./5.0)+t1047)+(t918-t1196+t15.*(t360+t22.*(t94-t413)).*(7.0./5.0)+t23.*(t189-t501)).*(t1134.*7.3e+1-t1153.*7.3e+1-t1375.*(5.11e+2./5.0)+t1389.*(5.11e+2./5.0))-(t25.*t1680-t17.*t1836).*(t1858+t1869+t1958+t40.*t883.*(2.1e+1./2.0))+t1824.*(t1092-t1848+t1880+t1950)+t1680.*(t311+t652+t1374.*1.5035e+2+t1375.*(8.0./2.5e+1)-t1389.*(8.0./2.5e+1)+t1390.*1.5035e+2)+t1673.*(t309+t650+t1374.*(8.0./2.5e+1)+t1375.*7.989e+1-t1389.*7.989e+1+t1390.*(8.0./2.5e+1)); */
@@ -5414,37 +5335,34 @@ static void ft_2(const real_T ct[671], real_T mass_mat[9][9])
   /* 'mass_mat_func:4862' mt2 = [(t489.*2.1e+2-t582.*1.5e+2).*(t439-t474)+t184.*(t337+t338)+t14.*t30+t22.*t38+t791.*t1268+t863.*t1559+t184.*(t72.*(-8.0./2.5e+1)+t80.*1.5035e+2+t81.*1.5035e+2+t91.*(8.0./2.5e+1))-t274.*(t72.*(-7.989e+1)+t80.*(8.0./2.5e+1)+t81.*(8.0./2.5e+1)+t91.*7.989e+1)+t409.*(t72.*(5.11e+2./5.0)-t91.*(5.11e+2./5.0))+t982.*(t484.*2.1e+2+t587.*1.5e+2)+t16.*t274.*t1526+t16.*t32.*t184.*t306.*4.3708e+2+t24.*t40.*t184.*t306.*1.4308e+2+t16.*t32.*t274.*t367.*2.317e+1+t24.*t40.*t274.*t367.*(9.9e+1./5.0),t2171,t2155,t1933,t1526]; */
   /* 'mass_mat_func:4863' mt3 = [t2249,t2247,t2243,t2230,t2171,t1667+1.0,t1667,t1069,t536,t2251,t2248,t2244,t2218,t2155,t1667,t1667,t1069,t536,t2245,t2236,t2184,t2053,t1933,t1069,t1069,t17.*t33.*3.371e+1+t25.*t41.*2.279e+1+3.009e+1,t103,t2220,t2126,t1996,t1755,t1526,t536,t536,t103,2.553e+1]; */
   /* 'mass_mat_func:4864' mass_mat = reshape([mt1,mt2,mt3],9,9); */
-  t1620 = ct[262] + (ct[161] * (ct[644] - ct[299]));
+  t1620 = ct[262] + ct[161] * (ct[644] - ct[299]);
   t1106 = ct[146] - ct[357];
   t921 = ct[166] * t1106;
-  ct_idx_143_tmp = ((ct[636] - (t1165 * 1.4)) + ((ct[117] * t1620) * 1.4)) +
-    t921;
+  ct_idx_143_tmp = ((ct[636] - t1165 * 1.4) + ct[117] * t1620 * 1.4) + t921;
   t1036 = t1652 * ct[233];
   t814_tmp = t1831 * ct[233];
-  b_ct[0] = (((((((((((((((ct[177] * ct_idx_143_tmp) + (ct[134] * ct_idx_447)) *
-    (((ct[298] * t2051) * 150.0) + ((ct[237] * t2089) * 150.0))) + (((ct[134] *
-    ct_idx_143_tmp) - (ct_idx_447 * ct[177])) * (((ct[237] * t2051) * 150.0) -
-    ((ct[298] * t2089) * 150.0)))) + (ct_idx_318 * t2245_tmp)) + (ct_idx_338 *
-    t1620)) - (t1106 * (((ct[341] * 1.4) + t1064) - (e_t2254_tmp * 1.4)))) +
-                    (ct_idx_448 * (((-t815) + (t1036 * 150.0)) + (t814_tmp *
-    210.0)))) + (ct_idx_448 * (((-t814) + (t1036 * 73.0)) + (t814_tmp * 102.2))))
-                  + (ct[139] * ct[244])) + (ct[321] * ct[421])) + (ct[321] * ct
-    [554])) + (ct[409] * ct[618])) + ((t1469 * t1652) * 350.0)) +
-             (((((((((ct_idx_363 * ct_idx_425) + (ct_idx_357 * ct_idx_433)) +
-                    (ct[409] * ((((t2244_tmp + t1418) + t1419) - ct_idx_157) +
-    t1443))) + (ct[603] * (((ct[338] * 1.4) + (ct[12] * 1.4)) + t1047))) +
-                  (ct_idx_143_tmp * ((((ct_idx_85 * 73.0) - (ct_idx_98 * 73.0))
-    - (ct_idx_215 * 102.2)) + (ct_idx_224 * 102.2)))) - (((ct_idx_318 * ct[177])
-    - (ct[134] * ct_idx_363)) * b_t2245_tmp)) + (ct_idx_357 * (((ct_idx_54 -
-    ct_idx_370) + ct_idx_391) + t1950))) + (ct_idx_318 * ((((c_t2254_tmp +
-    (ct_idx_214 * 150.35)) + (ct_idx_215 * 0.32)) - (ct_idx_224 * 0.32)) +
-    (ct_idx_225 * 150.35)))) + (ct_idx_316 * ((((b_t2254_tmp + (ct_idx_214 *
-    0.32)) + (ct_idx_215 * 79.89)) - (ct_idx_224 * 79.89)) + (ct_idx_225 * 0.32)))))
-    + ((((((((ct_idx_85 * 350.0) - (ct_idx_98 * 350.0)) * (ct[636] + t921)) +
-           (t2147 * ((ct_idx_318 * ct[134]) + (ct_idx_363 * ct[177])))) +
-          (ct_idx_447 * ((ct_idx_690 + (ct_idx_290 * 73.0)) + (t2089_tmp * 102.2))))
-         - (ct[58] * f_t2254_tmp)) + ((((ct[0] * ct[47]) * ct[182]) * ct[187]) *
-         10.0)) + (((ct[0] * ct[147]) * ct[182]) * ct[255]));
+  b_ct[0] = (((((((((((((ct[177] * ct_idx_143_tmp + ct[134] * ct_idx_447) * (ct
+    [298] * t2051 * 150.0 + ct[237] * t2089 * 150.0) + (ct[134] * ct_idx_143_tmp
+    - ct_idx_447 * ct[177]) * (ct[237] * t2051 * 150.0 - ct[298] * t2089 * 150.0))
+                       + ct_idx_318 * t2245_tmp) + ct_idx_338 * t1620) - t1106 *
+                     ((ct[341] * 1.4 + t1064) - e_t2254_tmp * 1.4)) + ct_idx_448
+                    * ((-t815 + t1036 * 150.0) + t814_tmp * 210.0)) + ct_idx_448
+                   * ((-t814 + t1036 * 73.0) + t814_tmp * 102.2)) + ct[139] *
+                  ct[244]) + ct[321] * ct[421]) + ct[321] * ct[554]) + ct[409] *
+               ct[618]) + t1469 * t1652 * 350.0) + ((((((((ct_idx_363 *
+    ct_idx_425 + ct_idx_357 * ct_idx_433) + ct[409] * ((((t2244_tmp + t1418) +
+    t1419) - ct_idx_157) + t1443)) + ct[603] * ((ct[338] * 1.4 + ct[12] * 1.4) +
+    t1047)) + ct_idx_143_tmp * (((ct_idx_85 * 73.0 - ct_idx_98 * 73.0) -
+    ct_idx_215 * 102.2) + ct_idx_224 * 102.2)) - (ct_idx_318 * ct[177] - ct[134]
+    * ct_idx_363) * b_t2245_tmp) + ct_idx_357 * (((ct_idx_54 - ct_idx_370) +
+    ct_idx_391) + t1950)) + ct_idx_318 * ((((c_t2254_tmp + ct_idx_214 * 150.35)
+    + ct_idx_215 * 0.32) - ct_idx_224 * 0.32) + ct_idx_225 * 150.35)) +
+              ct_idx_316 * ((((b_t2254_tmp + ct_idx_214 * 0.32) + ct_idx_215 *
+    79.89) - ct_idx_224 * 79.89) + ct_idx_225 * 0.32))) + ((((((ct_idx_85 *
+    350.0 - ct_idx_98 * 350.0) * (ct[636] + t921) + t2147 * (ct_idx_318 * ct[134]
+    + ct_idx_363 * ct[177])) + ct_idx_447 * ((ct_idx_690 + ct_idx_290 * 73.0) +
+    t2089_tmp * 102.2)) - ct[58] * f_t2254_tmp) + ct[0] * ct[47] * ct[182] * ct
+    [187] * 10.0) + ct[0] * ct[147] * ct[182] * ct[255]);
   b_ct[1] = t1168;
   b_ct[2] = t955;
   b_ct[3] = t2257;
@@ -5456,27 +5374,26 @@ static void ft_2(const real_T ct[671], real_T mass_mat[9][9])
   b_ct[9] = t1168;
   ct_idx_143_tmp = t1544 * ct[233];
   t1036 = ct[233] * ct_idx_411_tmp;
-  b_ct[10] = (((((((((ct[550] * 350.0) - (ct[576] * 350.0)) * ct_idx_99) -
-                   (t1314 * ((((ct_idx_135 - (ct_idx_776 * 150.35)) -
-    (ct_idx_779 * 0.32)) - (t1023 * 150.35)) + (ct_idx_52_tmp * 0.32)))) -
-                  (t1276 * ((((t1091_tmp - (ct_idx_776 * 0.32)) - (ct_idx_779 *
-    79.89)) - (t1023 * 0.32)) + (ct_idx_52_tmp * 79.89)))) + (ct_idx_262 * ((ct
-    [294] - (ct_idx_143_tmp * 210.0)) + (t1036 * 150.0)))) + (ct_idx_262 * ((ct
-    [273] - (ct_idx_143_tmp * 102.2)) + (t1036 * 73.0)))) + (t1314 * t1376)) +
-              ((((((((((((((((((ct_idx_337 * ((((ct[549] * 73.0) + (ct[579] *
-    73.0)) + (ct_idx_779 * 102.2)) - (ct_idx_52_tmp * 102.2))) + (ct[47] * ct
-    [187])) + ((ct[147] * ct[255]) * 10.0)) + (ct[188] * ct[289])) + (ct_idx_220
-    * ct[417])) + (t1519 * t1732)) + (t1875 * t2016)) + (ct_idx_380 * t2125)) +
-                        (ct[188] * ((((((ct[530] * 117.0) + ct[180]) + ct_idx_13)
-    + ct_idx_14) + ct_idx_43) + ct_idx_52))) + (ct[326] * (((ct[121] * -1.4) +
-    (ct[366] * 1.4)) + ct[457]))) + (ct[349] * (((ct[129] * 1.4) + (ct[363] *
-    1.4)) + ct[485]))) + (t1815 * ((ct[272] + (b_ct_idx_411_tmp * 102.2)) -
-    ((ct[293] * ct_idx_411_tmp) * 73.0)))) - (ct_idx_223 * ct_idx_202)) + (t1777
-    * ct_idx_152_tmp)) + (t2126 * ct_idx_152_tmp)) + (t2064 * (((ct_idx_382 *
-    ct[237]) * 150.0) + ((ct_idx_411 * ct[298]) * 150.0)))) + (t2071 *
-    (((ct_idx_382 * ct[298]) * 150.0) - ((ct_idx_411 * ct[237]) * 150.0)))) +
-               (ct[65] * ((ct[549] * 350.0) + (ct[579] * 350.0))))) + ((((ct[155]
-    * ct[261]) * ct[303]) * ct[486]) * 1.306071E+6);
+  b_ct[10] = (((((((ct[550] * 350.0 - ct[576] * 350.0) * ct_idx_99 - t1314 *
+                   ((((ct_idx_135 - ct_idx_776 * 150.35) - ct_idx_779 * 0.32) -
+                     t1023 * 150.35) + ct_idx_52_tmp * 0.32)) - t1276 *
+                  ((((t1091_tmp - ct_idx_776 * 0.32) - ct_idx_779 * 79.89) -
+                    t1023 * 0.32) + ct_idx_52_tmp * 79.89)) + ct_idx_262 * ((ct
+    [294] - ct_idx_143_tmp * 210.0) + t1036 * 150.0)) + ct_idx_262 * ((ct[273] -
+    ct_idx_143_tmp * 102.2) + t1036 * 73.0)) + t1314 * t1376) +
+              (((((((((((((((((ct_idx_337 * (((ct[549] * 73.0 + ct[579] * 73.0)
+    + ct_idx_779 * 102.2) - ct_idx_52_tmp * 102.2) + ct[47] * ct[187]) + ct[147]
+    * ct[255] * 10.0) + ct[188] * ct[289]) + ct_idx_220 * ct[417]) + t1519 *
+    t1732) + t1875 * t2016) + ct_idx_380 * t2125) + ct[188] * (((((ct[530] *
+    117.0 + ct[180]) + ct_idx_13) + ct_idx_14) + ct_idx_43) + ct_idx_52)) + ct
+                       [326] * ((ct[121] * -1.4 + ct[366] * 1.4) + ct[457])) +
+                      ct[349] * ((ct[129] * 1.4 + ct[363] * 1.4) + ct[485])) +
+                     t1815 * ((ct[272] + b_ct_idx_411_tmp * 102.2) - ct[293] *
+    ct_idx_411_tmp * 73.0)) - ct_idx_223 * ct_idx_202) + t1777 * ct_idx_152_tmp)
+                  + t2126 * ct_idx_152_tmp) + t2064 * (ct_idx_382 * ct[237] *
+    150.0 + ct_idx_411 * ct[298] * 150.0)) + t2071 * (ct_idx_382 * ct[298] *
+    150.0 - ct_idx_411 * ct[237] * 150.0)) + ct[65] * (ct[549] * 350.0 + ct[579]
+    * 350.0))) + ct[155] * ct[261] * ct[303] * ct[486] * 1.306071E+6;
   b_ct[11] = t2256;
   b_ct[12] = t1630;
   b_ct[13] = t2253;
@@ -5487,25 +5404,24 @@ static void ft_2(const real_T ct[671], real_T mass_mat[9][9])
   b_ct[18] = t955;
   b_ct[19] = t2256;
   ct_idx_143_tmp = ct[158] * ct[270];
-  b_ct[20] = ((((((((((((((((-ct_idx_255) * t2184_tmp) + (ct[624] * b_t2184_tmp))
-    + (t2243_tmp * ((((ct[172] + (ct[342] * 0.32)) + (ct[346] * 79.89)) - (ct
-    [368] * 79.89)) + (ct[375] * 0.32)))) - (((ct_idx_216 * 150.0) - (t1642 *
-    150.0)) * t867)) + (b_ct_idx_254 * (((ct[279] - ct_idx_119) + ct_idx_172) +
-    t1409))) + (ct_idx_143_tmp * 1.306071E+6)) + ((ct[310] * ct[330]) * 21350.0))
-                     + (ct[189] * ct[505])) + (ct[239] * ct[542])) + (ct[59] *
-    ct_idx_242)) + (ct_idx_292 * ct_idx_356)) + ((ct_idx_362 * ct_idx_415) *
-    150.0)) + (ct_idx_231 * ((ct[197] + (ct[465] * 150.0)) + (t1624_tmp * 210.0))))
-               + (t1398 * ((ct[154] + (ct[470] * 73.0)) + (t1620_tmp * 102.2))))
-              + (ct_idx_231 * ((ct[176] + (ct[465] * 73.0)) + (t1624_tmp * 102.2))))
-    + ((((((((((-ct_idx_263) * ((t1557 - (ct[346] * 102.2)) + (ct[368] * 102.2)))
-              - (ct[318] * ((ct[106] * 21350.0) - (ct[125] * 21350.0)))) + (ct
-              [624] * ((((ct[174] + (ct[342] * 150.35)) + (ct[346] * 0.32)) -
-                        (ct[368] * 0.32)) + (ct[375] * 150.35)))) +
-            (b_ct_idx_254 * b_t2244_tmp)) + (t1023_tmp * ((((ct[138] + ct[431])
-    + ct[434]) - ct_idx_607) + t662))) + ((t712 * (((ct[494] * 1.4) - (ct[131] *
-    1.4)) + ((ct[206] * ct[214]) * 61.0))) * 61.0)) + ((t1249 * (((ct[544] * 1.4)
-             + (ct[122] * 1.4)) + ((ct[206] * ct[277]) * 61.0))) * 61.0)) +
-        ((t1023_tmp * ct[206]) * ct[261])) + 1.0);
+  b_ct[20] = ((((((((((((((-ct_idx_255 * t2184_tmp + ct[624] * b_t2184_tmp) +
+    t2243_tmp * ((((ct[172] + ct[342] * 0.32) + ct[346] * 79.89) - ct[368] *
+                  79.89) + ct[375] * 0.32)) - (ct_idx_216 * 150.0 - t1642 *
+    150.0) * t867) + b_ct_idx_254 * (((ct[279] - ct_idx_119) + ct_idx_172) +
+    t1409)) + ct_idx_143_tmp * 1.306071E+6) + ct[310] * ct[330] * 21350.0) + ct
+                     [189] * ct[505]) + ct[239] * ct[542]) + ct[59] * ct_idx_242)
+                  + ct_idx_292 * ct_idx_356) + ct_idx_362 * ct_idx_415 * 150.0)
+                + ct_idx_231 * ((ct[197] + ct[465] * 150.0) + t1624_tmp * 210.0))
+               + t1398 * ((ct[154] + ct[470] * 73.0) + t1620_tmp * 102.2)) +
+              ct_idx_231 * ((ct[176] + ct[465] * 73.0) + t1624_tmp * 102.2)) +
+    ((((((((-ct_idx_263 * ((t1557 - ct[346] * 102.2) + ct[368] * 102.2) - ct[318]
+            * (ct[106] * 21350.0 - ct[125] * 21350.0)) + ct[624] * ((((ct[174] +
+    ct[342] * 150.35) + ct[346] * 0.32) - ct[368] * 0.32) + ct[375] * 150.35)) +
+          b_ct_idx_254 * b_t2244_tmp) + t1023_tmp * ((((ct[138] + ct[431]) + ct
+            [434]) - ct_idx_607) + t662)) + t712 * ((ct[494] * 1.4 - ct[131] *
+          1.4) + ct[206] * ct[214] * 61.0) * 61.0) + t1249 * ((ct[544] * 1.4 +
+         ct[122] * 1.4) + ct[206] * ct[277] * 61.0) * 61.0) + t1023_tmp * ct[206]
+      * ct[261]) + 1.0);
   b_ct[21] = t2252;
   b_ct[22] = t2250;
   b_ct[23] = t2243;
@@ -5517,18 +5433,17 @@ static void ft_2(const real_T ct[671], real_T mass_mat[9][9])
   b_ct[29] = t2252;
   t1036 = ct[124] * ct[233];
   t814_tmp = ct[171] * ct[293];
-  b_ct[30] = ((((((((((((((((-ct[268]) * t2053_tmp) - (ct[158] * (((((-ct[469])
-    + ct[208]) + ct[212]) + ct[213]) - ct[228]))) + ct_idx_143_tmp) + (t1024 *
-    ct[371])) + (ct_idx_327 * ct[410])) - (ct_idx_72 * t1534)) + (ct_idx_90 *
-    ((ct[520] * 150.0) - (t1358_tmp * 210.0)))) + (ct_idx_103 * ((ct[516] *
-    150.0) + (ct_idx_203_tmp * 210.0)))) + (ct[410] * t2218_tmp)) - (t1754 *
-    ct_idx_101)) + (ct[327] * ((ct[115] * 102.2) + (ct[116] * 102.2)))) - (ct
-    [268] * (((((ct[106] * 150.35) + (ct[115] * 0.32)) + (ct[116] * 0.32)) -
-              (ct[125] * 150.35)) + ct[135]))) + (ct[231] * (((((ct[106] * 0.32)
-    + (ct[115] * 79.89)) + (ct[116] * 79.89)) - (ct[125] * 0.32)) + ct[133]))) +
-               ((t712 * ct[206]) * ct[214])) + ((t1249 * ct[206]) * ct[277])) +
-    ((((t1036 * ct[268]) * ct[359]) * -437.08) - (((t814_tmp * ct[268]) * ct[359])
-      * 143.08));
+  b_ct[30] = ((((((((((((((-ct[268] * t2053_tmp - ct[158] * ((((-ct[469] + ct
+    [208]) + ct[212]) + ct[213]) - ct[228])) + ct_idx_143_tmp) + t1024 * ct[371])
+                        + ct_idx_327 * ct[410]) - ct_idx_72 * t1534) + ct_idx_90
+                      * (ct[520] * 150.0 - t1358_tmp * 210.0)) + ct_idx_103 *
+                     (ct[516] * 150.0 + ct_idx_203_tmp * 210.0)) + ct[410] *
+                    t2218_tmp) - t1754 * ct_idx_101) + ct[327] * (ct[115] *
+    102.2 + ct[116] * 102.2)) - ct[268] * ((((ct[106] * 150.35 + ct[115] * 0.32)
+    + ct[116] * 0.32) - ct[125] * 150.35) + ct[135])) + ct[231] * ((((ct[106] *
+    0.32 + ct[115] * 79.89) + ct[116] * 79.89) - ct[125] * 0.32) + ct[133])) +
+               t712 * ct[206] * ct[214]) + t1249 * ct[206] * ct[277]) + (t1036 *
+    ct[268] * ct[359] * -437.08 - t814_tmp * ct[268] * ct[359] * 143.08);
   b_ct[31] = t2246;
   b_ct[32] = ct_idx_488;
   b_ct[33] = t2218;
@@ -5538,16 +5453,16 @@ static void ft_2(const real_T ct[671], real_T mass_mat[9][9])
   b_ct[37] = t2253;
   b_ct[38] = t2250;
   b_ct[39] = t2246;
-  b_ct[40] = ((((((((((((((((ct[348] * 210.0) - (ct[422] * 150.0)) * b_t2246_tmp)
-    + (ct[141] * t1933_tmp)) + (ct[107] * ct[214])) + (ct[161] * ct[277])) +
-                       (ct_idx_159 * ct[555])) + (t1559 * ct[604])) + (ct[141] *
-    ((((ct[510] * -0.32) + (ct[560] * 150.35)) + (ct[567] * 150.35)) + (ct[631] *
-    0.32)))) - (ct[190] * ((((ct[510] * -79.89) + (ct[560] * 0.32)) + (ct[567] *
-    0.32)) + (ct[631] * 79.89)))) + (ct[297] * ((ct[510] * 102.2) - (ct[631] *
-    102.2)))) + (ct[663] * ((ct[344] * 210.0) + (ct[424] * 150.0)))) +
-                 (t2246_tmp * ct_idx_271)) + (((t1036 * ct[141]) * ct[220]) *
-    437.08)) + (((t814_tmp * ct[141]) * ct[220]) * 143.08)) + (((t1036 * ct[190])
-    * ct[267]) * 23.17)) + (((t814_tmp * ct[190]) * ct[267]) * 19.8);
+  b_ct[40] = ((((((((((((((ct[348] * 210.0 - ct[422] * 150.0) * b_t2246_tmp +
+    ct[141] * t1933_tmp) + ct[107] * ct[214]) + ct[161] * ct[277]) + ct_idx_159 *
+                       ct[555]) + t1559 * ct[604]) + ct[141] * (((ct[510] *
+    -0.32 + ct[560] * 150.35) + ct[567] * 150.35) + ct[631] * 0.32)) - ct[190] *
+                    (((ct[510] * -79.89 + ct[560] * 0.32) + ct[567] * 0.32) +
+                     ct[631] * 79.89)) + ct[297] * (ct[510] * 102.2 - ct[631] *
+    102.2)) + ct[663] * (ct[344] * 210.0 + ct[424] * 150.0)) + t2246_tmp *
+                 ct_idx_271) + t1036 * ct[141] * ct[220] * 437.08) + t814_tmp *
+               ct[141] * ct[220] * 143.08) + t1036 * ct[190] * ct[267] * 23.17)
+    + t814_tmp * ct[190] * ct[267] * 19.8;
   b_ct[41] = ct_idx_481;
   b_ct[42] = t2155;
   b_ct[43] = t1933;
@@ -5577,8 +5492,7 @@ static void ft_2(const real_T ct[671], real_T mass_mat[9][9])
   b_ct[67] = t1933;
   b_ct[68] = ct[34];
   b_ct[69] = ct[34];
-  b_ct[70] = (((ct[134] * ct[237]) * 33.71) + ((ct[177] * ct[298]) * 22.79)) +
-    30.09;
+  b_ct[70] = (ct[134] * ct[237] * 33.71 + ct[177] * ct[298] * 22.79) + 30.09;
   b_ct[71] = ct[17];
   b_ct[72] = t2220;
   b_ct[73] = t2126;
@@ -5589,28 +5503,23 @@ static void ft_2(const real_T ct[671], real_T mass_mat[9][9])
   b_ct[78] = ct[385];
   b_ct[79] = ct[17];
   b_ct[80] = 25.53;
-  for (b_i = 0; b_i < 9; b_i++) {
+  for (i = 0; i < 9; i++) {
     for (i1 = 0; i1 < 9; i1++) {
-      mass_mat[b_i][i1] = b_ct[i1 + (9 * b_i)];
+      mass_mat[i][i1] = b_ct[i1 + 9 * i];
     }
   }
 }
 
 /*
  * function mass_mat = mass_mat_func(in1)
- *
- * MASS_MAT_FUNC
- *     MASS_MAT = MASS_MAT_FUNC(IN1)
- *
- * Arguments    : const real_T in1[9]
- *                real_T mass_mat[9][9]
- * Return Type  : void
  */
 static void mass_mat_func(const real_T in1[9], real_T mass_mat[9][9])
 {
   real_T ct[671];
   real_T b_ct_tmp;
   real_T b_t270_tmp;
+  real_T b_t273_tmp;
+  real_T b_t519_tmp;
   real_T c_ct_tmp;
   real_T ct_idx_116;
   real_T ct_idx_133;
@@ -5618,6 +5527,7 @@ static void mass_mat_func(const real_T in1[9], real_T mass_mat[9][9])
   real_T ct_idx_146;
   real_T ct_idx_160;
   real_T ct_idx_161;
+  real_T ct_idx_161_tmp;
   real_T ct_idx_163;
   real_T ct_idx_164;
   real_T ct_idx_165;
@@ -5635,7 +5545,6 @@ static void mass_mat_func(const real_T in1[9], real_T mass_mat[9][9])
   real_T ct_idx_240;
   real_T ct_idx_241;
   real_T ct_idx_243;
-  real_T ct_idx_248;
   real_T ct_idx_249;
   real_T ct_idx_250;
   real_T ct_idx_251;
@@ -5643,18 +5552,15 @@ static void mass_mat_func(const real_T in1[9], real_T mass_mat[9][9])
   real_T ct_idx_259_tmp;
   real_T ct_idx_260;
   real_T ct_idx_262;
-  real_T ct_idx_273;
+  real_T ct_idx_273_tmp;
   real_T ct_idx_276;
-  real_T ct_idx_279;
   real_T ct_idx_280;
-  real_T ct_idx_282;
   real_T ct_idx_284;
   real_T ct_idx_284_tmp;
   real_T ct_idx_284_tmp_tmp;
   real_T ct_idx_285;
-  real_T ct_idx_287;
+  real_T ct_idx_287_tmp;
   real_T ct_idx_288;
-  real_T ct_idx_292;
   real_T ct_idx_295;
   real_T ct_idx_299;
   real_T ct_idx_305;
@@ -5683,7 +5589,9 @@ static void mass_mat_func(const real_T in1[9], real_T mass_mat[9][9])
   real_T i_ct_tmp;
   real_T j_ct_tmp;
   real_T k_ct_tmp;
+  real_T l_ct_tmp;
   real_T m_ct_tmp;
+  real_T n_ct_tmp;
   real_T o_ct_tmp;
   real_T p_ct_tmp;
   real_T t102;
@@ -5701,7 +5609,7 @@ static void mass_mat_func(const real_T in1[9], real_T mass_mat[9][9])
   real_T t140;
   real_T t142;
   real_T t144;
-  real_T t147;
+  real_T t147_tmp;
   real_T t14_tmp;
   real_T t152;
   real_T t153;
@@ -5745,15 +5653,14 @@ static void mass_mat_func(const real_T in1[9], real_T mass_mat[9][9])
   real_T t264;
   real_T t270_tmp;
   real_T t271;
-  real_T t273;
   real_T t273_tmp;
   real_T t274_tmp;
   real_T t282;
   real_T t285;
-  real_T t292;
-  real_T t293;
+  real_T t292_tmp;
+  real_T t293_tmp;
   real_T t315;
-  real_T t318;
+  real_T t318_tmp;
   real_T t327_tmp;
   real_T t328;
   real_T t328_tmp;
@@ -5764,7 +5671,7 @@ static void mass_mat_func(const real_T in1[9], real_T mass_mat[9][9])
   real_T t339;
   real_T t360_tmp;
   real_T t363;
-  real_T t365;
+  real_T t365_tmp;
   real_T t374;
   real_T t385;
   real_T t391;
@@ -5783,6 +5690,7 @@ static void mass_mat_func(const real_T in1[9], real_T mass_mat[9][9])
   real_T t451;
   real_T t452;
   real_T t457;
+  real_T t457_tmp;
   real_T t46_tmp;
   real_T t470;
   real_T t472;
@@ -5790,12 +5698,11 @@ static void mass_mat_func(const real_T in1[9], real_T mass_mat[9][9])
   real_T t478;
   real_T t479;
   real_T t47_tmp;
-  real_T t482;
+  real_T t482_tmp;
   real_T t483;
-  real_T t484;
+  real_T t484_tmp;
   real_T t485;
   real_T t486;
-  real_T t487;
   real_T t489;
   real_T t48_tmp;
   real_T t495;
@@ -5806,7 +5713,7 @@ static void mass_mat_func(const real_T in1[9], real_T mass_mat[9][9])
   real_T t50_tmp;
   real_T t510;
   real_T t518;
-  real_T t519;
+  real_T t519_tmp;
   real_T t52_tmp;
   real_T t535;
   real_T t536;
@@ -5814,11 +5721,9 @@ static void mass_mat_func(const real_T in1[9], real_T mass_mat[9][9])
   real_T t54;
   real_T t544;
   real_T t545;
-  real_T t546;
   real_T t549;
   real_T t54_tmp;
   real_T t550;
-  real_T t554;
   real_T t556;
   real_T t557;
   real_T t56;
@@ -5826,7 +5731,6 @@ static void mass_mat_func(const real_T in1[9], real_T mass_mat[9][9])
   real_T t577;
   real_T t577_tmp;
   real_T t59_tmp;
-  real_T t622;
   real_T t623;
   real_T t633;
   real_T t649;
@@ -5860,13 +5764,15 @@ static void mass_mat_func(const real_T in1[9], real_T mass_mat[9][9])
   real_T t86_tmp;
   real_T t88;
   real_T t882;
+  real_T t89;
   real_T t898;
-  real_T t89_tmp;
   real_T t92;
   real_T t94;
   real_T t97_tmp;
   real_T t98_tmp;
 
+  /* MASS_MAT_FUNC */
+  /*     MASS_MAT = MASS_MAT_FUNC(IN1) */
   /*     This function was generated by the Symbolic Math Toolbox version 8.7. */
   /*     20-May-2021 12:17:41 */
   /* 'mass_mat_func:9' theta2 = in1(2,:); */
@@ -5987,7 +5893,7 @@ static void mass_mat_func(const real_T in1[9], real_T mass_mat[9][9])
 
   /* 'mass_mat_func:70' t55 = t12.*t19.*t21; */
   /* 'mass_mat_func:71' t56 = t14.*t19.*t20; */
-  t56 = (t14_tmp * t19_tmp) * t20_tmp;
+  t56 = t14_tmp * t19_tmp * t20_tmp;
 
   /* 'mass_mat_func:72' t57 = t14.*t20.*t21; */
   /* 'mass_mat_func:73' t58 = t13.*t20.*t24; */
@@ -5998,7 +5904,7 @@ static void mass_mat_func(const real_T in1[9], real_T mass_mat[9][9])
   /* 'mass_mat_func:78' t85 = t10.*t11.*t12; */
   /* 'mass_mat_func:79' t93 = t10.*t11.*t20; */
   /* 'mass_mat_func:80' t94 = t10.*t13.*t19; */
-  t94 = (t10_tmp * t13_tmp) * t19_tmp;
+  t94 = t10_tmp * t13_tmp * t19_tmp;
 
   /* 'mass_mat_func:81' t95 = t12.*t13.*t19; */
   /* 'mass_mat_func:82' t96 = t13.*t16.*t20; */
@@ -6054,7 +5960,7 @@ static void mass_mat_func(const real_T in1[9], real_T mass_mat[9][9])
   t88 = t19_tmp * t21_tmp;
 
   /* 'mass_mat_func:108' t89 = t36.*t38; */
-  t89_tmp = t20_tmp * t22_tmp;
+  t89 = t20_tmp * t22_tmp;
 
   /* 'mass_mat_func:109' t90 = t37.*t40; */
   /* 'mass_mat_func:110' t91 = t38.*t39; */
@@ -6086,7 +5992,7 @@ static void mass_mat_func(const real_T in1[9], real_T mass_mat[9][9])
   /* 'mass_mat_func:126' t114 = t14.*t29.*t38; */
   /* 'mass_mat_func:127' t115 = t21.*t29.*t36; */
   /* 'mass_mat_func:128' t118 = t29.*t34.*6.1e+1; */
-  t118_tmp = (t13_tmp * t18_tmp) * 61.0;
+  t118_tmp = t13_tmp * t18_tmp * 61.0;
 
   /* 'mass_mat_func:129' t121 = -t85; */
   /* 'mass_mat_func:130' t123 = t11.*t43.*6.1e+1; */
@@ -6140,14 +6046,14 @@ static void mass_mat_func(const real_T in1[9], real_T mass_mat[9][9])
   /* 'mass_mat_func:155' t251 = t34.*t37.*2.135e+4; */
   /* 'mass_mat_func:156' t270 = t45+t93; */
   t270_tmp = t10_tmp * t11_tmp;
-  b_t270_tmp = (t12_tmp * t18_tmp) + (t270_tmp * t20_tmp);
+  b_t270_tmp = t12_tmp * t18_tmp + t270_tmp * t20_tmp;
 
   /* 'mass_mat_func:157' t271 = t46+t95; */
-  t271 = t46_tmp + ((t12_tmp * t13_tmp) * t19_tmp);
+  t271 = t46_tmp + t12_tmp * t13_tmp * t19_tmp;
 
   /* 'mass_mat_func:158' t273 = t47+t57; */
   t273_tmp = t78_tmp * t21_tmp;
-  t273 = t47_tmp + t273_tmp;
+  b_t273_tmp = t47_tmp + t273_tmp;
 
   /* 'mass_mat_func:159' t291 = t24.*t40.*2.317e+1; */
   /* 'mass_mat_func:160' t336 = t32.*t33.*2.279e+1; */
@@ -6195,7 +6101,7 @@ static void mass_mat_func(const real_T in1[9], real_T mass_mat[9][9])
   /* 'mass_mat_func:186' t145 = t37.*t70; */
   /* 'mass_mat_func:187' t146 = t28.*t79; */
   /* 'mass_mat_func:188' t147 = t36.*t71; */
-  t147 = t20_tmp * t71;
+  t147_tmp = t20_tmp * t71;
 
   /* 'mass_mat_func:189' t148 = t29.*t80; */
   /* 'mass_mat_func:190' t149 = t29.*t81; */
@@ -6209,7 +6115,7 @@ static void mass_mat_func(const real_T in1[9], real_T mass_mat[9][9])
 
   /* 'mass_mat_func:195' t154 = t28.*t88; */
   /* 'mass_mat_func:196' t155 = t27.*t89; */
-  t155 = t11_tmp * t89_tmp;
+  t155 = t11_tmp * t89;
 
   /* 'mass_mat_func:197' t156 = t35.*t78; */
   t156 = t19_tmp * t78_tmp;
@@ -6230,7 +6136,7 @@ static void mass_mat_func(const real_T in1[9], real_T mass_mat[9][9])
   /* 'mass_mat_func:205' t164 = t40.*t84; */
   /* 'mass_mat_func:206' t165 = t35.*t89; */
   /* 'mass_mat_func:207' t166 = t37.*t89; */
-  t166 = t21_tmp * t89_tmp;
+  t166 = t21_tmp * t89;
 
   /* 'mass_mat_func:208' t167 = t37.*t91; */
   /* 'mass_mat_func:209' t168 = t40.*t92; */
@@ -6279,16 +6185,16 @@ static void mass_mat_func(const real_T in1[9], real_T mass_mat[9][9])
   /* 'mass_mat_func:246' t269 = t70.*t88; */
   /* 'mass_mat_func:247' t272 = t77.*t88; */
   /* 'mass_mat_func:248' t274 = t44+t64; */
-  t274_tmp = t44_tmp + (-t53_tmp);
+  t274_tmp = t44_tmp - t53_tmp;
 
   /* 'mass_mat_func:249' t281 = t32.*t72.*(2.1e+1./2.0); */
   /* 'mass_mat_func:250' t283 = t33.*t82.*(2.1e+1./2.0); */
   /* 'mass_mat_func:251' t286 = t32.*t91.*(2.1e+1./2.0); */
   /* 'mass_mat_func:252' t292 = t17.*t184; */
-  t292 = t17_tmp * t184_tmp;
+  t292_tmp = t17_tmp * t184_tmp;
 
   /* 'mass_mat_func:253' t293 = t25.*t184; */
-  t293 = t25_tmp * t184_tmp;
+  t293_tmp = t25_tmp * t184_tmp;
 
   /* 'mass_mat_func:254' t295 = t27.*t70.*(4.27e+2./5.0); */
   /* 'mass_mat_func:255' t302 = t40.*t72.*(9.9e+1./5.0); */
@@ -6303,25 +6209,25 @@ static void mass_mat_func(const real_T in1[9], real_T mass_mat[9][9])
 
   /* 'mass_mat_func:262' t316 = t40.*t91.*(9.9e+1./5.0); */
   /* 'mass_mat_func:263' t318 = t97+t98; */
-  t318 = t97_tmp + t98_tmp;
+  t318_tmp = t97_tmp + t98_tmp;
 
   /* 'mass_mat_func:264' t321 = t32.*t36.*t69.*6.1e+1; */
   /* 'mass_mat_func:265' t325 = t75.*t78.*6.1e+1; */
   /* 'mass_mat_func:266' t327 = t51+t121; */
-  t327_tmp = t1084 + (-(t270_tmp * t12_tmp));
+  t327_tmp = t1084 - t270_tmp * t12_tmp;
 
   /* 'mass_mat_func:267' t328 = t42+t104; */
   t328_tmp = t12_tmp * t19_tmp;
-  t328 = t42_tmp + (-(t328_tmp * t21_tmp));
+  t328 = t42_tmp - t328_tmp * t21_tmp;
 
   /* 'mass_mat_func:268' t331 = t75.*t89.*6.1e+1; */
   /* 'mass_mat_func:269' t332 = t78.*t88.*6.1e+1; */
   /* 'mass_mat_func:270' t333 = t36.*t40.*t76.*6.1e+1; */
-  t333 = (t195_tmp * t76) * 61.0;
+  t333 = t195_tmp * t76 * 61.0;
 
   /* 'mass_mat_func:271' t334 = t43+t108; */
   t334_tmp = t20_tmp * t21_tmp;
-  t334 = t43_tmp + (-(t334_tmp * t22_tmp));
+  t334 = t43_tmp - t334_tmp * t22_tmp;
 
   /* 'mass_mat_func:272' t335 = t88.*t89.*6.1e+1; */
   /* 'mass_mat_func:273' t337 = t80.*3.009e+1; */
@@ -6341,7 +6247,7 @@ static void mass_mat_func(const real_T in1[9], real_T mass_mat[9][9])
 
   /* 'mass_mat_func:282' t364 = t15.*t273; */
   /* 'mass_mat_func:283' t365 = t23.*t273; */
-  t365 = t23_tmp * t273;
+  t365_tmp = t23_tmp * b_t273_tmp;
 
   /* 'mass_mat_func:284' t370 = t71.*t80.*(2.1e+1./2.0); */
   /* 'mass_mat_func:285' t371 = t71.*t81.*(2.1e+1./2.0); */
@@ -6372,12 +6278,13 @@ static void mass_mat_func(const real_T in1[9], real_T mass_mat[9][9])
   /* 'mass_mat_func:302' t418 = -t375; */
   /* 'mass_mat_func:303' t422 = t21.*t36.*t69.*1.306071e+6; */
   /* 'mass_mat_func:304' t433 = t62+t200; */
-  t433 = t118_tmp + ((t20_tmp * t54) * 61.0);
+  t433 = t118_tmp + t20_tmp * t54 * 61.0;
 
   /* 'mass_mat_func:305' t457 = t130+t194; */
   t1084 = t11_tmp * t47_tmp;
-  t518 = t78_tmp * t46_tmp;
-  t457 = (t1084 * 61.0) + (t518 * 61.0);
+  t510 = t78_tmp * t46_tmp;
+  t457_tmp = t510 * 61.0;
+  t457 = t1084 * 61.0 + t457_tmp;
 
   /* 'mass_mat_func:306' t460 = t71.*t80.*2.317e+1; */
   /* 'mass_mat_func:307' t461 = t71.*t81.*2.317e+1; */
@@ -6599,59 +6506,56 @@ static void mass_mat_func(const real_T in1[9], real_T mass_mat[9][9])
   /* 'mass_mat_func:507' t320 = t26.*t214; */
   /* 'mass_mat_func:508' t324 = t26.*t224; */
   /* 'mass_mat_func:509' mass_mat = ft_1({t10,t1000,t1004,t1007,t101,t1014,t102,t103,t105,t106,t107,t11,t1124,t113,t116,t117,t118,t119,t120,t124,t125,t127,t129,t13,t133,t136,t138,t14,t140,t143,t144,t146,t147,t148,t149,t15,t150,t152,t153,t155,t156,t158,t159,t16,t160,t165,t166,t169,t17,t170,t171,t174,t175,t176,t178,t18,t180,t183,t184,t185,t186,t187,t188,t189,t19,t190,t191,t193,t195,t196,t197,t198,t199,t20,t202,t203,t206,t207,t208,t209,t21,t210,t211,t212,t213,t214,t215,t216,t217,t218,t219,t22,t220,t221,t222,t223,t224,t225,t226,t227,t229,t23,t230,t231,t233,t234,t235,t236,t238,t239,t24,t240,t241,t242,t243,t246,t249,t25,t251,t252,t253,t254,t255,t256,t257,t258,t259,t26,t260,t261,t262,t264,t265,t266,t267,t268,t27,t271,t273,t274,t275,t276,t277,t278,t279,t28,t280,t281,t282,t283,t284,t285,t287,t288,t289,t29,t290,t291,t292,t293,t294,t295,t296,t297,t298,t299,t30,t300,t301,t302,t303,t304,t305,t306,t307,t308,t309,t31,t310,t311,t312,t313,t314,t315,t317,t318,t319,t32,t321,t322,t323,t324,t325,t329,t33,t330,t332,t333,t334,t336,t337,t338,t339,t34,t340,t35,t350,t351,t354,t357,t358,t359,t36,t360,t361,t362,t363,t364,t365,t366,t367,t368,t37,t372,t373,t374,t376,t377,t378,t379,t38,t380,t382,t384,t385,t388,t389,t39,t391,t392,t393,t394,t397,t398,t399,t40,t400,t401,t402,t403,t404,t405,t407,t408,t409,t41,t410,t411,t412,t413,t414,t415,t416,t417,t418,t419,t42,t420,t421,t422,t424,t426,t428,t429,t430,t431,t434,t435,t436,t437,t438,t439,t440,t442,t445,t456,t457,t458,t459,t460,t461,t464,t466,t467,t469,t471,t473,t477,t480,t491,t493,t494,t499,t50,t500,t501,t508,t52,t528,t529,t532,t533,t534,t536,t537,t54,t56,t561,t562,t563,t568,t58,t586,t593,t594,t598,t60,t601,t606,t607,t609,t611,t612,t626,t628,t63,t646,t663,t67,t671,t678,t68,t688,t689,t69,t690,t70,t700,t701,t71,t716,t72,t720,t721,t73,t75,t77,t784,t787,t79,t80,t808,t81,t810,t82,t827,t88,t89,t90,t91,t92,t94,t96,t971,t972,t977}); */
-  ct_idx_45 = t19_tmp * t89_tmp;
+  ct_idx_45 = t19_tmp * t89;
   ct_idx_47 = -(t21_tmp * 0.85);
   ct_idx_49 = -(t21_tmp * 0.07);
   ct_idx_72 = t50_tmp * 4453.0;
-  ct_idx_87 = t147 * 61.0;
+  ct_idx_87 = t147_tmp * 61.0;
   ct_idx_116 = -(t52_tmp * 4453.0);
   ct_idx_133 = t10_tmp * t135;
   ct_idx_135 = t22_tmp * t140;
   ct_idx_146 = -(t52_tmp * 9150.0);
   ct_idx_160 = t86_tmp * 0.07;
-  t510 = t11_tmp * t43_tmp;
-  ct_idx_161 = t510 * 85.4;
+  ct_idx_161_tmp = t11_tmp * t43_tmp;
+  ct_idx_161 = ct_idx_161_tmp * 85.4;
   ct_idx_163 = t142 * 0.85;
   ct_idx_164 = t97_tmp * 0.85;
   ct_idx_165 = t98_tmp * 0.85;
   ct_idx_167 = t142 * 0.07;
-  ct_idx_168 = t147 * 19.8;
+  ct_idx_168 = t147_tmp * 19.8;
   ct_idx_170 = t1084 * 85.4;
   ct_idx_176 = t152 * 0.85;
   ct_idx_178 = t153 * 0.85;
   ct_idx_179 = t152 * 0.07;
   ct_idx_180 = t153 * 0.07;
-  ct_idx_221 = t59_tmp + (-t86_tmp);
-  t1084 = t17_tmp * t147;
-  ct_idx_223 = t1084 * 10.5;
+  ct_idx_221 = t59_tmp - t86_tmp;
+  t518 = t17_tmp * t147_tmp;
+  ct_idx_223 = t518 * 10.5;
   ct_idx_231 = t159 * 23.17;
   ct_idx_232 = t159 * 25.53;
   ct_idx_240 = t46_tmp + t142;
-  ct_idx_241 = t76 + (t12_tmp * t46_tmp);
-  ct_idx_243 = t518 * 85.4;
-  ct_idx_248 = t47_tmp + t273_tmp;
-  ct_idx_249 = t78_tmp + (t21_tmp * t47_tmp);
-  ct_idx_250 = t83 + (t24_tmp * t84);
-  ct_idx_251 = t84 + (t24_tmp * t83);
-  ct_idx_254_tmp = (t44_tmp * 1.4) + (-(t53_tmp * 1.4));
+  ct_idx_241 = t76 + t12_tmp * t46_tmp;
+  ct_idx_243 = t510 * 85.4;
+  ct_idx_249 = t78_tmp + t21_tmp * t47_tmp;
+  ct_idx_250 = t83 + t24_tmp * t84;
+  ct_idx_251 = t84 + t24_tmp * t83;
+  ct_idx_254_tmp = t44_tmp * 1.4 - t53_tmp * 1.4;
   ct_idx_259_tmp = t21_tmp * t327_tmp;
   ct_idx_260 = t22_tmp * t328;
   ct_idx_262 = t15_tmp * t334;
-  ct_idx_273 = (t97_tmp * 61.0) + (t98_tmp * 61.0);
-  t76 = t46_tmp * t89_tmp;
-  ct_idx_276 = -(t76 * 85.4);
-  ct_idx_279 = t17_tmp * t184_tmp;
-  ct_idx_280 = t365 * 1.4;
-  ct_idx_282 = t25_tmp * t184_tmp;
+  ct_idx_273_tmp = t97_tmp * 61.0 + t98_tmp * 61.0;
+  t1084 = t46_tmp * t89;
+  ct_idx_276 = -(t1084 * 85.4);
+  ct_idx_280 = t365_tmp * 1.4;
   ct_idx_284_tmp_tmp = t18_tmp * t21_tmp;
   ct_idx_284_tmp = ct_idx_284_tmp_tmp * 61.0;
-  ct_idx_284 = ct_idx_284_tmp + (-((t20_tmp * t94) * 61.0));
-  ct_idx_285 = (t48_tmp * 1.4) + (t49_tmp * 1.4);
-  ct_idx_287 = (t97_tmp * 1.4) + (t98_tmp * 1.4);
-  ct_idx_288 = t1084 * 22.79;
-  ct_idx_292 = t97_tmp + t98_tmp;
+  ct_idx_284 = ct_idx_284_tmp - t20_tmp * t94 * 61.0;
+  ct_idx_285 = t48_tmp * 1.4 + t49_tmp * 1.4;
+  ct_idx_287_tmp = t97_tmp * 1.4 + t98_tmp * 1.4;
+  ct_idx_288 = t518 * 22.79;
   ct_idx_295 = t161 + t162;
-  ct_idx_299 = (t510 * 61.0) + (-(t76 * 61.0));
+  t510 = t1084 * 61.0;
+  ct_idx_299 = ct_idx_161_tmp * 61.0 - t510;
   ct_idx_305 = t22_tmp * t433;
   ct_idx_309 = t23_tmp * t457;
   ct_idx_314_tmp_tmp = t12_tmp * t16_tmp;
@@ -6659,7 +6563,7 @@ static void mass_mat_func(const real_T in1[9], real_T mass_mat[9][9])
   ct_idx_314 = t1084 * 210.0;
   ct_idx_323 = t1084 * 102.2;
   t1084 = t12_tmp * t24_tmp;
-  ct_idx_327 = (t1084 * t184_tmp) * 102.2;
+  ct_idx_327 = t1084 * t184_tmp * 102.2;
   ct_idx_333_tmp = t12_tmp * t184_tmp;
   ct_idx_333 = ct_idx_333_tmp * 30.09;
   ct_idx_340_tmp_tmp = t20_tmp * t50_tmp;
@@ -7065,25 +6969,25 @@ static void mass_mat_func(const real_T in1[9], real_T mass_mat[9][9])
   /* 'mass_mat_func:907' t427 = -t384; */
   /* 'mass_mat_func:908' t432 = -t401; */
   /* 'mass_mat_func:909' t441 = t107+t178; */
-  t441 = (t59_tmp * 61.0) + (-(t86_tmp * 61.0));
+  t441 = t59_tmp * 61.0 - t86_tmp * 61.0;
 
   /* 'mass_mat_func:910' t443 = t69+t219; */
-  t443 = (-(t12_tmp * t88)) + t42_tmp;
+  t443 = -(t12_tmp * t88) + t42_tmp;
 
   /* 'mass_mat_func:911' t444 = t88+t206; */
-  t444 = (-t135) + t88;
+  t444 = -t135 + t88;
 
   /* 'mass_mat_func:912' t446 = t70+t229; */
-  t446 = (-t166) + t43_tmp;
+  t446 = -t166 + t43_tmp;
 
   /* 'mass_mat_func:913' t447 = t89+t211; */
-  t447 = (-(t21_tmp * t43_tmp)) + t89_tmp;
+  t447 = -(t21_tmp * t43_tmp) + t89;
 
   /* 'mass_mat_func:914' t448 = t73+t231; */
-  t448 = (-(t24_tmp * t92)) + t73;
+  t448 = -(t24_tmp * t92) + t73;
 
   /* 'mass_mat_func:915' t449 = t92+t212; */
-  t449 = (-(t24_tmp * t73)) + t92;
+  t449 = -(t24_tmp * t73) + t92;
 
   /* 'mass_mat_func:916' t450 = -t407; */
   /* 'mass_mat_func:917' t451 = t17.*t368; */
@@ -7115,61 +7019,58 @@ static void mass_mat_func(const real_T in1[9], real_T mass_mat[9][9])
 
   /* 'mass_mat_func:930' t481 = t38.*t394; */
   /* 'mass_mat_func:931' t482 = t31.*t402; */
-  t482 = t15_tmp * ct_idx_248;
+  t482_tmp = t15_tmp * b_t273_tmp;
 
   /* 'mass_mat_func:932' t483 = t31.*t403; */
   t483 = t15_tmp * ct_idx_249;
 
   /* 'mass_mat_func:933' t484 = t40.*t437; */
-  t484 = t24_tmp * ct_idx_279;
+  t484_tmp = t24_tmp * t292_tmp;
 
   /* 'mass_mat_func:934' t485 = t34.*t402; */
-  t485 = t18_tmp * ct_idx_248;
+  t485 = t18_tmp * b_t273_tmp;
 
   /* 'mass_mat_func:935' t486 = t35.*t403; */
   t486 = t19_tmp * ct_idx_249;
 
   /* 'mass_mat_func:936' t487 = t39.*t402; */
-  t487 = t23_tmp * ct_idx_248;
-
   /* 'mass_mat_func:937' t488 = t39.*t403; */
   /* 'mass_mat_func:938' t489 = t40.*t440; */
-  t489 = t24_tmp * ct_idx_282;
+  t489 = t24_tmp * t293_tmp;
 
   /* 'mass_mat_func:939' t490 = t171+t202; */
   /* 'mass_mat_func:940' t492 = -t459; */
   /* 'mass_mat_func:941' t495 = t119+t226; */
-  t495 = t119 + (t273_tmp * 61.0);
+  t495 = t119 + t273_tmp * 61.0;
 
   /* 'mass_mat_func:942' t496 = t16.*t429; */
   /* 'mass_mat_func:943' t498 = t24.*t429; */
   /* 'mass_mat_func:944' t503 = t13.*t20.*t393; */
   /* 'mass_mat_func:945' t504 = t138+t223; */
-  t504 = t86_tmp + (t13_tmp * (-t53_tmp));
+  t504 = t86_tmp + t13_tmp * -t53_tmp;
 
   /* 'mass_mat_func:946' t505 = t16.*t445; */
   /* 'mass_mat_func:947' t506 = t24.*t445; */
   /* 'mass_mat_func:948' t507 = t150+t230; */
-  t507 = (t21_tmp * t44_tmp) + (t21_tmp * (-t53_tmp));
+  t507 = t21_tmp * t44_tmp + t21_tmp * -t53_tmp;
 
   /* 'mass_mat_func:949' t509 = t29.*t442; */
   t509_tmp = t13_tmp * t327_tmp;
 
   /* 'mass_mat_func:950' t513 = t37.*t442; */
   /* 'mass_mat_func:951' t519 = t50+t408; */
-  t519 = (t24_tmp * t318) + t50_tmp;
+  t519_tmp = t24_tmp * t318_tmp;
+  b_t519_tmp = t519_tmp + t50_tmp;
 
   /* 'mass_mat_func:952' t530 = t17.*t458; */
   /* 'mass_mat_func:953' t531 = t25.*t458; */
   /* 'mass_mat_func:954' t544 = t32.*t466; */
-  t544 = t16_tmp * ct_idx_292;
+  t544 = t16_tmp * t318_tmp;
 
   /* 'mass_mat_func:955' t545 = t26.*t27.*t403; */
   t545 = t270_tmp * ct_idx_249;
 
   /* 'mass_mat_func:956' t546 = t40.*t466; */
-  t546 = t24_tmp * ct_idx_292;
-
   /* 'mass_mat_func:957' t547 = t32.*t471; */
   /* 'mass_mat_func:958' t549 = t15.*t491; */
   t549 = t15_tmp * ct_idx_299;
@@ -7179,14 +7080,12 @@ static void mass_mat_func(const real_T in1[9], real_T mass_mat[9][9])
 
   /* 'mass_mat_func:960' t552 = t23.*t491; */
   /* 'mass_mat_func:961' t554 = t217+t218; */
-  t554 = (t97_tmp * 61.0) + (t98_tmp * 61.0);
-
   /* 'mass_mat_func:962' t556 = t118+t330; */
-  t556 = t118_tmp + ((t20_tmp * t152) * 61.0);
+  t556 = t118_tmp + t20_tmp * t152 * 61.0;
 
   /* 'mass_mat_func:963' t557 = t32.*t367.*(2.1e+1./2.0); */
-  t73 = t16_tmp * t274_tmp;
-  t557 = t73 * 10.5;
+  ct_idx_161_tmp = t16_tmp * t274_tmp;
+  t557 = ct_idx_161_tmp * 10.5;
 
   /* 'mass_mat_func:964' t558 = t33.*t456; */
   /* 'mass_mat_func:965' t559 = t29.*t367.*4.453e+3; */
@@ -7198,7 +7097,7 @@ static void mass_mat_func(const real_T in1[9], real_T mass_mat[9][9])
   /* 'mass_mat_func:969' t575 = t38.*t404.*(2.1e+1./2.0); */
   /* 'mass_mat_func:970' t577 = t60+t412; */
   t577_tmp = t19_tmp * t20_tmp;
-  t577 = (t14_tmp * t328) + (t577_tmp * t22_tmp);
+  t577 = t14_tmp * t328 + t577_tmp * t22_tmp;
 
   /* 'mass_mat_func:971' t579 = -t529; */
   /* 'mass_mat_func:972' t583 = t28.*t367.*(8.0./2.5e+1); */
@@ -7206,15 +7105,13 @@ static void mass_mat_func(const real_T in1[9], real_T mass_mat[9][9])
   /* 'mass_mat_func:974' t585 = t28.*t367.*(1.7e+1./2.0e+1); */
   /* 'mass_mat_func:975' t588 = -t561; */
   /* 'mass_mat_func:976' t622 = t254+t255; */
-  t622 = (t97_tmp * 1.4) + (t98_tmp * 1.4);
-
   /* 'mass_mat_func:977' t623 = t258+t259; */
-  t623 = (t161 * 1.4) + (t162 * 1.4);
+  t623 = t161 * 1.4 + t162 * 1.4;
 
   /* 'mass_mat_func:978' t627 = t437.*3.371e+1; */
   /* 'mass_mat_func:979' t629 = t440.*2.279e+1; */
   /* 'mass_mat_func:980' t633 = t224+t332; */
-  t633 = t224 + ((t78_tmp * t88) * 61.0);
+  t633 = t224 + t78_tmp * t88 * 61.0;
 
   /* 'mass_mat_func:981' t638 = t129+t413; */
   /* 'mass_mat_func:982' t640 = -t606; */
@@ -7223,13 +7120,13 @@ static void mass_mat_func(const real_T in1[9], real_T mass_mat[9][9])
   /* 'mass_mat_func:985' t647 = t16.*t40.*t367.*(9.9e+1./5.0); */
   /* 'mass_mat_func:986' t648 = t29.*t367.*1.5035e+2; */
   /* 'mass_mat_func:987' t649 = t213+t325; */
-  t649 = (t11_tmp * t119) + (t518 * 61.0);
+  t649 = t11_tmp * t119 + t457_tmp;
 
   /* 'mass_mat_func:988' t654 = t214+t359; */
-  t654 = (t19_tmp * t117) + (-((t88 * t89_tmp) * 61.0));
+  t654 = t19_tmp * t117 - t88 * t89 * 61.0;
 
   /* 'mass_mat_func:989' t657 = t28.*t40.*t367.*(9.9e+1./5.0); */
-  t657 = (t1084 * t274_tmp) * 19.8;
+  t657 = t1084 * t274_tmp * 19.8;
 
   /* 'mass_mat_func:990' t659 = t35.*t36.*t367.*(8.0./2.5e+1); */
   /* 'mass_mat_func:991' t660 = t36.*t37.*t367.*(8.0./2.5e+1); */
@@ -7237,21 +7134,21 @@ static void mass_mat_func(const real_T in1[9], real_T mass_mat[9][9])
   /* 'mass_mat_func:993' t664 = t191.*t393; */
   /* 'mass_mat_func:994' t669 = t29.*t30.*t404.*(2.1e+1./2.0); */
   /* 'mass_mat_func:995' t685 = t32.*t367.*2.553e+1; */
-  t685 = t73 * 25.53;
+  t685 = ct_idx_161_tmp * 25.53;
 
   /* 'mass_mat_func:996' t686 = t28.*t367.*7.989e+1; */
   /* 'mass_mat_func:997' t687 = t208+t357; */
-  t687 = (t11_tmp * t117) + (-(t76 * 61.0));
+  t687 = t11_tmp * t117 - t510;
 
   /* 'mass_mat_func:998' t693 = t40.*t393.*2.317e+1; */
-  t693 = (ct_idx_240 * t24_tmp) * 23.17;
+  t693 = ct_idx_240 * t24_tmp * 23.17;
 
   /* 'mass_mat_func:999' t694 = t233.*t393; */
   /* 'mass_mat_func:1000' t696 = t30.*t405.*3.371e+1; */
   /* 'mass_mat_func:1001' t698 = t38.*t404.*2.279e+1; */
   /* 'mass_mat_func:1002' t699 = -t663; */
   /* 'mass_mat_func:1003' t704 = t27.*t466.*(8.0./2.5e+1); */
-  t1084 = t11_tmp * ct_idx_292;
+  t1084 = t11_tmp * t318_tmp;
   t704 = t1084 * 0.32;
 
   /* 'mass_mat_func:1004' t705 = t27.*t466.*(1.7e+1./2.0e+1); */
@@ -7260,7 +7157,7 @@ static void mass_mat_func(const real_T in1[9], real_T mass_mat[9][9])
   /* 'mass_mat_func:1005' t711 = -t678; */
   /* 'mass_mat_func:1006' t714 = t36.*t82.*t367.*2.1e+2; */
   /* 'mass_mat_func:1007' t715 = t246+t402; */
-  t715 = t246 + ct_idx_248;
+  t715 = t246 + b_t273_tmp;
 
   /* 'mass_mat_func:1008' t717 = t36.*t471.*(8.0./2.5e+1); */
   /* 'mass_mat_func:1009' t718 = t36.*t471.*(1.7e+1./2.0e+1); */
@@ -7278,7 +7175,7 @@ static void mass_mat_func(const real_T in1[9], real_T mass_mat[9][9])
   /* 'mass_mat_func:1021' t749 = -t720; */
   /* 'mass_mat_func:1022' t750 = t24.*t32.*t367.*2.317e+1; */
   /* 'mass_mat_func:1023' t751 = t28.*t32.*t367.*2.317e+1; */
-  t751 = (ct_idx_314_tmp_tmp * t274_tmp) * 23.17;
+  t751 = ct_idx_314_tmp_tmp * t274_tmp * 23.17;
 
   /* 'mass_mat_func:1024' t758 = t36.*t37.*t367.*3.009e+1; */
   /* 'mass_mat_func:1025' t761 = t35.*t36.*t367.*7.989e+1; */
@@ -7286,7 +7183,7 @@ static void mass_mat_func(const real_T in1[9], real_T mass_mat[9][9])
   /* 'mass_mat_func:1027' t774 = t36.*t82.*t367.*(5.11e+2./5.0); */
   /* 'mass_mat_func:1028' t777 = t35.*t36.*t40.*t367.*(9.9e+1./5.0); */
   t777_tmp = t577_tmp * t24_tmp;
-  t777 = (t777_tmp * t274_tmp) * 19.8;
+  t777 = t777_tmp * t274_tmp * 19.8;
 
   /* 'mass_mat_func:1029' t780 = t36.*t90.*t367.*(5.11e+2./5.0); */
   /* 'mass_mat_func:1030' t781 = t33.*t102.*t466; */
@@ -7301,7 +7198,7 @@ static void mass_mat_func(const real_T in1[9], real_T mass_mat[9][9])
   /* 'mass_mat_func:1037' t812 = t23.*(t56-t414); */
   /* 'mass_mat_func:1038' t816 = t36.*t471.*7.989e+1; */
   /* 'mass_mat_func:1039' t819 = t26.*t35.*t466.*(8.0./2.5e+1); */
-  t518 = t54_tmp * ct_idx_292;
+  t518 = t54_tmp * t318_tmp;
   t819 = t518 * 0.32;
 
   /* 'mass_mat_func:1040' t820 = t26.*t35.*t466.*(1.7e+1./2.0e+1); */
@@ -7315,17 +7212,17 @@ static void mass_mat_func(const real_T in1[9], real_T mass_mat[9][9])
   /* 'mass_mat_func:1046' t847 = -t810; */
   /* 'mass_mat_func:1047' t855 = t26.*t28.*t32.*t35.*t367.*4.453e+3; */
   t1084 = t10_tmp * t12_tmp;
-  t510 = ((t1084 * t16_tmp) * t19_tmp) * t274_tmp;
+  t510 = t1084 * t16_tmp * t19_tmp * t274_tmp;
   t855 = t510 * 4453.0;
 
   /* 'mass_mat_func:1048' t857 = t26.*t28.*t35.*t40.*t367.*4.453e+3; */
   t857_tmp = t1084 * t19_tmp;
-  t857 = ((t857_tmp * t24_tmp) * t274_tmp) * 4453.0;
+  t857 = t857_tmp * t24_tmp * t274_tmp * 4453.0;
 
   /* 'mass_mat_func:1049' t858 = -t827; */
   /* 'mass_mat_func:1050' t862 = t193+t500; */
   t84 = t54_tmp * t47_tmp;
-  t862 = (t84 * 61.0) + (t14_tmp * t433);
+  t862 = t84 * 61.0 + t14_tmp * t433;
 
   /* 'mass_mat_func:1051' t872 = t32.*t35.*t36.*t367.*2.317e+1; */
   /* 'mass_mat_func:1052' t882 = t26.*t28.*t32.*t35.*t367.*9.15e+3; */
@@ -7333,10 +7230,10 @@ static void mass_mat_func(const real_T in1[9], real_T mass_mat[9][9])
 
   /* 'mass_mat_func:1053' t897 = t234+t501; */
   /* 'mass_mat_func:1054' t898 = t364+t419; */
-  t898 = (t15_tmp * t273) + (t23_tmp * t334);
+  t898 = t482_tmp + t23_tmp * t334;
 
   /* 'mass_mat_func:1055' t908 = t26.*t35.*t466.*7.989e+1; */
-  t328 = t518 * 79.89;
+  t162 = t518 * 79.89;
 
   /* 'mass_mat_func:1056' t914 = t28.*t35.*t471.*7.989e+1; */
   /* 'mass_mat_func:1057' t937 = t416+t420; */
@@ -7358,7 +7255,7 @@ static void mass_mat_func(const real_T in1[9], real_T mass_mat[9][9])
   /* 'mass_mat_func:1073' t1069 = t418+t611; */
   /* 'mass_mat_func:1074' t1075 = t29.*t409.*t456.*7.3e+1; */
   /* 'mass_mat_func:1075' t1084 = t32.*t367.*t392.*2.317e+1; */
-  t1084 = (t73 * b_t270_tmp) * 23.17;
+  t1084 = ct_idx_161_tmp * b_t270_tmp * 23.17;
 
   /* 'mass_mat_func:1076' t1100 = t442.*t471.*(8.0./2.5e+1); */
   /* 'mass_mat_func:1077' t1101 = t442.*t471.*(1.7e+1./2.0e+1); */
@@ -7682,166 +7579,165 @@ static void mass_mat_func(const real_T in1[9], real_T mass_mat[9][9])
   /* 'mass_mat_func:1387' t592 = t510.*1.17e+2; */
   /* 'mass_mat_func:1388' mass_mat = ft_2({t10,t1000,t1004,t1006,t1007,t101,t1011,t1012,t1014,t1016,t1017,t102,t1020,t1022,t1025,t1027,t1029,t103,t1033,t1034,t1035,t1037,t1039,t1042,t1044,t1046,t1052,t1053,t1056,t1060,t1061,t1062,t1065,t1067,t1069,t1073,t1077,t1083,t1084,t1085,t1086,t1087,t1088,t1094,t1095,t1096,t1097,t11,t1100,t1101,t1102,t1103,t1104,t1105,t1109,t1111,t1113,t1115,t1118,t1120,t1125,t1129,t113,t1130,t1136,t1138,t1143,t1144,t1149,t1152,t1161,t1163,t1170,t1174,t1175,t1177,t1186,t120,t1200,t1201,t1202,t1206,t1213,t1225,t1263,t1267,t1275,t1284,t1285,t1296,t13,t1301,t1302,t1303,t1312,t1313,t1319,t1320,t1327,t1328,t1329,t1334,t1335,t1345,t1352,t136,t138,t14,t140,t144,t1453,t146,t147,t1471,t1472,t148,t149,t15,t152,t153,t155,t156,t158,t159,t16,t160,t1637,t1643,t1646,t165,t1650,t166,t1667,t169,t17,t170,t174,t175,t176,t18,t180,t184,t185,t186,t187,t188,t189,t19,t190,t191,t195,t196,t197,t198,t199,t20,t203,t207,t21,t215,t216,t22,t221,t222,t225,t227,t23,t233,t235,t238,t239,t24,t240,t241,t242,t243,t249,t25,t252,t253,t256,t257,t26,t260,t262,t264,t268,t27,t271,t273,t274,t275,t276,t277,t278,t279,t28,t280,t281,t282,t283,t284,t285,t287,t288,t289,t29,t290,t294,t295,t296,t297,t298,t299,t30,t300,t301,t303,t304,t305,t306,t307,t308,t309,t31,t310,t311,t312,t313,t314,t315,t318,t319,t32,t321,t324,t326,t33,t333,t334,t336,t337,t338,t339,t34,t340,t341,t342,t343,t344,t345,t346,t347,t348,t349,t35,t350,t352,t354,t355,t358,t36,t360,t361,t363,t365,t366,t367,t368,t369,t37,t372,t373,t374,t377,t378,t379,t38,t380,t382,t385,t386,t387,t388,t389,t39,t390,t391,t392,t393,t397,t398,t399,t40,t400,t404,t405,t409,t41,t413,t414,t415,t416,t42,t422,t423,t425,t426,t427,t428,t429,t430,t431,t434,t437,t438,t439,t440,t441,t442,t443,t445,t448,t449,t451,t452,t457,t458,t459,t464,t466,t467,t468,t469,t470,t472,t473,t474,t477,t478,t479,t480,t482,t483,t484,t485,t487,t488,t489,t491,t492,t493,t494,t496,t497,t498,t499,t501,t502,t504,t505,t508,t510,t511,t512,t513,t514,t515,t516,t517,t518,t519,t520,t521,t522,t523,t524,t525,t526,t527,t529,t530,t531,t532,t534,t536,t537,t538,t539,t540,t543,t544,t545,t548,t549,t550,t553,t555,t556,t557,t558,t559,t56,t560,t562,t564,t565,t566,t567,t569,t570,t571,t572,t573,t574,t575,t576,t577,t578,t58,t580,t581,t582,t586,t587,t588,t589,t590,t591,t592,t593,t597,t601,t607,t608,t613,t614,t615,t616,t617,t618,t619,t620,t621,t622,t624,t625,t626,t627,t629,t63,t630,t636,t640,t642,t645,t646,t649,t650,t652,t659,t660,t661,t664,t665,t666,t667,t668,t669,t67,t670,t671,t672,t673,t674,t677,t678,t679,t68,t680,t681,t682,t683,t684,t685,t687,t69,t691,t693,t694,t695,t696,t698,t699,t70,t700,t701,t702,t704,t705,t706,t708,t709,t71,t711,t715,t716,t717,t718,t719,t72,t721,t723,t725,t727,t729,t730,t731,t732,t733,t736,t737,t738,t739,t741,t742,t743,t744,t745,t747,t75,t750,t751,t752,t754,t755,t756,t760,t761,t762,t763,t764,t766,t767,t77,t776,t777,t778,t781,t782,t783,t785,t786,t788,t790,t791,t792,t797,t798,t799,t80,t800,t803,t804,t807,t808,t809,t81,t810,t811,t812,t813,t816,t817,t819,t820,t821,t822,t823,t825,t826,t828,t829,t831,t832,t833,t834,t835,t836,t838,t839,t841,t842,t844,t847,t848,t851,t853,t854,t855,t857,t858,t860,t862,t863,t865,t870,t871,t872,t873,t874,t875,t876,t878,t879,t880,t881,t882,t883,t887,t890,t891,t894,t895,t898,t899,t90,t900,t907,t908,t909,t91,t911,t914,t915,t916,t918,t919,t926,t927,t928,t931,t934,t938,t94,t940,t941,t942,t943,t945,t948,t949,t950,t952,t953,t957,t959,t961,t964,t971,t972,t977,t980,t982,t983,t984,t985,t988,t994,t996,t999}); */
   ct[0] = t10_tmp;
-  t161 = t184_tmp * b_t270_tmp;
-  ct[1] = t161 * 150.35;
-  t162 = t16_tmp * t184_tmp;
-  t119 = t162 * b_t270_tmp;
-  ct[2] = t119 * 102.2;
-  t433 = t155 - t478;
-  ct[3] = (t23_tmp * t433) * -1.4;
-  ct_tmp = t24_tmp * t184_tmp;
-  ct[4] = (ct_tmp * b_t270_tmp) * 102.2;
+  t119 = t184_tmp * b_t270_tmp;
+  ct[1] = t119 * 150.35;
+  t433 = t16_tmp * t184_tmp;
+  ct_tmp = t433 * b_t270_tmp;
+  ct[2] = ct_tmp * 102.2;
+  b_ct_tmp = t155 - t478;
+  ct[3] = t23_tmp * b_ct_tmp * -1.4;
+  c_ct_tmp = t24_tmp * t184_tmp;
+  ct[4] = c_ct_tmp * b_t270_tmp * 102.2;
   ct[5] = -(t52_tmp * 61.0);
-  b_ct_tmp = t274_tmp * b_t270_tmp;
-  ct[6] = -(b_ct_tmp * 0.32);
-  ct[7] = -(b_ct_tmp * 0.85);
-  ct[8] = t161 * 30.09;
+  d_ct_tmp = t274_tmp * b_t270_tmp;
+  ct[6] = -(d_ct_tmp * 0.32);
+  ct[7] = -(d_ct_tmp * 0.85);
+  ct[8] = t119 * 30.09;
   ct[9] = b_t270_tmp * t557;
-  c_ct_tmp = t162 * t443;
-  ct[10] = c_ct_tmp * 10.5;
+  e_ct_tmp = t433 * t443;
+  ct[10] = e_ct_tmp * 10.5;
   ct[11] = t102;
-  d_ct_tmp = t140 - ct_idx_259_tmp;
-  ct[12] = t22_tmp * d_ct_tmp;
-  e_ct_tmp = t52_tmp - t544;
-  f_ct_tmp = t18_tmp * e_ct_tmp;
-  ct[13] = f_ct_tmp * -4453.0;
-  g_ct_tmp = t274_tmp * t443;
-  ct[14] = g_ct_tmp * 0.32;
-  h_ct_tmp = t11_tmp * e_ct_tmp;
-  ct[15] = h_ct_tmp * 10.5;
-  i_ct_tmp = t73 * t443;
-  ct[16] = i_ct_tmp * 210.0;
+  f_ct_tmp = t140 - ct_idx_259_tmp;
+  ct[12] = t22_tmp * f_ct_tmp;
+  g_ct_tmp = t52_tmp - t544;
+  h_ct_tmp = t18_tmp * g_ct_tmp;
+  ct[13] = h_ct_tmp * -4453.0;
+  i_ct_tmp = t274_tmp * t443;
+  ct[14] = i_ct_tmp * 0.32;
+  j_ct_tmp = t11_tmp * g_ct_tmp;
+  ct[15] = j_ct_tmp * 10.5;
+  k_ct_tmp = ct_idx_161_tmp * t443;
+  ct[16] = k_ct_tmp * 210.0;
   ct[17] = t103;
-  j_ct_tmp = t274_tmp * t24_tmp;
-  ct[18] = (j_ct_tmp * b_t270_tmp) * 19.8;
-  ct[19] = (ct_tmp * t443) * 19.8;
-  ct[20] = f_ct_tmp * -9150.0;
-  ct[21] = t475 + t484;
-  f_ct_tmp = t71 - t550;
-  k_ct_tmp = t20_tmp * f_ct_tmp;
-  ct[22] = k_ct_tmp * -19.8;
-  ct[23] = (((t24_tmp * t79) * t184_tmp) * t274_tmp) * 143.08;
-  ct[24] = (b_t270_tmp * ct_idx_254_tmp) * 73.0;
-  m_ct_tmp = t184_tmp * t443;
-  ct[25] = m_ct_tmp * 79.89;
+  l_ct_tmp = t274_tmp * t24_tmp;
+  ct[18] = l_ct_tmp * b_t270_tmp * 19.8;
+  ct[19] = c_ct_tmp * t443 * 19.8;
+  ct[20] = h_ct_tmp * -9150.0;
+  ct[21] = t475 + t484_tmp;
+  h_ct_tmp = t71 - t550;
+  m_ct_tmp = t20_tmp * h_ct_tmp;
+  ct[22] = m_ct_tmp * -19.8;
+  ct[23] = t24_tmp * t79 * t184_tmp * t274_tmp * 143.08;
+  ct[24] = b_t270_tmp * ct_idx_254_tmp * 73.0;
+  n_ct_tmp = t184_tmp * t443;
+  ct[25] = n_ct_tmp * 79.89;
   o_ct_tmp = t446 * t449;
   ct[26] = o_ct_tmp * 10.5;
-  p_ct_tmp = ct_idx_248 * ct_idx_250;
+  p_ct_tmp = b_t273_tmp * ct_idx_250;
   ct[27] = p_ct_tmp * 22.79;
-  ct[28] = (((t16_tmp * t71) * t184_tmp) * t274_tmp) * 437.08;
-  ct[29] = (t443 * ct_idx_285) * 73.0;
-  ct[30] = g_ct_tmp * 150.35;
-  ct[31] = -(b_ct_tmp * 79.89);
-  ct[32] = i_ct_tmp * 102.2;
-  ct[33] = (j_ct_tmp * t443) * 102.2;
-  ct[34] = (-((t191_tmp * t25_tmp) * 33.71)) + (t25_tmp * t535);
-  ct[35] = (t274_tmp * t556) * 73.0;
-  b_ct_tmp = t54_tmp * e_ct_tmp;
-  ct[36] = b_ct_tmp * -10.5;
-  ct[37] = g_ct_tmp * 30.09;
+  ct[28] = t16_tmp * t71 * t184_tmp * t274_tmp * 437.08;
+  ct[29] = t443 * ct_idx_285 * 73.0;
+  ct[30] = i_ct_tmp * 150.35;
+  ct[31] = -(d_ct_tmp * 79.89);
+  ct[32] = k_ct_tmp * 102.2;
+  ct[33] = l_ct_tmp * t443 * 102.2;
+  ct[34] = -(t191_tmp * t25_tmp * 33.71) + t25_tmp * t535;
+  ct[35] = t274_tmp * t556 * 73.0;
+  d_ct_tmp = t54_tmp * g_ct_tmp;
+  ct[36] = d_ct_tmp * -10.5;
+  ct[37] = i_ct_tmp * 30.09;
   ct[38] = t1084;
-  ct[39] = c_ct_tmp * 23.17;
-  ct[40] = h_ct_tmp * -23.17;
+  ct[39] = e_ct_tmp * 23.17;
+  ct[40] = j_ct_tmp * -23.17;
   ct[41] = b_t270_tmp * t685;
-  ct[42] = c_ct_tmp * 25.53;
-  ct[43] = (ct_idx_248 * t448) * 33.71;
-  ct[44] = (ct_idx_251 * t446) * 33.71;
-  c_ct_tmp = t71 * t184_tmp;
-  ct[45] = t339 + (-(c_ct_tmp * 23.17));
-  ct[46] = -(((t13_tmp * ct_idx_254_tmp) * ct_idx_285) * 73.0);
+  ct[42] = e_ct_tmp * 25.53;
+  ct[43] = b_t273_tmp * t448 * 33.71;
+  ct[44] = ct_idx_251 * t446 * 33.71;
+  e_ct_tmp = t71 * t184_tmp;
+  ct[45] = t339 - e_ct_tmp * 23.17;
+  ct[46] = -(t13_tmp * ct_idx_254_tmp * ct_idx_285 * 73.0);
   ct[47] = t11_tmp;
-  e_ct_tmp = t327_tmp * ct_idx_295;
-  ct[48] = e_ct_tmp * 0.32;
-  ct[49] = e_ct_tmp * 0.85;
-  ct[50] = (t328_tmp * f_ct_tmp) * -19.8;
-  g_ct_tmp = t162 * t556;
-  ct[51] = g_ct_tmp * 73.0;
-  ct[52] = g_ct_tmp * 150.0;
-  g_ct_tmp = t11_tmp * t20_tmp;
-  ct[53] = (g_ct_tmp * f_ct_tmp) * 4453.0;
-  ct[54] = (ct_tmp * t556) * 73.0;
+  i_ct_tmp = t327_tmp * ct_idx_295;
+  ct[48] = i_ct_tmp * 0.32;
+  ct[49] = i_ct_tmp * 0.85;
+  ct[50] = t328_tmp * h_ct_tmp * -19.8;
+  k_ct_tmp = t433 * t556;
+  ct[51] = k_ct_tmp * 73.0;
+  ct[52] = k_ct_tmp * 150.0;
+  k_ct_tmp = t11_tmp * t20_tmp;
+  ct[53] = k_ct_tmp * h_ct_tmp * 4453.0;
+  ct[54] = c_ct_tmp * t556 * 73.0;
   ct[55] = -t1084;
-  ct[56] = h_ct_tmp * 23.17;
-  ct[57] = h_ct_tmp * 25.53;
-  h_ct_tmp = t94 - ct_idx_259_tmp;
-  i_ct_tmp = t22_tmp * b_t270_tmp;
-  ct[58] = i_ct_tmp + ((-t14_tmp) * h_ct_tmp);
-  ct[59] = ((t13_tmp * t16_tmp) * t20_tmp) + ((-t24_tmp) * (t365 - ct_idx_262));
+  ct[56] = j_ct_tmp * 23.17;
+  ct[57] = j_ct_tmp * 25.53;
+  j_ct_tmp = t94 - ct_idx_259_tmp;
+  t457_tmp = t22_tmp * b_t270_tmp;
+  ct[58] = t457_tmp + -t14_tmp * j_ct_tmp;
+  ct[59] = t147_tmp + -t24_tmp * (t365_tmp - ct_idx_262);
   ct[60] = o_ct_tmp * 22.79;
   o_ct_tmp = t327_tmp * t507;
   ct[61] = o_ct_tmp * 0.32;
   ct[62] = t246_tmp * t14_tmp;
   ct[63] = o_ct_tmp * 0.07;
-  t54 = t54_tmp * t20_tmp;
-  ct[64] = (t54 * f_ct_tmp) * -4453.0;
-  ct[65] = (t15_tmp * t457) + (t23_tmp * ct_idx_299);
-  ct[66] = b_ct_tmp * -23.17;
-  ct[67] = b_ct_tmp * -25.53;
-  ct[68] = e_ct_tmp * 79.89;
-  b_ct_tmp = (t16_tmp * t327_tmp) * t507;
-  ct[69] = b_ct_tmp * 210.0;
-  ct[70] = (t327_tmp * t623) * 73.0;
+  t161 = t54_tmp * t20_tmp;
+  ct[64] = t161 * h_ct_tmp * -4453.0;
+  ct[65] = t15_tmp * t457 + t23_tmp * ct_idx_299;
+  ct[66] = d_ct_tmp * -23.17;
+  ct[67] = d_ct_tmp * -25.53;
+  ct[68] = i_ct_tmp * 79.89;
+  d_ct_tmp = t16_tmp * t327_tmp * t507;
+  ct[69] = d_ct_tmp * 210.0;
+  ct[70] = t327_tmp * t623 * 73.0;
   ct[71] = o_ct_tmp * 150.35;
-  ct[72] = ((t243 + ((t79 * t48_tmp) * 19.8)) + ((t79 * t49_tmp) * 19.8)) *
-    t16_tmp;
+  ct[72] = ((t243 + t79 * t48_tmp * 19.8) + t79 * t49_tmp * 19.8) * t16_tmp;
   ct[73] = o_ct_tmp * 30.09;
-  ct[74] = b_ct_tmp * 102.2;
-  ct[75] = ((t24_tmp * t327_tmp) * t507) * 102.2;
-  b_ct_tmp = t360_tmp + (t22_tmp * h_ct_tmp);
-  ct[76] = (-t15_tmp) * b_ct_tmp;
+  ct[74] = d_ct_tmp * 102.2;
+  ct[75] = t24_tmp * t327_tmp * t507 * 102.2;
+  d_ct_tmp = t360_tmp + t22_tmp * j_ct_tmp;
+  ct[76] = -t15_tmp * d_ct_tmp;
   ct[77] = t50_tmp * 61.0;
-  e_ct_tmp = ct_idx_309 - t549;
-  ct[78] = (-t16_tmp) * e_ct_tmp;
-  ct[79] = (-t24_tmp) * e_ct_tmp;
-  ct[80] = t23_tmp * b_ct_tmp;
-  e_ct_tmp = t79 * t184_tmp;
-  ct[81] = (t24_tmp * t274_tmp) * (t243 + (e_ct_tmp * 19.8));
-  ct[82] = (t15_tmp * b_ct_tmp) * -1.4;
-  b_ct_tmp = t184_tmp * d_ct_tmp;
-  ct[83] = b_ct_tmp * -0.32;
-  h_ct_tmp = t274_tmp * d_ct_tmp;
-  ct[84] = h_ct_tmp * -0.32;
+  i_ct_tmp = ct_idx_309 - t549;
+  ct[78] = -t16_tmp * i_ct_tmp;
+  ct[79] = -t24_tmp * i_ct_tmp;
+  ct[80] = t23_tmp * d_ct_tmp;
+  i_ct_tmp = t79 * t184_tmp;
+  ct[81] = l_ct_tmp * (t243 + i_ct_tmp * 19.8);
+  ct[82] = t15_tmp * d_ct_tmp * -1.4;
+  d_ct_tmp = t184_tmp * f_ct_tmp;
+  ct[83] = d_ct_tmp * -0.32;
+  j_ct_tmp = t274_tmp * f_ct_tmp;
+  ct[84] = j_ct_tmp * -0.32;
   o_ct_tmp = t334_tmp * t274_tmp;
-  ct[85] = ct_idx_333 + (o_ct_tmp * 30.09);
-  ct[86] = b_ct_tmp * -79.89;
-  t162 *= d_ct_tmp;
-  ct[87] = t162 * 10.5;
-  b_ct_tmp = t73 * d_ct_tmp;
-  ct[88] = b_ct_tmp * -210.0;
-  ct[89] = h_ct_tmp * -150.35;
+  ct[85] = ct_idx_333 + o_ct_tmp * 30.09;
+  ct[86] = d_ct_tmp * -79.89;
+  t433 *= f_ct_tmp;
+  ct[87] = t433 * 10.5;
+  d_ct_tmp = ct_idx_161_tmp * f_ct_tmp;
+  ct[88] = d_ct_tmp * -210.0;
+  ct[89] = j_ct_tmp * -150.35;
   ct[90] = t13_tmp;
-  t73 = t71 * t48_tmp;
-  t92 = t71 * t49_tmp;
-  ct[91] = t24_tmp * (((-t339) + (t73 * 23.17)) + (t92 * 23.17));
-  ct[92] = (ct_tmp * d_ct_tmp) * 19.8;
-  ct[93] = (t327_tmp * f_ct_tmp) * 19.8;
-  ct[94] = (ct_idx_285 * d_ct_tmp) * 73.0;
-  ct[95] = h_ct_tmp * -30.09;
-  ct[96] = b_ct_tmp * -102.2;
-  ct[97] = (j_ct_tmp * d_ct_tmp) * -102.2;
-  ct_tmp = t13_tmp * t274_tmp;
-  b_ct_tmp = t13_tmp * t184_tmp;
-  ct[98] = (ct_idx_49 + (b_ct_tmp * 0.32)) + (ct_tmp * 150.35);
-  h_ct_tmp = (ct_idx_280 + t441) - t470;
-  ct[99] = (-t17_tmp) * h_ct_tmp;
-  ct[100] = (-t25_tmp) * h_ct_tmp;
-  ct[101] = t162 * -23.17;
-  ct[102] = t162 * -25.53;
-  ct[103] = (ct_idx_47 + (ct_tmp * 0.32)) + (b_ct_tmp * 79.89);
-  ct[104] = t162 * 25.53;
+  t54 = t71 * t48_tmp;
+  t328 = t71 * t49_tmp;
+  ct[91] = t24_tmp * ((-t339 + t54 * 23.17) + t328 * 23.17);
+  ct[92] = c_ct_tmp * f_ct_tmp * 19.8;
+  ct[93] = t327_tmp * h_ct_tmp * 19.8;
+  ct[94] = ct_idx_285 * f_ct_tmp * 73.0;
+  ct[95] = j_ct_tmp * -30.09;
+  ct[96] = d_ct_tmp * -102.2;
+  ct[97] = l_ct_tmp * f_ct_tmp * -102.2;
+  c_ct_tmp = t13_tmp * t274_tmp;
+  d_ct_tmp = t13_tmp * t184_tmp;
+  ct[98] = (ct_idx_49 + d_ct_tmp * 0.32) + c_ct_tmp * 150.35;
+  j_ct_tmp = (ct_idx_280 + t441) - t470;
+  ct[99] = -t17_tmp * j_ct_tmp;
+  ct[100] = -t25_tmp * j_ct_tmp;
+  ct[101] = t433 * -23.17;
+  ct[102] = t433 * -25.53;
+  ct[103] = (ct_idx_47 + c_ct_tmp * 0.32) + d_ct_tmp * 79.89;
+  ct[104] = t433 * 25.53;
   ct[105] = t136;
   ct[106] = t86_tmp;
   ct[107] = t14_tmp;
   ct[108] = t140;
   ct[109] = t144;
-  ct[110] = t236_tmp * ((((t136 + ct_idx_45) + ct_idx_161) + (-(t43_tmp * t88)))
-                        + ct_idx_276);
+  ct[110] = t236_tmp * ((((t136 + ct_idx_45) + ct_idx_161) - t43_tmp * t88) +
+                        ct_idx_276);
   ct[111] = t12_tmp * t79;
-  ct[112] = t147;
-  ct[113] = t246_tmp * ((((t144 + (-t156)) + ct_idx_170) + (-(t47_tmp * t88))) +
+  ct[112] = t147_tmp;
+  ct[113] = t246_tmp * ((((t144 - t156) + ct_idx_170) - t47_tmp * t88) +
                         ct_idx_243);
-  t162 = t20_tmp * t52_tmp;
-  ct[114] = (ct_idx_168 + t657) + (-((t162 * t184_tmp) * 19.8));
+  t433 = t20_tmp * t52_tmp;
+  ct[114] = (ct_idx_168 + t657) - t433 * t184_tmp * 19.8;
   ct[115] = t97_tmp;
   ct[116] = t98_tmp;
   ct[117] = t15_tmp;
@@ -7853,19 +7749,17 @@ static void mass_mat_func(const real_T in1[9], real_T mass_mat[9][9])
   ct[123] = t159;
   ct[124] = t16_tmp;
   ct[125] = t59_tmp;
-  b_ct_tmp = ct_idx_340_tmp_tmp * t274_tmp;
-  ct[126] = ((ct_idx_146 + ct_idx_314) + (c_ct_tmp * 9150.0)) + (b_ct_tmp *
-    210.0);
-  ct[127] = ((ct_idx_72 + (e_ct_tmp * 4453.0)) + ct_idx_327) + ((t162 * t274_tmp)
-    * 102.2);
-  ct[128] = ((ct_idx_116 + (c_ct_tmp * 4453.0)) + ct_idx_323) + (b_ct_tmp *
-    102.2);
+  j_ct_tmp = ct_idx_340_tmp_tmp * t274_tmp;
+  ct[126] = ((ct_idx_146 + ct_idx_314) + e_ct_tmp * 9150.0) + j_ct_tmp * 210.0;
+  ct[127] = ((ct_idx_72 + i_ct_tmp * 4453.0) + ct_idx_327) + t433 * t274_tmp *
+    102.2;
+  ct[128] = ((ct_idx_116 + e_ct_tmp * 4453.0) + ct_idx_323) + j_ct_tmp * 102.2;
   ct[129] = ct_idx_45;
-  ct[130] = (-t519) * (t657 + (k_ct_tmp * 19.8));
+  ct[130] = -b_t519_tmp * (t657 + m_ct_tmp * 19.8);
   ct[131] = t166;
-  ct[132] = ((((((t16_tmp * t16_tmp) * 19.8) + ((t24_tmp * t24_tmp) * 23.17)) +
-               ((((t16_tmp * t25_tmp) * t16_tmp) * t25_tmp) * 33.71)) + (t24_tmp
-    * t536)) + (t191_tmp * t535)) + 117.0;
+  ct[132] = ((((t16_tmp * t16_tmp * 19.8 + t24_tmp * t24_tmp * 23.17) + t16_tmp *
+               t25_tmp * t16_tmp * t25_tmp * 33.71) + t24_tmp * t536) + t191_tmp
+             * t535) + 117.0;
   ct[133] = ct_idx_47;
   ct[134] = t17_tmp;
   ct[135] = ct_idx_49;
@@ -7876,14 +7770,15 @@ static void mass_mat_func(const real_T in1[9], real_T mass_mat[9][9])
   ct[140] = -(t52_tmp * 61.0);
   ct[141] = t184_tmp;
   ct[142] = -(t270_tmp * t19_tmp);
-  ct[143] = (t54_tmp * t11_tmp) * 10.0;
+  ct[143] = t54_tmp * t11_tmp * 10.0;
   ct[144] = -(t236_tmp * t22_tmp);
-  ct[145] = -((t21_tmp * t13_tmp) * t20_tmp);
+  ct[145] = -(t21_tmp * t13_tmp * t20_tmp);
   ct[146] = t189;
   ct[147] = t19_tmp;
-  t162 = t16_tmp * t20_tmp;
-  b_ct_tmp = t162 * t42_tmp;
-  ct[148] = b_ct_tmp * 61.0;
+  t73 = t16_tmp * t20_tmp;
+  t92 = t73 * t42_tmp;
+  t433 = t92 * 61.0;
+  ct[148] = t433;
   ct[149] = t191;
   ct[150] = t195;
   ct[151] = t46_tmp * -117.0;
@@ -7892,7 +7787,7 @@ static void mass_mat_func(const real_T in1[9], real_T mass_mat[9][9])
   ct[154] = ct_idx_72;
   ct[155] = t20_tmp;
   ct[156] = t52_tmp * 10.5;
-  ct[157] = t12_tmp * (-t71);
+  ct[157] = t12_tmp * -t71;
   ct[158] = t21_tmp;
   ct[159] = t14_tmp * t118_tmp;
   ct[160] = ct_idx_87;
@@ -7924,7 +7819,7 @@ static void mass_mat_func(const real_T in1[9], real_T mass_mat[9][9])
   ct[186] = ct_idx_135;
   ct[187] = t11_tmp;
   ct[188] = t271;
-  ct[189] = t273;
+  ct[189] = b_t273_tmp;
   ct[190] = t274_tmp;
   ct[191] = -t239;
   ct[192] = -t241;
@@ -7933,11 +7828,11 @@ static void mass_mat_func(const real_T in1[9], real_T mass_mat[9][9])
   ct[195] = -(t53_tmp * 0.85);
   ct[196] = t12_tmp;
   ct[197] = ct_idx_146;
-  e_ct_tmp = t16_tmp * t44_tmp;
-  ct[198] = e_ct_tmp * 10.5;
+  i_ct_tmp = t16_tmp * t44_tmp;
+  ct[198] = i_ct_tmp * 10.5;
   ct[199] = t282;
-  h_ct_tmp = t17_tmp * t50_tmp;
-  ct[200] = h_ct_tmp * 10.5;
+  j_ct_tmp = t17_tmp * t50_tmp;
+  ct[200] = j_ct_tmp * 10.5;
   ct[201] = -t256;
   ct[202] = t285;
   ct[203] = t152 * -117.0;
@@ -7956,11 +7851,11 @@ static void mass_mat_func(const real_T in1[9], real_T mass_mat[9][9])
   ct[216] = ct_idx_168;
   ct[217] = ct_idx_170;
   ct[218] = t18_tmp * t236;
-  ct[219] = h_ct_tmp * 9150.0;
+  ct[219] = j_ct_tmp * 9150.0;
   ct[220] = t184_tmp;
   ct[221] = -t285;
-  j_ct_tmp = t16_tmp * t53_tmp;
-  ct[222] = -(j_ct_tmp * 10.5);
+  l_ct_tmp = t16_tmp * t53_tmp;
+  ct[222] = -(l_ct_tmp * 10.5);
   ct[223] = ct_idx_176;
   ct[224] = t15_tmp;
   ct[225] = ct_idx_178;
@@ -7969,10 +7864,10 @@ static void mass_mat_func(const real_T in1[9], real_T mass_mat[9][9])
   ct[228] = t59_tmp * 0.07;
   ct[229] = t18_tmp * t246;
   ct[230] = t315;
-  ct[231] = t318;
-  ct[232] = t14_tmp * (-t140);
+  ct[231] = t318_tmp;
+  ct[232] = t14_tmp * -t140;
   ct[233] = t16_tmp;
-  ct[234] = b_ct_tmp * 61.0;
+  ct[234] = t433;
   ct[235] = t10_tmp * t224;
   ct[236] = ct_idx_87 * t19_tmp;
   ct[237] = t17_tmp;
@@ -8003,26 +7898,26 @@ static void mass_mat_func(const real_T in1[9], real_T mass_mat[9][9])
   ct[262] = t360_tmp;
   ct[263] = t16_tmp * t271;
   ct[264] = t363;
-  ct[265] = t365;
+  ct[265] = t365_tmp;
   ct[266] = -t339;
   ct[267] = t274_tmp;
   ct[268] = ct_idx_221;
-  ct[269] = -((t14_tmp * t140) * 1.4);
+  ct[269] = -(t14_tmp * t140 * 1.4);
   ct[270] = t21_tmp;
   ct[271] = ct_idx_223;
-  ct[272] = b_ct_tmp * 4453.0;
+  ct[272] = t92 * 4453.0;
   ct[273] = t374;
-  ct[274] = e_ct_tmp * 25.53;
+  ct[274] = i_ct_tmp * 25.53;
   ct[275] = t86_tmp * 30.09;
-  ct[276] = h_ct_tmp * 22.79;
+  ct[276] = j_ct_tmp * 22.79;
   ct[277] = t22_tmp;
   ct[278] = ct_idx_231;
   ct[279] = ct_idx_232;
   ct[280] = t385;
   ct[281] = ct_idx_133 * 0.85;
   ct[282] = ct_idx_133 * 0.07;
-  ct[283] = -(t73 * 10.5);
-  ct[284] = -(t92 * 10.5);
+  ct[283] = -(t54 * 10.5);
+  ct[284] = -(t328 * 10.5);
   ct[285] = t23_tmp;
   ct[286] = -ct_idx_223;
   ct[287] = t391;
@@ -8042,20 +7937,20 @@ static void mass_mat_func(const real_T in1[9], real_T mass_mat[9][9])
   ct[301] = -t363;
   ct[302] = ct_idx_262;
   ct[303] = t42_tmp;
-  ct[304] = (t334_tmp * t42_tmp) * 1.306071E+6;
+  ct[304] = t334_tmp * t42_tmp * 1.306071E+6;
   ct[305] = -ct_idx_231;
   ct[306] = -ct_idx_232;
-  ct[307] = -(j_ct_tmp * 25.53);
+  ct[307] = -(l_ct_tmp * 25.53);
   ct[308] = -(t59_tmp * 30.09);
   ct[309] = -t385;
-  ct[310] = ct_idx_273;
+  ct[310] = ct_idx_273_tmp;
   ct[311] = -t391;
   ct[312] = -t400;
   ct[313] = ct_idx_276;
-  ct[314] = ct_idx_279;
+  ct[314] = t292_tmp;
   ct[315] = ct_idx_280;
-  ct[316] = (t24_tmp * t293) * 1.4;
-  ct[317] = ct_idx_282;
+  ct[316] = t83;
+  ct[317] = t293_tmp;
   ct[318] = t441;
   ct[319] = t327_tmp;
   ct[320] = t443;
@@ -8065,38 +7960,41 @@ static void mass_mat_func(const real_T in1[9], real_T mass_mat[9][9])
   ct[324] = t451;
   ct[325] = t452;
   ct[326] = t457;
-  ct[327] = ct_idx_287;
+  ct[327] = ct_idx_287_tmp;
   ct[328] = ct_idx_288;
-  ct[329] = (t25_tmp * t147) * 33.71;
-  ct[330] = ct_idx_292;
-  ct[331] = ((t162 * t25_tmp) * t42_tmp) * 9150.0;
+  ct[329] = t25_tmp * t147_tmp * 33.71;
+  ct[330] = t318_tmp;
+  ct[331] = t73 * t25_tmp * t42_tmp * 9150.0;
   ct[332] = t21_tmp * ct_idx_240;
-  ct[333] = (t78_tmp * t152) * 85.4;
+  ct[333] = t78_tmp * t152 * 85.4;
   ct[334] = t470;
   ct[335] = t472;
-  ct[336] = (t89_tmp * t152) * 85.4;
-  ct[337] = t17_tmp * ct_idx_254_tmp;
+  ct[336] = t89 * t152 * 85.4;
+  t433 = t17_tmp * ct_idx_254_tmp;
+  ct[337] = t433;
   ct[338] = t360_tmp;
   ct[339] = t478;
   ct[340] = t479;
-  ct[341] = i_ct_tmp;
-  ct[342] = t482;
+  ct[341] = t457_tmp;
+  ct[342] = t482_tmp;
   ct[343] = t483;
-  ct[344] = t484;
+  ct[344] = t484_tmp;
   ct[345] = t485;
-  ct[346] = t487;
+  ct[346] = t365_tmp;
   ct[347] = t23_tmp * ct_idx_249;
   ct[348] = t489;
   ct[349] = ct_idx_299;
   ct[350] = -ct_idx_288;
-  ct[351] = -(t73 * 25.53);
-  ct[352] = -(t92 * 25.53);
-  ct[353] = t16_tmp * ct_idx_273;
+  ct[351] = -(t54 * 25.53);
+  ct[352] = -(t328 * 25.53);
+  j_ct_tmp = t16_tmp * ct_idx_273_tmp;
+  ct[353] = j_ct_tmp;
   ct[354] = -t452;
-  ct[355] = t24_tmp * ct_idx_273;
-  ct[356] = -(((t191_tmp * t20_tmp) * t42_tmp) * 9150.0);
+  m_ct_tmp = t24_tmp * ct_idx_273_tmp;
+  ct[355] = m_ct_tmp;
+  ct[356] = -(t191_tmp * t20_tmp * t42_tmp * 9150.0);
   ct[357] = ct_idx_305;
-  ct[358] = t117 + (-(t166 * 61.0));
+  ct[358] = t117 - t166 * 61.0;
   ct[359] = t504;
   ct[360] = t16_tmp * ct_idx_284;
   ct[361] = t103 * t184_tmp;
@@ -8109,29 +8007,31 @@ static void mass_mat_func(const real_T in1[9], real_T mass_mat[9][9])
   ct[368] = t15_tmp * t446;
   ct[369] = t15_tmp * t447;
   ct[370] = t518;
-  ct[371] = t519;
+  ct[371] = b_t519_tmp;
   ct[372] = t18_tmp * t446;
   ct[373] = t19_tmp * t447;
   ct[374] = -t486;
   ct[375] = t23_tmp * t446;
   ct[376] = t76;
-  ct[377] = -t487;
+  ct[377] = -t365_tmp;
   ct[378] = t24_tmp * t475;
   ct[379] = -t489;
   ct[380] = ct_idx_309;
-  ct[381] = t17_tmp * ct_idx_287;
-  ct[382] = t25_tmp * ct_idx_287;
+  t457_tmp = t17_tmp * ct_idx_287_tmp;
+  ct[381] = t457_tmp;
+  t54 = t25_tmp * ct_idx_287_tmp;
+  ct[382] = t54;
   ct[383] = ct_idx_333_tmp * 0.32;
   ct[384] = ct_idx_333_tmp * 0.07;
   ct[385] = t536;
   ct[386] = ct_idx_314;
   ct[387] = t483 * 1.4;
-  ct[388] = t484 * 1.4;
+  ct[388] = t484_tmp * 1.4;
   ct[389] = t485 * 1.4;
   ct[390] = t83;
   ct[391] = t544;
   ct[392] = t545;
-  ct[393] = (t24_tmp * t451) * 1.4;
+  ct[393] = t24_tmp * t451 * 1.4;
   ct[394] = t549;
   ct[395] = t550;
   ct[396] = -(t176_tmp * ct_idx_240);
@@ -8139,382 +8039,379 @@ static void mass_mat_func(const real_T in1[9], real_T mass_mat[9][9])
   ct[398] = t556;
   ct[399] = t557;
   ct[400] = t17_tmp * ct_idx_285;
-  ct[401] = ct_tmp * 4453.0;
+  ct[401] = c_ct_tmp * 4453.0;
   ct[402] = t56;
   ct[403] = t25_tmp * ct_idx_285;
-  ct_tmp = t11_tmp * t12_tmp;
-  ct[404] = (ct_tmp * t184_tmp) * 4453.0;
+  c_ct_tmp = t11_tmp * t12_tmp;
+  ct[404] = c_ct_tmp * t184_tmp * 4453.0;
   ct[405] = -t518;
   ct[406] = t102 * ct_idx_240;
   ct[407] = t11_tmp * t495;
   ct[408] = t15_tmp * t495;
   ct[409] = t569;
-  ct[410] = t52_tmp + (-(t16_tmp * t318));
+  ct[410] = g_ct_tmp;
   ct[411] = -t76;
   ct[412] = -(t486 * 1.4);
-  ct[413] = -(t487 * 1.4);
+  ct[413] = -(t365_tmp * 1.4);
   ct[414] = -t83;
-  b_ct_tmp = t22_tmp * ct_idx_250;
-  ct[415] = b_ct_tmp * 10.5;
+  g_ct_tmp = t22_tmp * ct_idx_250;
+  ct[415] = g_ct_tmp * 10.5;
   ct[416] = t23_tmp * t495;
   ct[417] = t577;
-  ct[418] = -((t24_tmp * t452) * 1.4);
+  ct[418] = -(t24_tmp * t452 * 1.4);
   ct[419] = t176_tmp * t24_tmp;
-  ct[420] = (t86_tmp * 61.0) + (-(t59_tmp * 61.0));
-  h_ct_tmp = t20_tmp * t140;
-  ct[421] = ct_idx_284_tmp + (-(h_ct_tmp * 61.0));
-  ct[422] = t17_tmp * ct_idx_254_tmp;
+  ct[420] = t86_tmp * 61.0 - t59_tmp * 61.0;
+  t328 = t20_tmp * t140;
+  ct[421] = ct_idx_284_tmp - t328 * 61.0;
+  ct[422] = t433;
   ct[423] = ct_idx_333_tmp * 150.35;
-  ct[424] = t25_tmp * ct_idx_254_tmp;
-  ct[425] = -(c_ct_tmp * 10.5);
+  t433 = t25_tmp * ct_idx_254_tmp;
+  ct[424] = t433;
+  ct[425] = -(e_ct_tmp * 10.5);
   ct[426] = t479 * 19.8;
   ct[427] = t509_tmp * 117.0;
   ct[428] = t509_tmp * 118.0;
   ct[429] = t510 * 117.0;
   ct[430] = ct_idx_323;
-  ct[431] = t482 * 0.07;
+  ct[431] = t482_tmp * 0.07;
   ct[432] = ct_idx_327;
-  i_ct_tmp = t334_tmp * t184_tmp;
-  ct[433] = i_ct_tmp * 0.32;
-  ct[434] = t487 * 0.85;
+  ct_idx_161_tmp = t334_tmp * t184_tmp;
+  ct[433] = ct_idx_161_tmp * 0.32;
+  ct[434] = t365_tmp * 0.85;
   ct[435] = t17_tmp * t504;
-  ct[436] = t17_tmp * t519;
+  ct[436] = t17_tmp * b_t519_tmp;
   ct[437] = t14_tmp * ct_idx_259_tmp;
   ct[438] = t270_tmp * t447;
   ct[439] = t25_tmp * t504;
-  ct[440] = t25_tmp * t519;
+  ct[440] = t25_tmp * b_t519_tmp;
   ct[441] = t22_tmp * ct_idx_259_tmp;
   ct[442] = t17_tmp * t507;
   ct[443] = t25_tmp * t507;
-  ct[444] = t622;
-  k_ct_tmp = t12_tmp * t274_tmp;
-  ct[445] = -(k_ct_tmp * 0.32);
-  ct[446] = -(k_ct_tmp * 0.85);
+  ct[444] = ct_idx_287_tmp;
+  t84 = t12_tmp * t274_tmp;
+  ct[445] = -(t84 * 0.32);
+  ct[446] = -(t84 * 0.85);
   ct[447] = ct_idx_333;
-  ct[448] = ct_idx_279 * 33.71;
-  ct[449] = ct_idx_282 * 22.79;
+  ct[448] = t292_tmp * 33.71;
+  ct[449] = t293_tmp * 22.79;
   ct[450] = t50_tmp * 61.0;
   ct[451] = t12_tmp * t557;
-  t73 = t14_tmp * t449;
-  ct[452] = t73 * 10.5;
-  t92 = t577_tmp * t184_tmp;
-  ct[453] = -(t92 * 0.32);
-  ct[454] = -(t92 * 0.07);
+  t76 = t14_tmp * t449;
+  ct[452] = t76 * 10.5;
+  t83 = t577_tmp * t184_tmp;
+  ct[453] = -(t83 * 0.32);
+  ct[454] = -(t83 * 0.07);
   ct[455] = t545 * 1.4;
-  t76 = (t16_tmp * t19_tmp) * t20_tmp;
-  t83 = t76 * t184_tmp;
-  ct[456] = t83 * 210.0;
+  t92 = t16_tmp * t19_tmp * t20_tmp;
+  t510 = t92 * t184_tmp;
+  ct[456] = t510 * 210.0;
   ct[457] = t649;
   ct[458] = t509_tmp * 0.85;
   ct[459] = t509_tmp * 0.07;
-  t84 = t577_tmp * t274_tmp;
-  ct[460] = t84 * 0.32;
+  t518 = t577_tmp * t274_tmp;
+  ct[460] = t518 * 0.32;
   ct[461] = o_ct_tmp * 0.32;
-  ct[462] = t84 * 0.85;
+  ct[462] = t518 * 0.85;
   ct[463] = t191 * ct_idx_240;
   ct[464] = t544 * 10.5;
-  ct[465] = t16_tmp * t554;
+  ct[465] = j_ct_tmp;
   ct[466] = t544 * 4453.0;
   ct[467] = t16_tmp * t569;
-  t518 = t236_tmp * ct_idx_250;
-  ct[468] = t518 * 10.5;
+  j_ct_tmp = t236_tmp * ct_idx_250;
+  ct[468] = j_ct_tmp * 10.5;
   ct[469] = t67;
-  ct[470] = t24_tmp * t554;
-  ct[471] = (t857_tmp * t184_tmp) * 4453.0;
-  ct[472] = t546 * 4453.0;
+  ct[470] = m_ct_tmp;
+  ct[471] = t857_tmp * t184_tmp * 4453.0;
+  ct[472] = t519_tmp * 4453.0;
   ct[473] = t24_tmp * t569;
   ct[474] = t15_tmp * t577;
-  t510 = t16_tmp * t487;
-  ct[475] = t510 * 10.5;
+  m_ct_tmp = t16_tmp * t365_tmp;
+  ct[475] = m_ct_tmp * 10.5;
   ct[476] = ct_idx_340;
   ct[477] = t14_tmp * t556;
   ct[478] = t68;
   ct[479] = t54_tmp * t495;
   ct[480] = t23_tmp * t577;
   ct[481] = t22_tmp * t556;
-  t1084 = (t16_tmp * t24_tmp) * t274_tmp;
+  t1084 = t16_tmp * t24_tmp * t274_tmp;
   ct[482] = -(t1084 * 19.8);
-  ct[483] = (t12_tmp * ct_idx_254_tmp) * 73.0;
+  ct[483] = t12_tmp * ct_idx_254_tmp * 73.0;
   ct[484] = t685;
   ct[485] = t687;
   ct[486] = t42_tmp;
   ct[487] = -t657;
   ct[488] = t693;
   ct[489] = t233 * ct_idx_240;
-  ct[490] = t482 * 30.09;
-  ct[491] = (t14_tmp * ct_idx_251) * 33.71;
-  ct[492] = b_ct_tmp * 22.79;
-  ct[493] = -(t92 * 150.35);
+  ct[490] = t482_tmp * 30.09;
+  ct[491] = t14_tmp * ct_idx_251 * 33.71;
+  ct[492] = g_ct_tmp * 22.79;
+  ct[493] = -(t83 * 150.35);
   ct[494] = t43_tmp;
-  ct[495] = t92 * 30.09;
-  ct[496] = i_ct_tmp * 79.89;
-  ct[497] = (t16_tmp * t504) * 1.4;
+  ct[495] = t83 * 30.09;
+  ct[496] = ct_idx_161_tmp * 79.89;
+  ct[497] = t16_tmp * t504 * 1.4;
   ct[498] = t704;
   ct[499] = t705;
   ct[500] = t544 * 9150.0;
-  ct[501] = (t24_tmp * t504) * 1.4;
-  ct[502] = t546 * 19.8;
+  ct[501] = t24_tmp * t504 * 1.4;
+  ct[502] = t519_tmp * 19.8;
   ct[503] = t71;
   ct[504] = -ct_idx_340;
   ct[505] = t715;
-  ct[506] = t83 * 102.2;
-  b_ct_tmp = t20_tmp * ct_idx_295;
-  ct[507] = b_ct_tmp * 0.32;
-  ct[508] = b_ct_tmp * 0.85;
-  ct[509] = (t24_tmp * t487) * 19.8;
+  ct[506] = t510 * 102.2;
+  g_ct_tmp = t20_tmp * ct_idx_295;
+  ct[507] = g_ct_tmp * 0.32;
+  ct[508] = g_ct_tmp * 0.85;
+  ct[509] = t24_tmp * t365_tmp * 19.8;
   ct[510] = t44_tmp;
-  ct[511] = (t777_tmp * t184_tmp) * 102.2;
-  ct[512] = -(k_ct_tmp * 79.89);
-  ct[513] = -(c_ct_tmp * 25.53);
+  ct[511] = t777_tmp * t184_tmp * 102.2;
+  ct[512] = -(t84 * 79.89);
+  ct[513] = -(e_ct_tmp * 25.53);
   ct[514] = -t693;
   ct[515] = o_ct_tmp * 150.35;
-  ct[516] = t17_tmp * t622;
+  ct[516] = t457_tmp;
   ct[517] = -t704;
   ct[518] = -t705;
-  c_ct_tmp = (ct_tmp * t16_tmp) * t274_tmp;
-  ct[519] = c_ct_tmp * 4453.0;
-  ct[520] = t25_tmp * t622;
+  e_ct_tmp = c_ct_tmp * t16_tmp * t274_tmp;
+  ct[519] = e_ct_tmp * 4453.0;
+  ct[520] = t54;
   ct[521] = t103 * t504;
-  ct[522] = (t18_tmp * t504) * 4453.0;
-  ct[523] = ((ct_tmp * t24_tmp) * t274_tmp) * 4453.0;
-  ct_tmp = t56 - ct_idx_260;
-  ct[524] = (-t15_tmp) * ct_tmp;
+  ct[522] = t18_tmp * t504 * 4453.0;
+  ct[523] = c_ct_tmp * t24_tmp * t274_tmp * 4453.0;
+  c_ct_tmp = t56 - ct_idx_260;
+  ct[524] = -t15_tmp * c_ct_tmp;
   ct[525] = t577_tmp * t557;
   ct[526] = t17_tmp * t623;
-  i_ct_tmp = t246_tmp * t449;
-  ct[527] = i_ct_tmp * 10.5;
-  ct[528] = ((t20_tmp * t46_tmp) * t274_tmp) * 4453.0;
+  o_ct_tmp = t246_tmp * t449;
+  ct[527] = o_ct_tmp * 10.5;
+  ct[528] = t20_tmp * t46_tmp * t274_tmp * 4453.0;
   ct[529] = t25_tmp * t623;
   ct[530] = t46_tmp;
   ct[531] = t1084 * 23.17;
   ct[532] = t751;
   ct[533] = t12_tmp * t685;
-  ct[534] = t73 * 22.79;
-  ct[535] = (t577_tmp * ct_idx_254_tmp) * 73.0;
-  ct[536] = -((t334_tmp * ct_idx_285) * 73.0);
-  ct[537] = (t22_tmp * t448) * 33.71;
-  ct[538] = t84 * 79.89;
-  k_ct_tmp = t11_tmp * t504;
-  ct[539] = k_ct_tmp * 0.32;
-  ct[540] = k_ct_tmp * 0.07;
-  ct[541] = c_ct_tmp * 9150.0;
+  ct[534] = t76 * 22.79;
+  ct[535] = t577_tmp * ct_idx_254_tmp * 73.0;
+  ct[536] = -(t334_tmp * ct_idx_285 * 73.0);
+  ct[537] = t22_tmp * t448 * 33.71;
+  ct[538] = t518 * 79.89;
+  t457_tmp = t11_tmp * t504;
+  ct[539] = t457_tmp * 0.32;
+  ct[540] = t457_tmp * 0.07;
+  ct[541] = e_ct_tmp * 9150.0;
   ct[542] = t236 + t446;
-  ct[543] = (t18_tmp * t554) * 350.0;
+  ct[543] = t18_tmp * ct_idx_273_tmp * 350.0;
   ct[544] = t47_tmp;
-  c_ct_tmp = t20_tmp * t507;
-  ct[545] = c_ct_tmp * 0.32;
+  e_ct_tmp = t20_tmp * t507;
+  ct[545] = e_ct_tmp * 0.32;
   ct[546] = t777;
-  ct[547] = c_ct_tmp * 0.07;
-  ct[548] = (t102 * t17_tmp) * ct_idx_292;
+  ct[547] = e_ct_tmp * 0.07;
+  ct[548] = t102 * t17_tmp * t318_tmp;
   ct[549] = t15_tmp * t649;
   ct[550] = t23_tmp * t649;
   ct[551] = t10_tmp * t633;
   ct[552] = t15_tmp * t633;
   ct[553] = t23_tmp * t633;
-  ct[554] = (ct_idx_284_tmp_tmp * 21350.0) + (-(h_ct_tmp * 21350.0));
-  ct[555] = t292 + ((t24_tmp * t25_tmp) * t274_tmp);
+  ct[554] = ct_idx_284_tmp_tmp * 21350.0 - t328 * 21350.0;
+  ct[555] = t292_tmp + t24_tmp * t25_tmp * t274_tmp;
   ct[556] = -t751;
   ct[557] = t336 * ct_idx_240;
   ct[558] = t544 * 23.17;
   ct[559] = t544 * 25.53;
   ct[560] = t48_tmp;
   ct[561] = t800;
-  ct[562] = t518 * 22.79;
-  ct[563] = (t25_tmp * t479) * 33.71;
-  ct[564] = t510 * 23.17;
+  ct[562] = j_ct_tmp * 22.79;
+  ct[563] = t25_tmp * t479 * 33.71;
+  ct[564] = m_ct_tmp * 23.17;
   ct[565] = ct_idx_340_tmp * 23.17;
-  ct[566] = t510 * 25.53;
+  ct[566] = m_ct_tmp * 25.53;
   ct[567] = t49_tmp;
   ct[568] = ct_idx_363;
-  ct[569] = (t246_tmp * ct_idx_251) * 33.71;
-  ct[570] = t23_tmp * ct_tmp;
+  ct[569] = t246_tmp * ct_idx_251 * 33.71;
+  ct[570] = t23_tmp * c_ct_tmp;
   ct[571] = -t777;
-  ct[572] = b_ct_tmp * 79.89;
-  b_ct_tmp = (t11_tmp * t16_tmp) * t504;
-  ct[573] = b_ct_tmp * 210.0;
+  ct[572] = g_ct_tmp * 79.89;
+  g_ct_tmp = t11_tmp * t16_tmp * t504;
+  ct[573] = g_ct_tmp * 210.0;
   ct[574] = t819;
   ct[575] = t820;
   ct[576] = t15_tmp * t687;
-  ct[577] = (t11_tmp * t78_tmp) + (t22_tmp * ct_idx_241);
-  ct[578] = t50_tmp + t546;
+  ct[577] = t11_tmp * t78_tmp + t22_tmp * ct_idx_241;
+  ct[578] = b_t519_tmp;
   ct[579] = t23_tmp * t687;
-  h_ct_tmp = (t162 * t46_tmp) * t184_tmp;
-  ct[580] = -(h_ct_tmp * 4453.0);
-  ct[581] = t79 + (t16_tmp * ct_idx_295);
+  j_ct_tmp = t73 * t46_tmp * t184_tmp;
+  ct[580] = -(j_ct_tmp * 4453.0);
+  ct[581] = t79 + t16_tmp * ct_idx_295;
   ct[582] = t22_tmp * t715;
-  o_ct_tmp = t328_tmp * ct_idx_295;
-  ct[583] = o_ct_tmp * 0.32;
-  ct[584] = o_ct_tmp * 0.85;
+  m_ct_tmp = t328_tmp * ct_idx_295;
+  ct[583] = m_ct_tmp * 0.32;
+  ct[584] = m_ct_tmp * 0.85;
   ct[585] = t10_tmp * t654;
   ct[586] = t15_tmp * t654;
-  t162 *= t507;
-  ct[587] = t162 * 210.0;
-  ct[588] = -(((t195_tmp * t46_tmp) * t184_tmp) * 4453.0);
+  t54 = t73 * t507;
+  ct[587] = t54 * 210.0;
+  ct[588] = -(t195_tmp * t46_tmp * t184_tmp * 4453.0);
   ct[589] = t23_tmp * t654;
-  ct[590] = (t11_tmp * t622) * 73.0;
-  ct[591] = k_ct_tmp * 150.35;
+  ct[590] = t11_tmp * ct_idx_287_tmp * 73.0;
+  ct[591] = t457_tmp * 150.35;
   ct[592] = -t800;
-  ct[593] = (t15_tmp * ct_tmp) * -1.4;
+  ct[593] = t15_tmp * c_ct_tmp * -1.4;
   ct[594] = -ct_idx_363;
-  ct[595] = (t20_tmp * t623) * 73.0;
-  ct[596] = c_ct_tmp * 150.35;
+  ct[595] = t20_tmp * t623 * 73.0;
+  ct[596] = e_ct_tmp * 150.35;
   ct[597] = -t819;
   ct[598] = -t820;
   ct[599] = t855;
   ct[600] = t857;
-  ct[601] = -(h_ct_tmp * 9150.0);
-  ct[602] = (g_ct_tmp * t507) * 4453.0;
+  ct[601] = -(j_ct_tmp * 9150.0);
+  ct[602] = k_ct_tmp * t507 * 4453.0;
   ct[603] = t862;
-  ct[604] = t293 + (-((t17_tmp * t24_tmp) * t274_tmp));
-  ct[605] = k_ct_tmp * 30.09;
-  ct[606] = (t236_tmp * t448) * 33.71;
-  ct[607] = i_ct_tmp * 22.79;
-  ct[608] = (t76 * t274_tmp) * 23.17;
+  ct[604] = t293_tmp - t17_tmp * t24_tmp * t274_tmp;
+  ct[605] = t457_tmp * 30.09;
+  ct[606] = t236_tmp * t448 * 33.71;
+  ct[607] = o_ct_tmp * 22.79;
+  ct[608] = t92 * t274_tmp * 23.17;
   ct[609] = t577_tmp * t685;
   ct[610] = t236_tmp * t715;
-  ct[611] = c_ct_tmp * 30.09;
-  ct[612] = b_ct_tmp * 102.2;
-  ct_tmp = t54_tmp * t504;
-  ct[613] = ct_tmp * 0.32;
-  ct[614] = ct_tmp * 0.07;
-  ct[615] = ((t11_tmp * t24_tmp) * t504) * 102.2;
+  ct[611] = e_ct_tmp * 30.09;
+  ct[612] = g_ct_tmp * 102.2;
+  c_ct_tmp = t54_tmp * t504;
+  ct[613] = c_ct_tmp * 0.32;
+  ct[614] = c_ct_tmp * 0.07;
+  ct[615] = t11_tmp * t24_tmp * t504 * 102.2;
   ct[616] = -t855;
   ct[617] = t882;
   ct[618] = t152 + t509_tmp;
   ct[619] = -t857;
-  b_ct_tmp = t328_tmp * t507;
-  ct[620] = b_ct_tmp * 0.32;
-  ct[621] = b_ct_tmp * 0.07;
-  ct[622] = t162 * 102.2;
-  ct[623] = (t195_tmp * t507) * 102.2;
+  e_ct_tmp = t328_tmp * t507;
+  ct[620] = e_ct_tmp * 0.32;
+  ct[621] = e_ct_tmp * 0.07;
+  ct[622] = t54 * 102.2;
+  ct[623] = t195_tmp * t507 * 102.2;
   ct[624] = t898;
-  ct[625] = t16_tmp * (((t24_tmp * t44_tmp) * 19.8) + (-((t24_tmp * t53_tmp) *
-    19.8)));
+  ct[625] = t16_tmp * (t24_tmp * t44_tmp * 19.8 - t24_tmp * t53_tmp * 19.8);
   ct[626] = t52_tmp;
-  ct[627] = (t152 + t153) + (t10_tmp * (-t135));
-  ct[628] = (t17_tmp * t546) * 22.79;
-  ct[629] = t328;
+  ct[627] = (t152 + t153) + t10_tmp * -t135;
+  ct[628] = t17_tmp * t519_tmp * 22.79;
+  ct[629] = t162;
   ct[630] = -t882;
   ct[631] = t53_tmp;
-  ct[632] = (t25_tmp * t546) * 33.71;
-  ct[633] = o_ct_tmp * 79.89;
-  t162 = ((t10_tmp * t16_tmp) * t19_tmp) * t504;
-  ct[634] = t162 * 210.0;
-  c_ct_tmp = (ct_idx_314_tmp_tmp * t19_tmp) * t507;
-  ct[635] = c_ct_tmp * 210.0;
+  ct[632] = t25_tmp * t519_tmp * 33.71;
+  ct[633] = m_ct_tmp * 79.89;
+  g_ct_tmp = t10_tmp * t16_tmp * t19_tmp * t504;
+  ct[634] = g_ct_tmp * 210.0;
+  j_ct_tmp = ct_idx_314_tmp_tmp * t19_tmp * t507;
+  ct[635] = j_ct_tmp * 210.0;
   ct[636] = t15_tmp * t862;
   ct[637] = t23_tmp * t862;
-  ct[638] = (t54_tmp * t622) * 73.0;
-  ct[639] = ct_tmp * 150.35;
-  ct[640] = -t328;
-  ct[641] = (t328_tmp * t623) * 73.0;
-  ct[642] = b_ct_tmp * 150.35;
-  ct[643] = (t54 * t507) * 4453.0;
+  ct[638] = t54_tmp * ct_idx_287_tmp * 73.0;
+  ct[639] = c_ct_tmp * 150.35;
+  ct[640] = -t162;
+  ct[641] = t328_tmp * t623 * 73.0;
+  ct[642] = e_ct_tmp * 150.35;
+  ct[643] = t161 * t507 * 4453.0;
   ct[644] = t94;
-  g_ct_tmp = t189 - ct_idx_305;
-  ct[645] = (-t15_tmp) * g_ct_tmp;
+  k_ct_tmp = t189 - ct_idx_305;
+  ct[645] = -t15_tmp * k_ct_tmp;
   ct[646] = t17_tmp * t898;
-  ct[647] = (-t23_tmp) * g_ct_tmp;
+  ct[647] = -t23_tmp * k_ct_tmp;
   ct[648] = t25_tmp * t898;
-  ct[649] = ct_tmp * 30.09;
-  ct[650] = b_ct_tmp * 30.09;
-  ct[651] = t162 * 102.2;
-  ct[652] = ((t54_tmp * t24_tmp) * t504) * 102.2;
-  ct[653] = c_ct_tmp * 102.2;
-  ct[654] = ((t328_tmp * t24_tmp) * t507) * 102.2;
-  ct[655] = (-t15_tmp) * t433;
-  ct[656] = (-t23_tmp) * t433;
-  ct[657] = (-t17_tmp) * f_ct_tmp;
-  ct[658] = (-t25_tmp) * f_ct_tmp;
-  ct[659] = t161 * 0.32;
-  ct[660] = t161 * 0.07;
-  ct[661] = t119 * 210.0;
-  ct[662] = ((t184_tmp * t13_tmp) * t274_tmp) * 30.09;
-  ct[663] = ((t24_tmp * t292) * 1.4) + (t25_tmp * ct_idx_254_tmp);
-  ct[664] = (t16_tmp * t898) * 1.4;
-  ct[665] = (-t14_tmp) * d_ct_tmp;
-  ct[666] = t10_tmp * t433;
-  ct[667] = (t24_tmp * t898) * 1.4;
+  ct[649] = c_ct_tmp * 30.09;
+  ct[650] = e_ct_tmp * 30.09;
+  ct[651] = g_ct_tmp * 102.2;
+  ct[652] = t54_tmp * t24_tmp * t504 * 102.2;
+  ct[653] = j_ct_tmp * 102.2;
+  ct[654] = t328_tmp * t24_tmp * t507 * 102.2;
+  ct[655] = -t15_tmp * b_ct_tmp;
+  ct[656] = -t23_tmp * b_ct_tmp;
+  ct[657] = -t17_tmp * h_ct_tmp;
+  ct[658] = -t25_tmp * h_ct_tmp;
+  ct[659] = t119 * 0.32;
+  ct[660] = t119 * 0.07;
+  ct[661] = ct_tmp * 210.0;
+  ct[662] = d_ct_tmp * t274_tmp * 30.09;
+  ct[663] = t484_tmp * 1.4 + t433;
+  ct[664] = t16_tmp * t898 * 1.4;
+  ct[665] = -t14_tmp * f_ct_tmp;
+  ct[666] = t10_tmp * b_ct_tmp;
+  ct[667] = t24_tmp * t898 * 1.4;
   ct[668] = p_ct_tmp * 10.5;
-  ct[669] = t24_tmp * ((e_ct_tmp * 23.17) + (-(j_ct_tmp * 23.17)));
-  ct[670] = m_ct_tmp * 0.32;
+  ct[669] = t24_tmp * (i_ct_tmp * 23.17 - l_ct_tmp * 23.17);
+  ct[670] = n_ct_tmp * 0.32;
   ft_2(ct, mass_mat);
 }
 
 /*
- * Arguments    : real_T c_A[9][9]
- *                real_T b_B[9]
- * Return Type  : void
+ *
  */
-static void mldivide(real_T c_A[9][9], real_T b_B[9])
+static void mldivide(real_T A[9][9], real_T B[9])
 {
-  real_T d_A[9][9];
-  real_T s;
+  real_T b_A[9][9];
   real_T smax;
-  int32_T a;
-  int32_T b_i;
-  int32_T b_tmp;
+  int32_T ijA;
   int32_T j;
   int32_T jA;
   int32_T jp1j;
   int32_T k;
-  int32_T n;
+  int32_T temp_tmp;
   int8_T ipiv[9];
-  int8_T c_i;
-  for (b_i = 0; b_i < 9; b_i++) {
+  for (ijA = 0; ijA < 9; ijA++) {
     for (jA = 0; jA < 9; jA++) {
-      d_A[b_i][jA] = c_A[b_i][jA];
+      b_A[ijA][jA] = A[ijA][jA];
     }
 
-    ipiv[b_i] = (int8_T)(b_i + 1);
+    ipiv[ijA] = (int8_T)(ijA + 1);
   }
 
   for (j = 0; j < 8; j++) {
+    int32_T b_tmp;
+    int32_T n;
     b_tmp = j * 10;
     jp1j = b_tmp + 2;
     n = 9 - j;
-    a = 0;
-    smax = fabs((&d_A[0][0])[b_tmp]);
+    jA = 0;
+    smax = fabs((&b_A[0][0])[b_tmp]);
     for (k = 2; k <= n; k++) {
-      s = fabs((&d_A[0][0])[(b_tmp + k) - 1]);
+      real_T s;
+      s = fabs((&b_A[0][0])[(b_tmp + k) - 1]);
       if (s > smax) {
-        a = k - 1;
+        jA = k - 1;
         smax = s;
       }
     }
 
-    if ((&d_A[0][0])[b_tmp + a] != 0.0) {
-      if (a != 0) {
-        jA = j + a;
+    if ((&b_A[0][0])[b_tmp + jA] != 0.0) {
+      if (jA != 0) {
+        jA += j;
         ipiv[j] = (int8_T)(jA + 1);
         for (k = 0; k < 9; k++) {
-          a = j + (k * 9);
-          smax = (&d_A[0][0])[a];
-          b_i = jA + (k * 9);
-          (&d_A[0][0])[a] = (&d_A[0][0])[b_i];
-          (&d_A[0][0])[b_i] = smax;
+          temp_tmp = j + k * 9;
+          smax = (&b_A[0][0])[temp_tmp];
+          ijA = jA + k * 9;
+          (&b_A[0][0])[temp_tmp] = (&b_A[0][0])[ijA];
+          (&b_A[0][0])[ijA] = smax;
         }
       }
 
-      k = (b_tmp - j) + 9;
-      for (b_i = jp1j; b_i <= k; b_i++) {
-        (&d_A[0][0])[b_i - 1] /= (&d_A[0][0])[b_tmp];
+      ijA = (b_tmp - j) + 9;
+      for (temp_tmp = jp1j; temp_tmp <= ijA; temp_tmp++) {
+        (&b_A[0][0])[temp_tmp - 1] /= (&b_A[0][0])[b_tmp];
       }
     }
 
     n = 7 - j;
     jA = b_tmp + 11;
-    for (a = 0; a <= n; a++) {
-      smax = (&d_A[0][0])[(b_tmp + (a * 9)) + 9];
+    for (jp1j = 0; jp1j <= n; jp1j++) {
+      smax = (&b_A[0][0])[(b_tmp + jp1j * 9) + 9];
       if (smax != 0.0) {
-        k = (jA - j) + 7;
-        if ((jA <= k) && (k > 2147483646)) {
-          b_check_forloop_overflow_error();
+        temp_tmp = (jA - j) + 7;
+        if ((jA <= temp_tmp) && (temp_tmp > 2147483646)) {
+          check_forloop_overflow_error();
         }
 
-        for (b_i = jA; b_i <= k; b_i++) {
-          (&d_A[0][0])[b_i - 1] += (&d_A[0][0])[((b_tmp + b_i) - jA) + 1] *
-            (-smax);
+        for (ijA = jA; ijA <= temp_tmp; ijA++) {
+          (&b_A[0][0])[ijA - 1] += (&b_A[0][0])[((b_tmp + ijA) - jA) + 1] *
+            -smax;
         }
       }
 
@@ -8522,43 +8419,39 @@ static void mldivide(real_T c_A[9][9], real_T b_B[9])
     }
   }
 
-  for (b_i = 0; b_i < 8; b_i++) {
-    c_i = ipiv[b_i];
-    if (((int32_T)c_i) != (b_i + 1)) {
-      smax = b_B[b_i];
-      b_B[b_i] = b_B[c_i - 1];
-      b_B[c_i - 1] = smax;
+  for (temp_tmp = 0; temp_tmp < 8; temp_tmp++) {
+    int8_T i;
+    i = ipiv[temp_tmp];
+    if (i != temp_tmp + 1) {
+      smax = B[temp_tmp];
+      B[temp_tmp] = B[i - 1];
+      B[i - 1] = smax;
     }
   }
 
   for (k = 0; k < 9; k++) {
     jA = 9 * k;
-    if (b_B[k] != 0.0) {
-      a = k + 2;
-      for (b_i = a; b_i < 10; b_i++) {
-        b_B[b_i - 1] -= b_B[k] * (&d_A[0][0])[(b_i + jA) - 1];
+    if (B[k] != 0.0) {
+      ijA = k + 2;
+      for (temp_tmp = ijA; temp_tmp < 10; temp_tmp++) {
+        B[temp_tmp - 1] -= B[k] * (&b_A[0][0])[(temp_tmp + jA) - 1];
       }
     }
   }
 
   for (k = 8; k >= 0; k--) {
     jA = 9 * k;
-    if (b_B[k] != 0.0) {
-      b_B[k] /= (&d_A[0][0])[k + jA];
-      for (b_i = 0; b_i < k; b_i++) {
-        b_B[b_i] -= b_B[k] * (&d_A[0][0])[b_i + jA];
+    smax = B[k];
+    if (smax != 0.0) {
+      smax /= (&b_A[0][0])[k + jA];
+      B[k] = smax;
+      for (temp_tmp = 0; temp_tmp < k; temp_tmp++) {
+        B[temp_tmp] -= B[k] * (&b_A[0][0])[temp_tmp + jA];
       }
     }
   }
 }
 
-/*
- * Arguments    : int32_T aIndexValue
- *                int32_T aLoBound
- *                int32_T aHiBound
- *                const rtBoundsCheckInfo *aInfo
- * Return Type  : void
- */
 static void rtDynamicBoundsError(int32_T aIndexValue, int32_T aLoBound, int32_T
   aHiBound, const rtBoundsCheckInfo *aInfo)
 {
@@ -8569,297 +8462,1332 @@ static void rtDynamicBoundsError(int32_T aIndexValue, int32_T aLoBound, int32_T
   }
 
   if (rtIsNullOrEmptyString(aInfo->aName)) {
-    (void)fprintf(stderr,
-                  "Index exceeds array dimensions. Index value %d exceeds valid range [%d-%d].",
-                  aIndexValue, aLoBound, aHiBound);
-    (void)fprintf(stderr, "\n");
+    fprintf(stderr,
+            "Index exceeds array dimensions. Index value %d exceeds valid range [%d-%d].",
+            aIndexValue, aLoBound, aHiBound);
+    fprintf(stderr, "\n");
     rtReportErrorLocation(aInfo->fName, aInfo->lineNo);
-    (void)fflush(stderr);
+    fflush(stderr);
     abort();
   } else {
-    (void)fprintf(stderr,
-                  "Index exceeds array dimensions. Index value %d exceeds valid range [%d-%d] for array \'%s\'.",
-                  aIndexValue, aLoBound, aHiBound, aInfo->aName);
-    (void)fprintf(stderr, "\n");
+    fprintf(stderr,
+            "Index exceeds array dimensions. Index value %d exceeds valid range [%d-%d] for array \'%s\'.",
+            aIndexValue, aLoBound, aHiBound, aInfo->aName);
+    fprintf(stderr, "\n");
     rtReportErrorLocation(aInfo->fName, aInfo->lineNo);
-    (void)fflush(stderr);
+    fflush(stderr);
     abort();
   }
 }
 
-/*
- * Arguments    : const int32_T b_i
- *                const char_T *r
- *                const char_T *aFcnName
- *                int32_T aLineNum
- * Return Type  : void
- */
-static void rtErrorWithMessageID(const int32_T b_i, const char_T *r, const
-  char_T *aFcnName, int32_T aLineNum)
+static void rtErrorWithMessageID(const char_T *aFcnName, int32_T aLineNum)
 {
-  (void)fprintf(stderr,
-                "The loop variable of class %.*s might overflow on the last iteration of the for loop. This could lead to an infinite loop.",
-                b_i, r);
-  (void)fprintf(stderr, "\n");
-  (void)fprintf(stderr, "Error in %s (line %d)", aFcnName, aLineNum);
-  (void)fprintf(stderr, "\n");
-  (void)fflush(stderr);
+  fprintf(stderr, "Matrix must be positive definite.");
+  fprintf(stderr, "\n");
+  fprintf(stderr, "Error in %s (line %d)", aFcnName, aLineNum);
+  fprintf(stderr, "\n");
+  fflush(stderr);
   abort();
 }
 
-/*
- * Arguments    : const char_T *aString
- * Return Type  : boolean_T
- */
 static boolean_T rtIsNullOrEmptyString(const char_T *aString)
 {
-  return (aString == NULL) || (((int8_T)(*aString)) == '\x00');
+  return (aString == NULL) || (*aString == '\x00');
 }
 
-/*
- * Arguments    : const char_T *aFcnName
- *                int32_T aLineNo
- * Return Type  : void
- */
 static void rtReportErrorLocation(const char_T *aFcnName, int32_T aLineNo)
 {
-  (void)fprintf(stderr, "Error in %s (line %d)", aFcnName, aLineNo);
-  (void)fprintf(stderr, "\n");
+  fprintf(stderr, "Error in %s (line %d)", aFcnName, aLineNo);
+  fprintf(stderr, "\n");
 }
 
 /*
- * function [y_true] = bit_one_step(x0, tau_applied, unlock, w_piv, piv_flag,...
- *     dt, num_steps, tau_max_piv, thet_pit_nom)
- *
- * Run initialization script
- *
- * Arguments    : const real_T x0[21]
- *                const real_T tau_applied[9]
- *                const real_T unlock[9]
- *                real_T w_piv
- *                boolean_T piv_flag
- *                real_T dt
- *                uint16_T num_steps
- *                real_T tau_max_piv
- *                real_T thet_pit_nom
- *                real_T y_true[21]
- * Return Type  : void
+ * function [y_true, y_flex] = bit_one_step(x0, tau_applied, unlock, w_piv, piv_flag,...
+ *     dt, num_steps, tau_max_piv, thet_pit_nom, x_flex0, tau_flex)
  */
 void bit_one_step(const real_T x0[21], const real_T tau_applied[9], const real_T
                   unlock[9], real_T w_piv, boolean_T piv_flag, real_T dt,
                   uint16_T num_steps, real_T tau_max_piv, real_T thet_pit_nom,
-                  real_T y_true[21])
+                  const real_T x_flex0[104], const real_T tau_flex[5], real_T
+                  y_true[21], real_T y_flex[104])
 {
-  real_T b_y_true[21];
-  real_T k1[21];
-  real_T k2[21];
-  real_T k3[21];
-  real_T varargout_1[21];
-  real_T d;
-  real_T dw_piv;
-  int32_T b_i;
-  int32_T c_i;
-  int32_T step;
-  boolean_T th_over[9];
-  boolean_T th_under[9];
+  static const real_T a_flex[104][104] = { { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      -6850.0880077557886, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, -7962.6706577762307, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 }, { 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -12647.866496740349, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      -13102.13472955605, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, -17096.533871483229, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -19067.27580068196, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 }, { 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      -25085.498408823711, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, -26771.233428688109, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -28195.442436642312, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      -34562.538682549493, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, -36233.2578458545, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -48525.3521198063, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      -52667.483029779527, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 }, { 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, -64059.558804126144, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -64572.011562112908, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      -68941.640846773153, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, -76967.907407482664, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 }, { 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -81003.609059009119, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      -90222.62662533854, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, -92586.065715088145, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -95916.09088249068, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 }, { 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      -101665.5083955781, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, -108912.3115872177, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -129428.24167601109, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      -152960.2015770768, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, -154039.89905106369, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -163213.47678699941, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      -166657.26090653459, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 }, { 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, -172526.03224322811, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -176768.18600326759, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      -182183.82551471441, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, -211920.51399000589, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 }, { 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -214126.80521207751, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      -223222.93762258449, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, -229895.57465282839, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -240003.81612398339, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 }, { 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      -244064.29661276529, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, -253884.3362742863, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -259570.1238903646, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      -274165.328172819, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, -283336.09120653989, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -288225.92719689809, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      -297350.78483045712, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 }, { 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, -301055.71221588022, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -316221.39474900393, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      -317060.74671177007, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, -334528.25056612171, 0.0, 0.0, 0.0, 0.0, 0.0 }, { 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -347548.48344749858, 0.0, 0.0, 0.0,
+      0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      -372964.2843963927, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, -378028.03081502032, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -388815.66217016062, 0.0 }, { 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      -394431.31787162268 }, { 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0 }, { 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0 } };
 
+  static const real_T b_b_flex[5][104] = { { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.008320756923076926, 0.0065853999999999956, -0.0045507713846153841,
+      2.3593846153845192E-5, 2.7445538461513241E-5, -0.00249863076923077,
+      1.609753846154618E-5, -0.0022254400000000008, -0.002463941538461537,
+      0.00223066153846153, -2.8643076923081969E-5, 8.7846153846164549E-6,
+      1.9177230769230859E-5, 0.003132307692307692, 0.00063538461538461828,
+      -3.5815384615377248E-5, 2.066923076923129E-6, -1.4461538461705661E-7,
+      -9.523076923055062E-6, 5.5323076923078142E-5, -1.191384615384621E-5,
+      -3.2095384615384731E-5, -1.5276923076928691E-6, -3.313846153849669E-7,
+      -0.0002440030769230776, 3.4061538461520358E-6, 3.0769230769294318E-7,
+      5.15999999999943E-6, 4.5215384615379618E-5, -8.59200000000264E-7,
+      6.1806153846194636E-6, 9.969230769234908E-8, -2.6215384615387891E-5,
+      -5.0276923076923239E-5, 1.3415384615457819E-6, 0.00027900000000000082,
+      -6.5280000000000527E-5, 0.0004809135384615377, -6.4572307692307713E-5,
+      1.0578461538461589E-5, 3.8012000000001492E-5, 5.8218461538461282E-5,
+      -2.194153846153877E-5, -0.00079818153846153721, 0.00013226769230769271,
+      3.2464615384613912E-5, 8.8439384615396387E-5, 0.0087015753846153947,
+      0.0001038030769230861, -0.00037063692307692488, -0.0069612153846153836,
+      -0.00084236923076923 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      -0.02028408936820085, -0.01917573822362954, -0.050332117293214122,
+      0.00017401236588194131, 7.5046009170591643E-6, -0.0331079744840978,
+      -3.5741380815567552E-5, -0.047396984974355107, 0.07450339366742105,
+      0.001964805512433017, -0.00019968240384938941, 5.6516417671537786E-6,
+      -0.00196204276914072, -0.0063280641260071487, -0.0013335468115891491,
+      0.00014313218770316169, -0.00023459760633672989, -9.6483638659862521E-5,
+      0.0016858162049253791, -0.01697703398445943, 0.0002157549203026301,
+      0.0077435122981707972, -0.00017203518714793611, 7.7685000194821223E-5,
+      0.01470508166875594, 9.0665602784118777E-7, 0.00020593681053143761,
+      0.0078081469720444052, 4.29262961931611E-5, -3.6730613043539878E-5,
+      -5.0244673051062043E-5, 0.00048017905966448549, -9.4008861002419316E-5,
+      0.00257742824112801, 8.6306138097192017E-6, 0.004202317993055143,
+      -0.001048493933533806, -0.00177394200299101, 0.0011312292340101479,
+      -0.00020575356572559691, 0.00098064365273438261, 0.001004444670946637,
+      -0.00029764326832194073, -0.01193821943767185, -0.0049886864834683478,
+      0.00058980575887233346, -0.00021359913917956371, -0.00065294045594938466,
+      -0.00079220034843404286, 0.0085644382159712467, -0.015748081391969641,
+      -0.00138099444723674 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0096540544864419688, -0.01163202554143886, -0.0112080844724667,
+      3.8991103418184389E-5, 0.00018744858245097379, 0.020152548174203429,
+      9.906953137522622E-5, 0.02051594005585481, -0.070543142469148973,
+      -0.044373987083714719, 0.00057701933035178815, 2.7359288201526761E-5,
+      0.0070067278074248491, -0.0021995904773451308, -0.00045426829755807992,
+      1.7266105640486431E-5, 0.00010334697399411461, -2.3651989944297551E-6,
+      -0.0002408698479152249, 0.0017120551601996349, -1.2687209902627771E-5,
+      0.0015495234145154039, 8.7508133047740959E-6, 9.8497412856638663E-5,
+      0.03946244961935412, 0.00040842752430981963, -9.9073891653510661E-5,
+      -0.0046964377497579783, 0.000108729033624576, 5.6014471013789877E-5,
+      -9.2546369420510632E-6, 0.000384300455837554, 0.00036850405269307421,
+      0.00319850945996064, 0.00072718931194515584, -0.016490930816761191,
+      0.0031574213879833959, 0.0048372685357203184, 0.0039254228428389224,
+      0.00016628967527601281, -0.000407242887271996, -0.00022437019258169381,
+      -0.00046825830990990171, -0.020657074438624759, -0.0069020276691464568,
+      0.00077598782626265206, 0.0001014908067770024, -0.001735771988292981,
+      -0.000296634453801802, 0.0058872119588950587, -0.0014413788705655861,
+      -0.00177066463838367 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      -0.0040428003580101251, 0.0074533822429511789, 0.0067533698625509113,
+      -0.01214358152176903, -0.0184522418228579, -0.0053156546824438388,
+      -0.005784926297461539, 0.01007161819628742, 0.0099811730068321818,
+      0.016725323182585409, 0.05896156151305363, 0.099212696332003275,
+      -0.02273034167112653, 0.0071072743908696528, -0.024456802788191311,
+      -0.022528240489751671, 0.060418491782594348, 0.030912859721961242,
+      -0.0020977979095101892, 0.06998252935527037, -0.00062013179746458048,
+      0.019571579687998879, 0.032313440511189263, -0.0071153149194514509,
+      0.089621056139394667, 0.0073898092281106161, -0.016483521469336959,
+      -0.048854396482386361, 0.0050727113573692329, 0.027054124644752951,
+      -0.0078139623198636449, -0.0363151838560942, 0.01355254005566818,
+      -0.043992907011276658, 0.035938381876238032, -0.15004597200136369,
+      -0.012797343110262959, 0.0057557493447683268, 0.01985315414395079,
+      0.0022292579060057909, -0.001354836098959031, 0.00093487139263365084,
+      0.0084864464580716673, -0.091530654463505348, -0.06528461539789468,
+      -0.0081798580013035145, 0.0263781227908255, 0.00048200608246749322,
+      0.03940911522087126, -0.17136697661704661, 0.025646802026163481,
+      -0.035870834732484209 }, { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+      0.0039324732961645709, -0.0075931218908970779, -0.00754166140885566,
+      -0.012050109567904241, -0.01820984604788407, 0.0056567649115213583,
+      -0.0057411447961357017, -0.010198305432373879, -0.009950058909049684,
+      -0.015912022138171479, 0.059086734067436079, 0.0992841302200189,
+      0.023166051028904538, 0.0022107087942586671, -0.024557664608419429,
+      -0.021401089625040681, 0.058912837419534882, 0.03009507657086875,
+      0.010974108517545151, -0.070591404052476672, 0.0022084232892898648,
+      -0.01918768523356695, 0.03111064053180964, -0.0079105713432141636,
+      -0.0902519657290362, 0.0055835836709739019, -0.01485229705796603,
+      0.048945935752260028, 0.0048189169315320723, 0.025597760264376671,
+      -0.0076758314089120164, 0.035289635636920808, 0.01052518260579636,
+      0.041272275986769927, 0.026174867780662081, 0.13343504659095989,
+      -0.073044822987175323, -0.0059794632994338674, -0.02207117798895579,
+      -0.0043628552308314743, 0.0199471501891688, 0.02347865569282875,
+      0.01489152586798825, 0.091990534816266345, 0.06344316825951378,
+      -0.016873668952046759, 0.022199905124457329, -0.0007647777929260239,
+      -0.00020938302908622, 0.166599021410397, -0.0144830576027064,
+      -0.054790779983943542 } };
+
+  real_T b_tau[5];
+  real_T c_tau[5];
+  real_T d_tau[5];
+  real_T tau[5];
+  real_T dw_piv;
+  real_T tau_tmp;
+  int32_T b_i;
+  int32_T i;
+  int32_T i1;
+  int32_T step;
+
+  /*  Run initialization script */
   /* 'bit_one_step:4' [ndof, g0, r_n1_n, z_n, p_n, m_n, c_n, ... */
   /* 'bit_one_step:5'     i_n, m_w_n,  i_rw, bear_k_cst, bear_c_cst, k_d, b_d, ... */
-  /* 'bit_one_step:6'     w_rw_max, w_rw_nom, hs_rw, hs_rw_max] = init_func(); */
+  /* 'bit_one_step:6'     w_rw_max, w_rw_nom, hs_rw, hs_rw_max, a_flex, b_flex] = init_func(); */
+  /* %% This file initializes are parameters for simulating BIT (9 DOF) */
+  /* 'init_func:6' ndof = 9; */
+  /* 'init_func:7' g0 = [0; 0; -9.72]; */
+  /* 'init_func:9' tel_offset = [0; 40.0*pi/180; 0]; */
+  /* each column is vector (F4 is -61m from F3) */
+  /* 'init_func:12' r_n1_n = [0,0,0,  0,0,0,0,   0,0; */
+  /* 'init_func:13'           0,0,0,  0,0,0,0,   0,0; */
+  /* 'init_func:14'           0,0,0,-61,0,0,0,-1.4,0]; */
+  /* each column is vector */
+  /* 'init_func:16' z_n = [0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0; */
+  /* 'init_func:17'        0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0; */
+  /* 'init_func:18'        1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0]; */
+  /* 'init_func:20' p_n = [zeros(3,9); z_n]; */
+  /* 'init_func:22' m_n = [0.0,0.0,100000.0,0.0,0.0,1.0,350.0,73.0,150.0]; */
+  /* each column is vector (COM of B3 (flight train) is 30.5m along z */
+  /* 'init_func:25' c_n = [0.,0.,  0.0,0.,0., 0.0,0.,0.,0.; */
+  /* 'init_func:26'        0.,0.,  0.0,0.,0., 0.0,0.,0.,0.; */
+  /* 'init_func:27'        0.,0.,-30.5,0.,0.,-1.4,0.,0.,0.]; */
+  /* each row is row wise matric % Updated gondola on april 13 according to */
+  /* michaels model */
+  /* 'init_func:30' i_n = [ [  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,   0.0], */
+  /* 'init_func:31'         [  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,   0.0], */
+  /* 'init_func:32'         [5448000.0,  0.0,  0.0,  0.0, 5448000.0,  0.0,  0.0,  0.0, 5448000.0], */
+  /* 'init_func:33'         [  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,   0.0], */
+  /* 'init_func:34'         [  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,   0.0], */
+  /* 'init_func:35'         [  1.0,  0.0,  0.0,  0.0,  1.0,  0.0,  0.0,  0.0,   1.0], */
+  /* 'init_func:36'         [  246,    0,    0,    0,  455,    0,    0,    0,   408], */
+  /* 'init_func:37'         [ 151,  0.0,  0.0,  0.0, 405,  0.0,  0.0,  0.0,  339], */
+  /* 'init_func:38'         [   213,  0.0,  0.0,  0.0, 134.0,  0.0, 0, 0, 244]]; */
+  /*  calculate the mass matricies */
+  /* 'init_func:41' m_w_n = zeros(6,6,9); */
+  /* 'init_func:42' for k = 1:9 */
+  /* 'init_func:51' i_rw = reshape([2.5,0.,0.,0.,2.5,0.,0.,0.,4.5], 3, 3); */
+  /* 'init_func:52' bear_k_cst = 0.0*2.0*0.9486*(0.0254*4.44822162)*180.0/pi; */
+  /* 'init_func:53' bear_c_cst = 0.; */
+  /* 'init_func:55' k_d = [0.,0.,0.,0.,0.,0.1*pi/180.0,0.,bear_k_cst,bear_k_cst]'; */
+  /* 'init_func:56' b_d = [0.,0.,0.,0.,0.,0.,0.,0.,0.]'; */
+  /* 'init_func:58' w_rw_max = 2.0*pi; */
+  /* 'init_func:59' w_rw_nom = pi; */
+  /* 'init_func:60' hs_rw = i_rw * w_rw_nom * z_n(:,7); */
+  /* 'init_func:61' hs_rw_max = i_rw * w_rw_max * z_n(:,7); */
+  /*  theta_0 = [0.,0.4*pi/180.0,0.4*pi/180.0,0.1*pi/180.0,0.1*pi/180.0,0.1*pi/180.0,0.,0.1,-40*pi/180]'; */
+  /* 'init_func:65' theta_0 = [0,0,0,0,0,0,0,0,0,0]'; */
+  /* setting IC from past sim */
+  /*  y0 = [0.017552353814854, -0.002156992032555, -0.002273627285241, ... */
+  /*      -0.004091940730352,  -0.002796089196615,   0.019674817779806,... */
+  /*      -0.017606183923045,                   0,                   0, ... */
+  /*       0.207860712172010,  -0.003878840466313,  -0.004340266988222, ... */
+  /*      -0.001098037684871,  -0.001085183886166,  -0.001924742862772, ... */
+  /*       2.937417436471931,                   0,                   0, ... */
+  /*                       0,                   0, 28.274274172758336]'; */
+  /* 'init_func:75' theta_des = [0.,0.4*pi/180.0,0.4*pi/180.0,0.1*pi/180.0,0.1*pi/180.0,0.1*pi/180.0,0.,0.1,40*pi/180]'; */
+  /* 'init_func:76' d_theta_dt_0 = [0.,0.,0.,0.,0.,0.,0.,0.,0.]'; */
+  /* 'init_func:78' unlock = [1.0,1.0,1.0,1.0,1.0,1.0,1,1,1]'; */
+  /* 'init_func:79' latency = 0.0150; */
+  /* 'init_func:80' fs =   50.0; */
+  /* 'init_func:81' fs_ekf = 1000.0; */
+  /* 'init_func:83' a_flex = a_f_func; */
+  /* 'init_func:84' b_flex = b_f_func(); */
   /*     %% Setup Simulation */
   /*  initial conditions, state is dtheta; theta */
   /* 'bit_one_step:9' y_true = x0; */
-  (void)memcpy(&y_true[0], &x0[0], 21U * (sizeof(real_T)));
+  memcpy(&y_true[0], &x0[0], 21U * sizeof(real_T));
+
+  /* 'bit_one_step:10' y_flex = x_flex0; */
+  memcpy(&y_flex[0], &x_flex0[0], 104U * sizeof(real_T));
 
   /*  Sim Parameters */
   /*  y_all1 = zeros(18, tf/(dt)); */
-  /* 'bit_one_step:12' step = 0; */
-  /* 'bit_one_step:14' sys = @(y_true, tau_applied, dw_piv) bit_propagator(y_true, c_n, z_n, m_n, r_n1_n, m_w_n, p_n, ...  */
-  /* 'bit_one_step:15'     k_d, b_d, g0, unlock, hs_rw_max, tau_applied, w_piv, piv_flag, dw_piv, tau_max_piv, thet_pit_nom) */
+  /* 'bit_one_step:14' step = 0; */
+  /* 'bit_one_step:16' sys = @(y_true, tau_applied, dw_piv) bit_propagator(y_true, c_n, z_n, m_n, r_n1_n, m_w_n, p_n, ...  */
+  /* 'bit_one_step:17'     k_d, b_d, g0, unlock, hs_rw_max, tau_applied, w_piv, piv_flag, dw_piv, tau_max_piv, thet_pit_nom); */
+  /* 'bit_one_step:18' tau_app_flex = tau_applied(7:9); */
+  /* 'bit_one_step:19' sys_flex = @(y_flex, tau_app_flex, tau_flex) flex_propogate(a_flex, b_flex, tau_app_flex, tau_flex, y_flex); */
   /*  sim */
-  /* 'bit_one_step:19' for step = 1:num_steps */
-  if ((1 <= ((int32_T)num_steps)) && (((int32_T)num_steps) > 65534)) {
-    check_forloop_overflow_error();
+  /* 'bit_one_step:23' for step = 1:num_steps */
+  i = num_steps;
+  if (num_steps - 1 >= 0) {
+    real_T b_tau_tmp;
+    real_T c_tau_tmp;
+    real_T d_tau_tmp;
+    dw_piv = tau_flex[0] + tau_applied[6];
+    tau[0] = dw_piv;
+    tau_tmp = tau_flex[1] + tau_applied[7] / 2.0;
+    tau[1] = tau_tmp;
+    b_tau_tmp = tau_flex[2] + tau_applied[7] / 2.0;
+    tau[2] = b_tau_tmp;
+    c_tau_tmp = tau_flex[3] + tau_applied[8] / 2.0;
+    tau[3] = c_tau_tmp;
+    d_tau_tmp = tau_flex[4] + tau_applied[8] / 2.0;
+    tau[4] = d_tau_tmp;
+    b_tau[0] = dw_piv;
+    b_tau[1] = tau_tmp;
+    b_tau[2] = b_tau_tmp;
+    b_tau[3] = c_tau_tmp;
+    b_tau[4] = d_tau_tmp;
+    c_tau[0] = dw_piv;
+    c_tau[1] = tau_tmp;
+    c_tau[2] = b_tau_tmp;
+    c_tau[3] = c_tau_tmp;
+    c_tau[4] = d_tau_tmp;
+    d_tau[0] = dw_piv;
+    d_tau[1] = tau_tmp;
+    d_tau[2] = b_tau_tmp;
+    d_tau[3] = c_tau_tmp;
+    d_tau[4] = d_tau_tmp;
   }
 
-  b_i = (int32_T)num_steps;
-  for (step = 0; step < b_i; step++) {
+  for (step = 0; step < i; step++) {
+    real_T b_flex[104];
+    real_T kf1[104];
+    real_T kf2[104];
+    real_T kf3[104];
+    real_T b_y_true[21];
+    real_T k1[21];
+    real_T k2[21];
+    real_T k3[21];
+    real_T varargout_1[21];
+    boolean_T th_over[9];
+    boolean_T th_under[9];
+
     /*         %% Propagate the system */
     /* RK4 solver */
-    /* 'bit_one_step:22' dw_piv = (w_piv - y_true(6))/dt; */
+    /* 'bit_one_step:26' dw_piv = (w_piv - y_true(6))/dt; */
     dw_piv = (w_piv - y_true[5]) / dt;
 
-    /* 'bit_one_step:24' k1 = sys(y_true, tau_applied, dw_piv) * dt; */
+    /* 'bit_one_step:28' k1 = sys(y_true, tau_applied, dw_piv) * dt; */
     bit_one_step_anonFcn1(unlock, w_piv, piv_flag, tau_max_piv, thet_pit_nom,
                           y_true, tau_applied, dw_piv, k1);
 
-    /* 'bit_one_step:25' k2 = sys(y_true + (k1/2), tau_applied, dw_piv) * dt; */
-    for (c_i = 0; c_i < 21; c_i++) {
-      d = k1[c_i] * dt;
-      k1[c_i] = d;
-      b_y_true[c_i] = y_true[c_i] + (d / 2.0);
+    /* 'bit_one_step:29' k2 = sys(y_true + (k1/2), tau_applied, dw_piv) * dt; */
+    for (b_i = 0; b_i < 21; b_i++) {
+      tau_tmp = k1[b_i] * dt;
+      k1[b_i] = tau_tmp;
+      b_y_true[b_i] = y_true[b_i] + tau_tmp / 2.0;
     }
 
     bit_one_step_anonFcn1(unlock, w_piv, piv_flag, tau_max_piv, thet_pit_nom,
                           b_y_true, tau_applied, dw_piv, k2);
 
-    /* 'bit_one_step:26' k3 = sys(y_true + (k2/2), tau_applied, dw_piv) * dt; */
-    for (c_i = 0; c_i < 21; c_i++) {
-      d = k2[c_i] * dt;
-      k2[c_i] = d;
-      b_y_true[c_i] = y_true[c_i] + (d / 2.0);
+    /* 'bit_one_step:30' k3 = sys(y_true + (k2/2), tau_applied, dw_piv) * dt; */
+    for (b_i = 0; b_i < 21; b_i++) {
+      tau_tmp = k2[b_i] * dt;
+      k2[b_i] = tau_tmp;
+      b_y_true[b_i] = y_true[b_i] + tau_tmp / 2.0;
     }
 
     bit_one_step_anonFcn1(unlock, w_piv, piv_flag, tau_max_piv, thet_pit_nom,
                           b_y_true, tau_applied, dw_piv, k3);
 
-    /* 'bit_one_step:27' k4 = sys(y_true + k3, tau_applied, dw_piv) * dt; */
-    for (c_i = 0; c_i < 21; c_i++) {
-      d = k3[c_i] * dt;
-      k3[c_i] = d;
-      b_y_true[c_i] = y_true[c_i] + d;
+    /* 'bit_one_step:31' k4 = sys(y_true + k3, tau_applied, dw_piv) * dt; */
+    for (b_i = 0; b_i < 21; b_i++) {
+      tau_tmp = k3[b_i] * dt;
+      k3[b_i] = tau_tmp;
+      b_y_true[b_i] = y_true[b_i] + tau_tmp;
     }
 
     bit_one_step_anonFcn1(unlock, w_piv, piv_flag, tau_max_piv, thet_pit_nom,
                           b_y_true, tau_applied, dw_piv, varargout_1);
 
-    /* 'bit_one_step:29' tdd = ((k1+(2*k2)+(2*k3)+k4)/6); */
-    /* 'bit_one_step:30' y_true = y_true + tdd; */
-    for (c_i = 0; c_i < 21; c_i++) {
-      y_true[c_i] += (((k1[c_i] + (2.0 * k2[c_i])) + (2.0 * k3[c_i])) +
-                      (varargout_1[c_i] * dt)) / 6.0;
+    /* 'bit_one_step:33' tdd = ((k1+(2*k2)+(2*k3)+k4)/6); */
+    /* 'bit_one_step:34' y_true = y_true + tdd; */
+    for (b_i = 0; b_i < 21; b_i++) {
+      y_true[b_i] += (((k1[b_i] + 2.0 * k2[b_i]) + 2.0 * k3[b_i]) +
+                      varargout_1[b_i] * dt) / 6.0;
     }
 
-    /* 'bit_one_step:32' th_over = y_true(10:18) > pi; */
-    /* 'bit_one_step:33' th_under = y_true(10:18) < -pi; */
-    for (c_i = 0; c_i < 9; c_i++) {
-      dw_piv = y_true[c_i + 9];
-      th_over[c_i] = (dw_piv > 3.1415926535897931);
-      th_under[c_i] = (dw_piv < -3.1415926535897931);
+    /* 'bit_one_step:36' th_over = y_true(10:18) > pi; */
+    /* 'bit_one_step:37' th_under = y_true(10:18) < -pi; */
+    for (b_i = 0; b_i < 9; b_i++) {
+      dw_piv = y_true[b_i + 9];
+      th_over[b_i] = (dw_piv > 3.1415926535897931);
+      th_under[b_i] = (dw_piv < -3.1415926535897931);
     }
 
-    /* 'bit_one_step:34' y_true(10:14) = y_true(10:14) -(2*pi*th_over(1:5)) + (2*pi*th_under(1:5)); */
-    for (c_i = 0; c_i < 5; c_i++) {
-      y_true[c_i + 9] = (y_true[c_i + 9] - (6.2831853071795862 * ((real_T)
-        (th_over[c_i] ? 1.0 : 0.0)))) + (6.2831853071795862 * ((real_T)
-        (th_under[c_i] ? 1.0 : 0.0)));
+    /* 'bit_one_step:38' y_true(10:14) = y_true(10:14) -(2*pi*th_over(1:5)) + (2*pi*th_under(1:5)); */
+    for (b_i = 0; b_i < 5; b_i++) {
+      y_true[b_i + 9] = (y_true[b_i + 9] - 6.2831853071795862 * (real_T)
+                         th_over[b_i]) + 6.2831853071795862 * (real_T)
+        th_under[b_i];
     }
 
-    /* 'bit_one_step:35' y_true(16:18) = y_true(16:18) -(2*pi*th_over(7:9)) + (2*pi*th_under(7:9)); */
-    y_true[15] = (y_true[15] - (6.2831853071795862 * ((real_T)(th_over[6] ? 1.0 :
-      0.0)))) + (6.2831853071795862 * ((real_T)(th_under[6] ? 1.0 : 0.0)));
-    y_true[16] = (y_true[16] - (6.2831853071795862 * ((real_T)(th_over[7] ? 1.0 :
-      0.0)))) + (6.2831853071795862 * ((real_T)(th_under[7] ? 1.0 : 0.0)));
-    y_true[17] = (y_true[17] - (6.2831853071795862 * ((real_T)(th_over[8] ? 1.0 :
-      0.0)))) + (6.2831853071795862 * ((real_T)(th_under[8] ? 1.0 : 0.0)));
+    /* 'bit_one_step:39' y_true(16:18) = y_true(16:18) -(2*pi*th_over(7:9)) + (2*pi*th_under(7:9)); */
+    y_true[15] = (y_true[15] - 6.2831853071795862 * (real_T)th_over[6]) +
+      6.2831853071795862 * (real_T)th_under[6];
+    y_true[16] = (y_true[16] - 6.2831853071795862 * (real_T)th_over[7]) +
+      6.2831853071795862 * (real_T)th_under[7];
+    y_true[17] = (y_true[17] - 6.2831853071795862 * (real_T)th_over[8]) +
+      6.2831853071795862 * (real_T)th_under[8];
 
     /*          fprintf('current state:  %0.15f \n  %0.15f \n %0.15f \n %0.15f \n %0.15f \n %0.15f \n %0.15f \n %0.15f \n %0.15f \n %0.15f \n %0.15f \n %0.15f \n %0.15f \n %0.15f \n %0.15f \n %0.15f \n %0.15f \n %0.15f \n  %0.15f \n %0.15f \n %0.15f \n \n', ... */
     /*              y_true(1), y_true(2), y_true(3), y_true(4), y_true(5), y_true(6),... */
     /*               y_true(7), y_true(8), y_true(9), y_true(10), y_true(11), y_true(12),... */
     /*                y_true(13), y_true(14), y_true(15), y_true(16), y_true(17), y_true(18),... */
-    /*                 y_true(19), y_true(20), y_true(21));         */
+    /*                 y_true(19), y_true(20), y_true(21));       */
+    /*         %% Propogate flexible system */
+    /* 'bit_one_step:47' kf1 = sys_flex(y_flex, tau_app_flex, tau_flex) * dt; */
+    /* 'bit_one_step:19' @(y_flex, tau_app_flex, tau_flex) flex_propogate(a_flex, b_flex, tau_app_flex, tau_flex, y_flex) */
+    /* UNTITLED Summary of this function goes here */
+    /*    Detailed explanation goes here */
+    /* 'flex_propogate:4' tau_yaw = tau_applied(1); */
+    /* 'flex_propogate:5' tau_roll = tau_applied(2); */
+    /* 'flex_propogate:6' tau_pitch = tau_applied(3); */
+    /* 'flex_propogate:8' tau = tau_flex; */
+    /* 'flex_propogate:9' tau(1) = tau(1) + tau_yaw; */
+    /* 'flex_propogate:10' tau(2) = tau(2) + (tau_roll/2); */
+    /* 'flex_propogate:11' tau(3) = tau(3) + (tau_roll/2); */
+    /* 'flex_propogate:12' tau(4) = tau(4) + (tau_pitch/2); */
+    /* 'flex_propogate:13' tau(5) = tau(5) + (tau_pitch/2); */
+    /* 'flex_propogate:16' eta_dot = (a_flex * x0_flex) + (b_flex * tau); */
+    /* 'bit_one_step:48' kf2 = sys_flex(y_flex + (kf1/2), tau_app_flex, tau_flex) * dt; */
+    /* 'bit_one_step:19' @(y_flex, tau_app_flex, tau_flex) flex_propogate(a_flex, b_flex, tau_app_flex, tau_flex, y_flex) */
+    /* UNTITLED Summary of this function goes here */
+    /*    Detailed explanation goes here */
+    /* 'flex_propogate:4' tau_yaw = tau_applied(1); */
+    /* 'flex_propogate:5' tau_roll = tau_applied(2); */
+    /* 'flex_propogate:6' tau_pitch = tau_applied(3); */
+    /* 'flex_propogate:8' tau = tau_flex; */
+    /* 'flex_propogate:9' tau(1) = tau(1) + tau_yaw; */
+    /* 'flex_propogate:10' tau(2) = tau(2) + (tau_roll/2); */
+    /* 'flex_propogate:11' tau(3) = tau(3) + (tau_roll/2); */
+    /* 'flex_propogate:12' tau(4) = tau(4) + (tau_pitch/2); */
+    /* 'flex_propogate:13' tau(5) = tau(5) + (tau_pitch/2); */
+    /* 'flex_propogate:16' eta_dot = (a_flex * x0_flex) + (b_flex * tau); */
+    for (b_i = 0; b_i < 104; b_i++) {
+      tau_tmp = 0.0;
+      for (i1 = 0; i1 < 104; i1++) {
+        tau_tmp += a_flex[i1][b_i] * y_flex[i1];
+      }
+
+      dw_piv = 0.0;
+      for (i1 = 0; i1 < 5; i1++) {
+        dw_piv += b_b_flex[i1][b_i] * tau[i1];
+      }
+
+      tau_tmp = (tau_tmp + dw_piv) * dt;
+      kf1[b_i] = tau_tmp;
+      b_flex[b_i] = y_flex[b_i] + tau_tmp / 2.0;
+    }
+
+    for (b_i = 0; b_i < 104; b_i++) {
+      tau_tmp = 0.0;
+      for (i1 = 0; i1 < 104; i1++) {
+        tau_tmp += a_flex[i1][b_i] * b_flex[i1];
+      }
+
+      kf2[b_i] = tau_tmp;
+    }
+
+    /* 'bit_one_step:49' kf3 = sys_flex(y_flex + (kf2/2), tau_app_flex, tau_flex) * dt; */
+    /* 'bit_one_step:19' @(y_flex, tau_app_flex, tau_flex) flex_propogate(a_flex, b_flex, tau_app_flex, tau_flex, y_flex) */
+    /* UNTITLED Summary of this function goes here */
+    /*    Detailed explanation goes here */
+    /* 'flex_propogate:4' tau_yaw = tau_applied(1); */
+    /* 'flex_propogate:5' tau_roll = tau_applied(2); */
+    /* 'flex_propogate:6' tau_pitch = tau_applied(3); */
+    /* 'flex_propogate:8' tau = tau_flex; */
+    /* 'flex_propogate:9' tau(1) = tau(1) + tau_yaw; */
+    /* 'flex_propogate:10' tau(2) = tau(2) + (tau_roll/2); */
+    /* 'flex_propogate:11' tau(3) = tau(3) + (tau_roll/2); */
+    /* 'flex_propogate:12' tau(4) = tau(4) + (tau_pitch/2); */
+    /* 'flex_propogate:13' tau(5) = tau(5) + (tau_pitch/2); */
+    /* 'flex_propogate:16' eta_dot = (a_flex * x0_flex) + (b_flex * tau); */
+    for (b_i = 0; b_i < 104; b_i++) {
+      tau_tmp = 0.0;
+      for (i1 = 0; i1 < 5; i1++) {
+        tau_tmp += b_b_flex[i1][b_i] * b_tau[i1];
+      }
+
+      tau_tmp = (kf2[b_i] + tau_tmp) * dt;
+      kf2[b_i] = tau_tmp;
+      b_flex[b_i] = y_flex[b_i] + tau_tmp / 2.0;
+    }
+
+    for (b_i = 0; b_i < 104; b_i++) {
+      tau_tmp = 0.0;
+      for (i1 = 0; i1 < 104; i1++) {
+        tau_tmp += a_flex[i1][b_i] * b_flex[i1];
+      }
+
+      kf3[b_i] = tau_tmp;
+    }
+
+    /* 'bit_one_step:50' kf4 = sys_flex(y_flex + kf3, tau_app_flex, tau_flex) * dt; */
+    /* 'bit_one_step:19' @(y_flex, tau_app_flex, tau_flex) flex_propogate(a_flex, b_flex, tau_app_flex, tau_flex, y_flex) */
+    /* UNTITLED Summary of this function goes here */
+    /*    Detailed explanation goes here */
+    /* 'flex_propogate:4' tau_yaw = tau_applied(1); */
+    /* 'flex_propogate:5' tau_roll = tau_applied(2); */
+    /* 'flex_propogate:6' tau_pitch = tau_applied(3); */
+    /* 'flex_propogate:8' tau = tau_flex; */
+    /* 'flex_propogate:9' tau(1) = tau(1) + tau_yaw; */
+    /* 'flex_propogate:10' tau(2) = tau(2) + (tau_roll/2); */
+    /* 'flex_propogate:11' tau(3) = tau(3) + (tau_roll/2); */
+    /* 'flex_propogate:12' tau(4) = tau(4) + (tau_pitch/2); */
+    /* 'flex_propogate:13' tau(5) = tau(5) + (tau_pitch/2); */
+    /* 'flex_propogate:16' eta_dot = (a_flex * x0_flex) + (b_flex * tau); */
+    /* 'bit_one_step:52' eta_dd = ((kf1+(2*kf2)+(2*kf3)+kf4)/6); */
+    /* 'bit_one_step:53' y_flex = y_flex + eta_dd; */
+    for (b_i = 0; b_i < 104; b_i++) {
+      tau_tmp = 0.0;
+      for (i1 = 0; i1 < 5; i1++) {
+        tau_tmp += b_b_flex[i1][b_i] * c_tau[i1];
+      }
+
+      tau_tmp = (kf3[b_i] + tau_tmp) * dt;
+      kf3[b_i] = tau_tmp;
+      b_flex[b_i] = y_flex[b_i] + tau_tmp;
+    }
+
+    for (b_i = 0; b_i < 104; b_i++) {
+      tau_tmp = 0.0;
+      for (i1 = 0; i1 < 104; i1++) {
+        tau_tmp += a_flex[i1][b_i] * b_flex[i1];
+      }
+
+      dw_piv = 0.0;
+      for (i1 = 0; i1 < 5; i1++) {
+        dw_piv += b_b_flex[i1][b_i] * d_tau[i1];
+      }
+
+      y_flex[b_i] += (((kf1[b_i] + 2.0 * kf2[b_i]) + 2.0 * kf3[b_i]) + (tau_tmp
+        + dw_piv) * dt) / 6.0;
+    }
   }
 }
 
 /*
  * function [omega] = compute_angular_velocity_C(x, z_n)
- *
- * UNTITLED2 Summary of this function goes here
- *    Detailed explanation goes here
- *
- * Arguments    : const real_T x[18]
- *                real_T z_n[9][3]
- *                real_T omega[3]
- * Return Type  : void
  */
 void compute_angular_velocity_C(const real_T x[18], real_T z_n[9][3], real_T
   omega[3])
 {
-  real_T e_Cn[9][3];
   real_T s9[9][3];
-  real_T d_Cn[3][3];
   real_T d;
-  real_T d1;
-  real_T d2;
   int32_T b_i;
-  int32_T c_i;
+  int32_T i;
   int32_T i1;
 
+  /* UNTITLED2 Summary of this function goes here */
+  /*    Detailed explanation goes here */
   /* 'compute_angular_velocity_C:4' theta = x(10:18); */
   /* 'compute_angular_velocity_C:5' dtheta = x(1:9); */
   /* 'compute_angular_velocity_C:7' s9 = zeros(3,9); */
-  for (b_i = 0; b_i < 9; b_i++) {
-    s9[b_i][0] = 0.0;
-    s9[b_i][1] = 0.0;
-    s9[b_i][2] = 0.0;
+  for (i = 0; i < 9; i++) {
+    s9[i][0] = 0.0;
+    s9[i][1] = 0.0;
+    s9[i][2] = 0.0;
   }
 
   /* 'compute_angular_velocity_C:8' for i = 1:9 */
-  for (c_i = 0; c_i < 9; c_i++) {
+  for (b_i = 0; b_i < 9; b_i++) {
+    real_T b_Cn[9][3];
+    real_T Cn[3][3];
+
     /* 'compute_angular_velocity_C:9' Cn = axis2rot(z_n(:,i), theta(i)); */
-    axis2rot(*((real_T (*)[3])(&z_n[c_i][0])), x[c_i + 9], d_Cn);
+    axis2rot(&z_n[b_i][0], x[b_i + 9], Cn);
 
     /* 'compute_angular_velocity_C:10' s9(:,i) = z_n(:,i); */
-    s9[c_i][0] = z_n[c_i][0];
-    s9[c_i][1] = z_n[c_i][1];
-    s9[c_i][2] = z_n[c_i][2];
+    s9[b_i][0] = z_n[b_i][0];
+    s9[b_i][1] = z_n[b_i][1];
+    s9[b_i][2] = z_n[b_i][2];
 
     /* 'compute_angular_velocity_C:11' s9 = Cn*s9; */
-    for (b_i = 0; b_i < 3; b_i++) {
-      d = d_Cn[0][b_i];
-      d1 = d_Cn[1][b_i];
-      d2 = d_Cn[2][b_i];
+    for (i = 0; i < 3; i++) {
+      real_T d1;
+      real_T d2;
+      d = Cn[0][i];
+      d1 = Cn[1][i];
+      d2 = Cn[2][i];
       for (i1 = 0; i1 < 9; i1++) {
-        e_Cn[i1][b_i] = ((d * s9[i1][0]) + (d1 * s9[i1][1])) + (d2 * s9[i1][2]);
+        b_Cn[i1][i] = (d * s9[i1][0] + d1 * s9[i1][1]) + d2 * s9[i1][2];
       }
     }
 
-    for (b_i = 0; b_i < 9; b_i++) {
-      s9[b_i][0] = e_Cn[b_i][0];
-      s9[b_i][1] = e_Cn[b_i][1];
-      s9[b_i][2] = e_Cn[b_i][2];
+    for (i = 0; i < 9; i++) {
+      s9[i][0] = b_Cn[i][0];
+      s9[i][1] = b_Cn[i][1];
+      s9[i][2] = b_Cn[i][2];
     }
   }
 
   /* 'compute_angular_velocity_C:14' omega = s9 * dtheta; */
-  for (b_i = 0; b_i < 3; b_i++) {
+  for (i = 0; i < 3; i++) {
     d = 0.0;
     for (i1 = 0; i1 < 9; i1++) {
-      d += s9[i1][b_i] * x[i1];
+      d += s9[i1][i] * x[i1];
     }
 
-    omega[b_i] = d;
+    omega[i] = d;
   }
 }
 
 /*
  * function [C] = compute_rotation_mat_C(z_n, theta)
- *
- * UNTITLED3 Summary of this function goes here
- *    Detailed explanation goes here
- *
- * Arguments    : real_T z_n[9][3]
- *                const real_T theta[9]
- *                real_T C[3][3]
- * Return Type  : void
  */
 void compute_rotation_mat_C(real_T z_n[9][3], const real_T theta[9], real_T C[3]
   [3])
 {
-  real_T a[3][3];
   real_T b_a[3][3];
-  real_T d;
-  real_T d1;
-  real_T d2;
   int32_T b_i;
-  int32_T c_i;
+  int32_T i;
   int32_T i1;
 
-  /* 'compute_rotation_mat_C:4' C = eye(3); */
-  for (b_i = 0; b_i < 3; b_i++) {
-    C[b_i][0] = 0.0;
-    C[b_i][1] = 0.0;
-    C[b_i][2] = 0.0;
+  /* UNTITLED3 Summary of this function goes here */
+  /*    Detailed explanation goes here */
+  /* 'compute_rotation_mat_C:4' C = (eye(3)); */
+  for (i = 0; i < 3; i++) {
+    C[i][0] = 0.0;
+    C[i][1] = 0.0;
+    C[i][2] = 0.0;
   }
 
   C[0][0] = 1.0;
@@ -8867,84 +9795,71 @@ void compute_rotation_mat_C(real_T z_n[9][3], const real_T theta[9], real_T C[3]
   C[2][2] = 1.0;
 
   /* 'compute_rotation_mat_C:5' for i = 1:9 */
-  for (c_i = 0; c_i < 9; c_i++) {
+  for (b_i = 0; b_i < 9; b_i++) {
+    real_T a[3][3];
+
     /* 'compute_rotation_mat_C:6' C = axis2rot(z_n(:,i), theta(i)) * C; */
-    axis2rot(*((real_T (*)[3])(&z_n[c_i][0])), theta[c_i], a);
-    for (b_i = 0; b_i < 3; b_i++) {
-      d = a[0][b_i];
-      d1 = a[1][b_i];
-      d2 = a[2][b_i];
+    axis2rot(&z_n[b_i][0], theta[b_i], b_a);
+    for (i = 0; i < 3; i++) {
+      real_T d;
+      real_T d1;
+      real_T d2;
+      d = b_a[0][i];
+      d1 = b_a[1][i];
+      d2 = b_a[2][i];
       for (i1 = 0; i1 < 3; i1++) {
-        b_a[i1][b_i] = ((d * C[i1][0]) + (d1 * C[i1][1])) + (d2 * C[i1][2]);
+        a[i1][i] = (d * C[i1][0] + d1 * C[i1][1]) + d2 * C[i1][2];
       }
     }
 
-    for (b_i = 0; b_i < 3; b_i++) {
-      C[b_i][0] = b_a[b_i][0];
-      C[b_i][1] = b_a[b_i][1];
-      C[b_i][2] = b_a[b_i][2];
+    for (i = 0; i < 3; i++) {
+      C[i][0] = a[i][0];
+      C[i][1] = a[i][1];
+      C[i][2] = a[i][2];
     }
   }
 
-  /* 'compute_rotation_mat_C:8' C = C' */
-  for (b_i = 0; b_i < 3; b_i++) {
-    a[b_i][0] = C[0][b_i];
-    a[b_i][1] = C[1][b_i];
-    a[b_i][2] = C[2][b_i];
+  /* 'compute_rotation_mat_C:8' C = C'; */
+  for (i = 0; i < 3; i++) {
+    b_a[i][0] = C[0][i];
+    b_a[i][1] = C[1][i];
+    b_a[i][2] = C[2][i];
   }
 
-  for (b_i = 0; b_i < 3; b_i++) {
-    C[b_i][0] = a[b_i][0];
-    C[b_i][1] = a[b_i][1];
-    C[b_i][2] = a[b_i][2];
+  for (i = 0; i < 3; i++) {
+    C[i][0] = b_a[i][0];
+    C[i][1] = b_a[i][1];
+    C[i][2] = b_a[i][2];
   }
 }
 
-/*
- * Arguments    : void
- * Return Type  : void
- */
 void libbitonestep_initialize(void)
 {
 }
 
-/*
- * Arguments    : void
- * Return Type  : void
- */
 void libbitonestep_terminate(void)
 {
-  /* (no terminate code required) */
 }
 
 /*
  * function [v, phi] = rot2axisC(C)
- *
- * Arguments    : real_T C[3][3]
- *                real_T v[3]
- *                real_T *phi
- * Return Type  : void
  */
 void rot2axis_C(real_T C[3][3], real_T v[3], real_T *phi)
 {
-  static rtRunTimeErrorInfo b_emlrtRTEI = { 14,/* lineNo */
-    9,                                 /* colNo */
-    "acos",                            /* fName */
-    "/usr/local/MATLAB/R2021b/toolbox/eml/lib/matlab/elfun/acos.m"/* pName */
+  static rtRunTimeErrorInfo b_emlrtRTEI = { 13,/* lineNo */
+    "sqrt"                             /* fName */
   };
 
-  static rtRunTimeErrorInfo c_emlrtRTEI = { 13,/* lineNo */
-    9,                                 /* colNo */
-    "sqrt",                            /* fName */
-    "/usr/local/MATLAB/R2021b/toolbox/eml/lib/matlab/elfun/sqrt.m"/* pName */
+  static rtRunTimeErrorInfo emlrtRTEI = { 14,/* lineNo */
+    "acos"                             /* fName */
   };
 
   real_T b_v;
 
   /* 'rot2axis_C:2' phi = acos((C(1,1) + C(2,2) + C(3,3) - 1)/2); */
   *phi = (((C[0][0] + C[1][1]) + C[2][2]) - 1.0) / 2.0;
-  if (((*phi) < -1.0) || ((*phi) > 1.0)) {
-    d_rtErrorWithMessageID("acos", b_emlrtRTEI.fName, b_emlrtRTEI.lineNo);
+  if ((*phi < -1.0) || (*phi > 1.0)) {
+    d_rtErrorWithMessageID("acos", emlrtRTEI.fName, emlrtRTEI.lineNo);
   }
 
   *phi = acos(*phi);
@@ -8957,9 +9872,9 @@ void rot2axis_C(real_T C[3][3], real_T v[3], real_T *phi)
   v[2] = (C[0][1] - C[1][0]) / b_v;
 
   /* 'rot2axis_C:6' v = v/sqrt(v'*v); */
-  b_v = ((v[0] * v[0]) + (v[1] * v[1])) + (v[2] * v[2]);
+  b_v = (v[0] * v[0] + v[1] * v[1]) + v[2] * v[2];
   if (b_v < 0.0) {
-    d_rtErrorWithMessageID("sqrt", c_emlrtRTEI.fName, c_emlrtRTEI.lineNo);
+    d_rtErrorWithMessageID("sqrt", b_emlrtRTEI.fName, b_emlrtRTEI.lineNo);
   }
 
   b_v = sqrt(b_v);
@@ -8968,8 +9883,4 @@ void rot2axis_C(real_T C[3][3], real_T v[3], real_T *phi)
   v[2] /= b_v;
 }
 
-/*
- * File trailer for libbitonestep.c
- *
- * [EOF]
- */
+/* End of code generation (libbitonestep.c) */
