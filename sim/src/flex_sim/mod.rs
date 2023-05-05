@@ -101,7 +101,7 @@ pub fn init_flex_model() -> Flex_model{
     let c_out = na::Vector5::<f64>::zeros();
     let g1_pos_out = na::Vector3::<f64>::zeros();
     let c_pos_out = na::Vector5::<f64>::zeros();
-    let flex_enable: bool = true;
+    let flex_enable: bool = false;
 
     let flex_model = Flex_model{
         a_mat,
