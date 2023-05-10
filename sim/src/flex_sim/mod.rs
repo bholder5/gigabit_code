@@ -82,6 +82,7 @@ impl Flex_model{
 
     pub fn update_eta(&mut self, eta1: &[f64]){
         self.eta = Eta::from_row_slice(eta1.as_ref());
+        // println!("eta {}", &self.eta[0]);
         self.update_gyro_outputs();
 
     }
@@ -90,6 +91,8 @@ impl Flex_model{
 pub fn init_flex_model() -> Flex_model{
     let a_mat = init_amat();
     let b_mat = 1000.0 * init_bmat();
+
+    // println!("{}", &b_mat);
     let k_mat = init_kmat();
     let g1_mat = 1000.0 * init_g1mat();
     let g2_mat = 1000.0 * init_g2mat();
@@ -101,7 +104,7 @@ pub fn init_flex_model() -> Flex_model{
     let c_out = na::Vector5::<f64>::zeros();
     let g1_pos_out = na::Vector3::<f64>::zeros();
     let c_pos_out = na::Vector5::<f64>::zeros();
-    let flex_enable: bool = false;
+    let flex_enable: bool = true;
 
     let flex_model = Flex_model{
         a_mat,

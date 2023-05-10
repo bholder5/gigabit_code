@@ -89,7 +89,7 @@ fn main() {
     tau_applied[7] = ctrl.fmot_roll.tau_applied.clone(); //roll
     tau_applied[8] = ctrl.fmot_pitch.tau_applied.clone(); //pitch
 
-    sc::push_record(&t, &bp, &est, &ctrl, &meas, &sim_state, &flex).unwrap();
+    sc::push_record(&t, &bp, &est, &ctrl, &meas, &sim_state, &flex, &fc).unwrap();
 
     let mut first_LIS = true;
 
@@ -102,7 +102,7 @@ fn main() {
 
 
     trace!("START");
-    for _step in 0..100000000 as usize {
+    for _step in 0..1 as usize {
         
         ///////// beginning of the simulation loop
         /////////////////////////////////////////
@@ -111,7 +111,7 @@ fn main() {
             trace!("bit_one_step start");
             bit_one_step(
                 bp.x.as_ptr(),
-                tau_applied.as_ptr(),
+                tau_applied.as_mut_ptr(),
                 bp.unlock.as_ptr(),
                 ctrl.pivot.omega_request,
                 false as u8,
@@ -151,6 +151,7 @@ fn main() {
         bp.update_state();
         bp.get_omega_meas();
         bp.get_orientation_vec(&flex);
+        bp.get_orientation_rots(&flex, &mut meas);
         bp.get_rw_speed();
 
         sim_state.update_current_equatorial_coordinates(&bp.phi_act);
@@ -171,7 +172,19 @@ fn main() {
         est.propogate();
 
         if fc.enable{
-            // fc.propogate_control_state(flex.c_out.as_slice(), bp._dt, bp._num_steps)
+            // need to input the gyro data from rigid modes
+            let gyro_in = [
+                meas.gyro_of.om_axial,
+                meas.gyro_bow.om_axial,
+                meas.gyro_stern.om_axial,
+                meas.gyro_port.om_axial,
+                meas.gyro_sb.om_axial
+            ]; 
+
+            // println!("{} {} {} {} {}", &gyro_in[0], &gyro_in[1], &gyro_in[2], &gyro_in[3], &gyro_in[4]);
+
+            fc.propogate_control_state(gyro_in.as_slice(), bp._dt, bp._num_steps);
+
         }
 
         if (step % 1000) < 1 {
@@ -227,17 +240,17 @@ fn main() {
 
             // update actual torque vector with applied torques
 
-            // if step < 1500{
+            if step < 1500{
                 ctrl.update_ctrl();
                 tau_applied[6] = 1.0*ctrl.rw.tau_applied; //yaw
                 tau_applied[7] = 1.0*ctrl.fmot_roll.tau_applied; //roll
                 tau_applied[8] = 1.0*ctrl.fmot_pitch.tau_applied; //pitch
-            // } else {
-            //     ctrl.rw.tau_applied = 0.0;
-            //     tau_applied[6] = 0.0*ctrl.rw.tau_applied; //yaw
-            //     tau_applied[7] = 0.0*ctrl.fmot_roll.tau_applied; //roll
-            //     tau_applied[8] = 0.0*ctrl.fmot_pitch.tau_applied; 
-            // }
+            } else {
+                ctrl.rw.tau_applied = 0.0;
+                tau_applied[6] = 0.0*ctrl.rw.tau_applied; //yaw
+                tau_applied[7] = 0.0*ctrl.fmot_roll.tau_applied; //roll
+                tau_applied[8] = 0.0*ctrl.fmot_pitch.tau_applied; 
+            }
             
 
             // if (step % 1000) < 1{
@@ -246,7 +259,7 @@ fn main() {
         }
 
         // record the data
-        sc::push_record(&t, &bp, &est, &ctrl, &meas, &sim_state, &flex).unwrap();
+        sc::push_record(&t, &bp, &est, &ctrl, &meas, &sim_state, &flex, &fc).unwrap();
         js::read_gains(&mut ctrl, &mut bp, &mut est); // read in gains from json file (for tuning)
 
     }

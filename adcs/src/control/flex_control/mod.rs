@@ -37,8 +37,16 @@ impl PassiveControl{
         let num_modes: usize = 2;
         let num_states: usize = 2*num_modes;
         let r = 1.0 * na::Matrix5::<f64>::identity();
-        let ql = 1.0*na::DMatrix::<f64>::identity(num_states+3, num_states+3);
-        let qr = 1.0 * na::DMatrix::<f64>::identity(num_states+3, num_states+3);
+        let mut ql = 1.0*na::DMatrix::<f64>::identity(num_states+3, num_states+3);
+        let mut qr = 1.0 * na::DMatrix::<f64>::identity(num_states+3, num_states+3);
+
+        // let qr_rigid = 0.1 * na::DMatrix::<f64>::identity(3,3);
+        // qr.slice_mut((0,0), (3, 3)).copy_from(&qr_rigid);
+
+        // let ql_rigid = 0.1 * na::DMatrix::<f64>::identity(3,3);
+        // ql.slice_mut((0,0), (3, 3)).copy_from(&ql_rigid);
+
+
         let a_cl = na::DMatrix::<f64>::zeros(num_states+3, num_states+3);
         let p_lyap = na::DMatrix::<f64>::zeros(num_states+3, num_states+3);
         let b_c = na::DMatrix::<f64>::zeros(num_states, 5);
@@ -46,7 +54,7 @@ impl PassiveControl{
         let state = na::DVector::<f64>::zeros(num_states+3);
         let u = na::DVector::<f64>::zeros(5);
         let u_rigid = na::DVector::<f64>::zeros(3);
-        let enable = true;      
+        let enable = true;  
 
 
         let passive_control = PassiveControl {
@@ -83,9 +91,10 @@ impl PassiveControl{
         
 
         // let mut a = DMatrix::<f64>::zeros(self.num_states, self.num_states);
-        // let mut b = DMatrix::<f64>::zeros(self.num_states,5);
+        // let mut b = DMatrix::<f64>::zeros(self.num_states,5);50
 
-            
+        println!("num states {}", &self.num_states);
+
         let a_use = self.a_flex.slice((0, 0), (self.num_states,self.num_states)).clone();
         let b_use = self.b_flex.slice((0, 0), (self.num_states,5)).clone();
 
@@ -98,7 +107,9 @@ impl PassiveControl{
         b.slice_mut((0,0), (3, 5)).copy_from(&self.b_rigid);
         b.slice_mut((3,0), (self.num_states, 5)).copy_from(&b_use);
 
-        println!("The bmatrix for comparison {}", &b);
+        println!("The b matrix for comparison {}", &b);
+        println!("The a matrix for comparison {}", &a);
+
 
         let num_states = &self.num_states + 3;
         // let b = self.b_full.fixed_slice::<self.num_states,5>(0, 0).clone();
@@ -179,7 +190,7 @@ impl PassiveControl{
         for (loc, el) in k.iter().enumerate(){
             self.c_c[loc] = -el;
         }
-        // println!("k is : {}, c is: {}",k, self.c_c);
+        println!("k is : {:.4}, c is: {:.4}",k, self.c_c);
     
         //////////////////////////////////
         //
@@ -194,6 +205,7 @@ impl PassiveControl{
         
     
         self.a_cl = a + (b*k);
+        println!("a_cl = {:.5}", &self.a_cl);
         
     }
     
@@ -222,11 +234,12 @@ impl PassiveControl{
         for (pos,el) in pv.iter().enumerate(){
             p[pos] = el.clone();
         }
-        self.p_lyap = p.clone();
+        self.p_lyap = -p.clone();
 
-        self.b_c = p.try_inverse().unwrap() * self.c_c.clone().transpose();
+        self.b_c = -p.try_inverse().unwrap() * self.c_c.clone().transpose();
         
-        // println!("{}", p);
+        println!("p lyap {:.5}", &self.p_lyap);
+        println!("bc {:.5}", &self.b_c);
     
     }
 

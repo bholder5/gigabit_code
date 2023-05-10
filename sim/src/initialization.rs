@@ -11,8 +11,9 @@
 //! -generating sensors measurements from the simulation state
 //!
 
-use crate::bindings::{compute_angular_velocity_C, compute_rotation_mat_C};
+use crate::bindings::{compute_angular_velocity_C, compute_rotation_mat_C, compute_angular_velocity_roll_C, compute_angular_velocity_yaw_C, compute_rotation_mat_roll_C, compute_rotation_mat_yaw_C};
 use crate::flex_sim::Flex_model;
+use crate::measurements::Meas;
 extern crate nalgebra as na;
 
 pub use std::env;
@@ -47,6 +48,8 @@ pub struct Params {
     pub omega_rw: f64,
     pub _i_z_rw: f64,
     pub omega_m: na::Vector3<f64>,
+    pub omega_m_roll: na::Vector3<f64>,
+    pub omega_m_yaw: na::Vector3<f64>,
     pub _dt: f64,
     pub _num_steps: u16,
     pub phi_act: [f64; 3],
@@ -90,6 +93,29 @@ impl Params {
             trace!("compute_angular_velocity_C end");
         }
         self.omega_m = na::Vector3::<f64>::from_row_slice(om.as_ref());
+        // roll
+        unsafe {
+            trace!("compute_angular_velocity_roll_C start");
+            compute_angular_velocity_roll_C(
+                self.dthet_thet.as_ptr(),
+                self._zn.as_mut_ptr(),
+                om.as_mut_ptr(),
+            );
+            trace!("compute_angular_velocity_roll_C end");
+        }
+        self.omega_m_roll = na::Vector3::<f64>::from_row_slice(om.as_ref());
+
+        //yaw
+        unsafe {
+            trace!("compute_angular_velocity_yaw_C start");
+            compute_angular_velocity_yaw_C(
+                self.dthet_thet.as_ptr(),
+                self._zn.as_mut_ptr(),
+                om.as_mut_ptr(),
+            );
+            trace!("compute_angular_velocity_yaw_C end");
+        }
+        self.omega_m_yaw = na::Vector3::<f64>::from_row_slice(om.as_ref());
         debug!("omega_m: {:}, om(pointer): {:?}", self.omega_m, om.as_ref());
         trace!("get_omega_meas end");
     }
@@ -145,6 +171,68 @@ impl Params {
         self.phi_act = [eul.0, -eul.1, -eul.2];
         // println!("x_act {:?}", self.phi_act);
         trace!("get_orientation_vector end");
+    }
+
+    pub fn get_orientation_rots(&mut self, flex: &Flex_model, meas: &mut Meas) -> () {
+       
+        trace!("get_orientation_rots start");
+        // let mut c_vec :[f64; 9] = [0.0; 9];
+        let mut c_vec: [[f64; 3]; 3] = [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]];
+        unsafe {
+            compute_rotation_mat_roll_C(
+                self._zn.as_mut_ptr(),
+                self.theta.as_ptr(),
+                c_vec.as_mut_ptr(),
+            )
+        }
+        //orientation in boresight so add flex here
+        let c = c_vec.as_ref();
+
+        // println!("{:?}", [c[0], c[1], c[2]].concat());
+        let rotmat = na::Rotation3::<f64>::from_matrix(&na::Matrix3::<f64>::from_row_slice(
+            &[c[0], c[1], c[2]].concat(),
+        ));
+
+        meas.c8h = rotmat.clone();
+
+        let mut c_vec: [[f64; 3]; 3] = [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]];
+        unsafe {
+            compute_rotation_mat_yaw_C(
+                self._zn.as_mut_ptr(),
+                self.theta.as_ptr(),
+                c_vec.as_mut_ptr(),
+            )
+        }
+        //orientation in boresight so add flex here
+        let c = c_vec.as_ref();
+
+        // println!("{:?}", [c[0], c[1], c[2]].concat());
+        let rotmat = na::Rotation3::<f64>::from_matrix(&na::Matrix3::<f64>::from_row_slice(
+            &[c[0], c[1], c[2]].concat(),
+        ));
+
+        meas.c7h = rotmat.clone();
+        //
+        //
+        //
+        //
+        //     DO I NEED TO CONSIDER FLEX POS IN THESE ROT MATS? I THINK I DO
+        //
+        //
+        //
+        //
+
+        // if flex.flex_enable{
+        //     let flex_pos_mat= na::Rotation3::from_axis_angle(
+        //         &na::Unit::new_normalize(flex.g1_pos_out.clone()),
+        //         flex.g1_pos_out.norm().clone(),
+        //     )
+        //     .inverse();
+          
+        //     rotmat = flex_pos_mat * rotmat;
+        // }
+        
+        trace!("get_orientation_rots end");
     }
 
     pub fn get_rw_speed(&mut self) {
@@ -243,10 +331,12 @@ pub fn init_bit() -> Params {
     // [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0]]);
 
     let omega_m = na::Vector3::<f64>::zeros();
+    let omega_m_roll = na::Vector3::<f64>::zeros();
+    let omega_m_yaw = na::Vector3::<f64>::zeros();
     let _dt = 0.0001;
     let _num_steps: u16 = 10;
     let phi_act = [0.0; 3];
-    let unlock = Vector9::from_row_slice(&[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0]);
+    let unlock = Vector9::from_row_slice(&[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]);
     let _tau_piv_max: f64 = 20.0;
     let _roll_theta_max: f64 = 6.0 * PI / 180.0;
     let _pitch_theta_max: f64 = -20.0 * PI / 180.0;
@@ -265,6 +355,8 @@ pub fn init_bit() -> Params {
         omega_rw,
         _i_z_rw,
         omega_m,
+        omega_m_roll,
+        omega_m_yaw,
         _dt,
         _num_steps,
         phi_act,

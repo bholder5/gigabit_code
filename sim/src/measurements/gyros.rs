@@ -18,6 +18,8 @@ pub struct Gyro_bs {
     pub bias: na::Vector3<f64>,
     /// maximum bias drift magnitude
     pub bias_drift: f64,
+    /// axial reading for flexible measurements (the axis being read)
+    pub om_axial: f64,
 }
 
 impl Gyro_bs {
@@ -40,6 +42,22 @@ impl Gyro_bs {
             // a_g_inv: na::Matrix3::<f64>::identity(),
             bias: na::Vector3::new(0.000001, -0.000005, 0.0000075),
             bias_drift: 0.0,
+            om_axial: 0.0,
+        }
+    }
+    //a default gyro with no bias and stuff
+    pub fn new_def() -> Gyro_bs {
+        Gyro_bs {
+            omega_k: na::Vector3::new(0.0, 0.0, 0.0),
+            omega_m: na::Vector3::new(0.0, 0.0, 0.0),
+            // remember to invert
+            c_bg_i: na::Rotation3::identity(),
+            // remember to invert
+            a_g_inv: na::Matrix3::identity(),
+            // a_g_inv: na::Matrix3::<f64>::identity(),
+            bias: na::Vector3::new(0.0, 0.0, 0.0),
+            bias_drift: 0.0,
+            om_axial: 0.0,
         }
     }
 

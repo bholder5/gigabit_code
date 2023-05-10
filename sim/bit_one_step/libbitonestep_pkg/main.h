@@ -53,7 +53,15 @@ extern void main_bit_one_step(void);
 
 extern void main_compute_angular_velocity_C(void);
 
+extern void main_compute_angular_velocity_roll_C(void);
+
+extern void main_compute_angular_velocity_yaw_C(void);
+
 extern void main_compute_rotation_mat_C(void);
+
+extern void main_compute_rotation_mat_roll_C(void);
+
+extern void main_compute_rotation_mat_yaw_C(void);
 
 extern void main_rot2axis_C(void);
 

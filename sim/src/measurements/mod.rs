@@ -9,8 +9,15 @@ use nalgebra as na;
 #[derive(Clone)]
 pub struct Meas {
     pub gyros_bs: gyros::Gyro_bs,
+    pub gyro_bow: gyros::Gyro_bs,
+    pub gyro_stern: gyros::Gyro_bs,
+    pub gyro_port: gyros::Gyro_bs,
+    pub gyro_sb: gyros::Gyro_bs,
+    pub gyro_of: gyros::Gyro_bs,
     pub gps: st::gps::Gps,
     pub cbh: na::Rotation3<f64>,
+    pub c8h: na::Rotation3<f64>,
+    pub c7h: na::Rotation3<f64>,
     pub roll: f64,
     pub pitch: f64,
     /// yaw_p is azimuth with opposite sign, not the position of OF WRT pivot
@@ -21,8 +28,15 @@ impl Meas {
     pub fn new() -> Meas {
         Meas {
             gyros_bs: gyros::Gyro_bs::new(),
+            gyro_bow: gyros::Gyro_bs::new_def(),
+            gyro_stern: gyros::Gyro_bs::new_def(),
+            gyro_port: gyros::Gyro_bs::new_def(),
+            gyro_sb: gyros::Gyro_bs::new_def(),
+            gyro_of: gyros::Gyro_bs::new_def(),
             gps: st::gps::Gps::new(),
             cbh: na::Rotation3::<f64>::identity(),
+            c8h: na::Rotation3::<f64>::identity(),
+            c7h: na::Rotation3::<f64>::identity(),
             roll: 0.0,
             pitch: 0.0,
             yaw_p: 0.0,
@@ -48,17 +62,65 @@ impl Meas {
         // need to add in flexible affects.
         self.gyros_bs.omega_k = bp.omega_m + (self.cbh * ceh.transpose() * w_di);
 
+        // frame based gyros
+        // self.gyro_bow.omega_k = bp.omega_m_roll + (self.c8h * ceh.transpose() * w_di);
+        // self.gyro_stern.omega_k = bp.omega_m_roll + (self.c8h * ceh.transpose() * w_di);
+        // self.gyro_of.omega_k = bp.omega_m_yaw + (self.c7h * ceh.transpose() * w_di);
+        // self.gyro_port.omega_k = self.gyros_bs.omega_k.clone();
+        // self.gyro_sb.omega_k = self.gyros_bs.omega_k.clone();
+        self.gyro_bow.omega_k = bp.omega_m_roll;
+        self.gyro_stern.omega_k = bp.omega_m_roll;
+        self.gyro_of.omega_k = bp.omega_m_yaw;
+        self.gyro_port.omega_k = bp.omega_m.clone();
+        self.gyro_sb.omega_k = bp.omega_m.clone();
+        
+
+        // add flexible affects
         if flex.flex_enable{
             self.gyros_bs.omega_k = flex.g1_out + self.gyros_bs.omega_k;
         }
 
-        self.gyros_bs.generate_measurement();
+        // //generate measurements
+        // self.gyros_bs.generate_measurement();
+        // self.gyro_bow.generate_measurement();
+        // self.gyro_stern.generate_measurement();
+        // self.gyro_port.generate_measurement();
+        // self.gyro_sb.generate_measurement();
+        // self.gyro_of.generate_measurement();
 
+        // axial measurements
+        self.gyro_bow.omega_k[0] = self.gyro_bow.omega_k[0] + flex.c_out[1];
+        self.gyro_stern.omega_k[0] = self.gyro_stern.omega_k[0] + flex.c_out[2];
+        self.gyro_port.omega_k[1]  = self.gyro_port.omega_k[1] + flex.c_out[3];
+        self.gyro_sb.omega_k[1] = self.gyro_sb.omega_k[1] + flex.c_out[4];
+        self.gyro_of.omega_k[2] = self.gyro_of.omega_k[2] + flex.c_out[0];
+
+        // println!("{}", self.gyro_bow.omega_m);
+
+        self.gyros_bs.generate_measurement();
+        self.gyro_bow.generate_measurement();
+        self.gyro_stern.generate_measurement();
+        self.gyro_port.generate_measurement();
+        self.gyro_sb.generate_measurement();
+        self.gyro_of.generate_measurement();
+
+        // println!("{}", self.gyro_bow.omega_m);
+
+        // axial measurements
+        self.gyro_bow.om_axial = self.gyro_bow.omega_m[0];
+        self.gyro_stern.om_axial = self.gyro_stern.omega_m[0];
+        self.gyro_port.om_axial = self.gyro_port.omega_m[1];
+        self.gyro_sb.om_axial = self.gyro_sb.omega_m[1];
+        self.gyro_of.om_axial = self.gyro_of.omega_m[2];
+
+        // println!("{} {} {} {} {}", self.gyro_bow.om_axial,self.gyro_stern.om_axial,self.gyro_port.om_axial,self.gyro_sb.om_axial,self.gyro_of.om_axial);
+
+        
         // ENCODERS
 
         if flex.flex_enable{
-            self.roll = bp.x[16] + flex.c_out[1];
-            self.pitch = bp.x[17] + flex.c_out[3];
+            self.roll = bp.x[16] + flex.c_pos_out[1];
+            self.pitch = bp.x[17] + flex.c_pos_out[3];
         } else {
             self.roll = bp.x[16];
             self.pitch = bp.x[17];

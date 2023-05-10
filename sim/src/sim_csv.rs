@@ -18,6 +18,7 @@ use adcs::control::state::State;
 use adcs::estimation::Estimator;
 use crate::measurements::Meas;
 use crate::flex_sim as fx;
+use adcs::control::flex_control as fc;
 
 use std::error::Error;
 use csv::WriterBuilder;
@@ -120,6 +121,11 @@ pub struct Record {
     tau_roll: f64,
     tau_pitch: f64,
     tau_yaw: f64,
+    tau_flex_yaw: f64,
+    tau_flex_bow: f64,
+    tau_flex_stern: f64,
+    tau_flex_port: f64,
+    tau_flex_sb: f64,
     // estimation
     ra_hat: f64,
     dec_hat: f64,
@@ -132,9 +138,10 @@ pub struct Record {
     gyro_bs_bias_yaw_act: f64,
 }
 
-pub fn push_record(t: &f64, bp: &Params, est: &Estimator, ctrl: &Ctrl, meas: &Meas, sim_st: &State, flex: &fx::Flex_model) -> Result<(), Box<dyn Error>> {
+pub fn push_record(t: &f64, bp: &Params, est: &Estimator, ctrl: &Ctrl, meas: &Meas, sim_st: &State, flex: &fx::Flex_model, flex_c: &fc::PassiveControl) -> Result<(), Box<dyn Error>> {
     // let file_path = "/home/b/sim_data/out.csv";
-    let file_path = "/home/bholder/data/out.csv";
+    // let file_path = "/home/bholder/data/out.csv";
+    let file_path = "/home/brad/data/out.csv";
 
     if Path::new(&file_path.clone()).exists() {
         let file = OpenOptions::new()
@@ -232,6 +239,11 @@ pub fn push_record(t: &f64, bp: &Params, est: &Estimator, ctrl: &Ctrl, meas: &Me
             tau_roll: ctrl.fmot_roll.tau_applied,
             tau_pitch: ctrl.fmot_pitch.tau_applied,
             tau_yaw: -ctrl.rw.tau_applied,
+            tau_flex_yaw: flex_c.u[0],
+            tau_flex_bow: flex_c.u[1],
+            tau_flex_stern: flex_c.u[2],
+            tau_flex_port: flex_c.u[3],
+            tau_flex_sb: flex_c.u[4],
             //Estimation
             ra_hat: est.eq_hat_k.ra,
             dec_hat: est.eq_hat_k.dec,
@@ -339,6 +351,11 @@ pub fn push_record(t: &f64, bp: &Params, est: &Estimator, ctrl: &Ctrl, meas: &Me
             tau_roll: ctrl.fmot_roll.tau_applied,
             tau_pitch: ctrl.fmot_pitch.tau_applied,
             tau_yaw: ctrl.rw.tau_applied,
+            tau_flex_yaw: flex_c.u[0],
+            tau_flex_bow: flex_c.u[1],
+            tau_flex_stern: flex_c.u[2],
+            tau_flex_port: flex_c.u[3],
+            tau_flex_sb: flex_c.u[4],
             // Estimation
             ra_hat: est.eq_hat_k.ra,
             dec_hat: est.eq_hat_k.dec,
@@ -357,7 +374,8 @@ pub fn push_record(t: &f64, bp: &Params, est: &Estimator, ctrl: &Ctrl, meas: &Me
 
 #[allow(dead_code)]
 pub fn read_last_state(mut _t: f64, bp: &mut Params, est: &mut Estimator, ctrl: &mut Ctrl, meas: &mut Meas, sim_st: &mut State, flex: &fx::Flex_model) -> () {
-    let file_path = "/home/bholder/data/out.csv";
+    // let file_path = "/home/bholder/data/out.csv";
+    let file_path = "/home/brad/data/out.csv";
 
     if Path::new(&file_path.clone()).exists() {
         let file = OpenOptions::new()

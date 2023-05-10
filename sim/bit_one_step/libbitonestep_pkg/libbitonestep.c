@@ -8505,7 +8505,7 @@ static void rtReportErrorLocation(const char_T *aFcnName, int32_T aLineNo)
  * function [y_true, y_flex] = bit_one_step(x0, tau_applied, unlock, w_piv, piv_flag,...
  *     dt, num_steps, tau_max_piv, thet_pit_nom, x_flex0, tau_flex)
  */
-void bit_one_step(const real_T x0[21], const real_T tau_applied[9], const real_T
+void bit_one_step(const real_T x0[21], real_T tau_applied[9], const real_T
                   unlock[9], real_T w_piv, boolean_T piv_flag, real_T dt,
                   uint16_T num_steps, real_T tau_max_piv, real_T thet_pit_nom,
                   const real_T x_flex0[104], const real_T tau_flex[5], real_T
@@ -9366,8 +9366,9 @@ void bit_one_step(const real_T x0[21], const real_T tau_applied[9], const real_T
   real_T c_tau[5];
   real_T d_tau[5];
   real_T tau[5];
-  real_T dw_piv;
-  real_T tau_tmp;
+  real_T tau_app_flex_idx_1;
+  real_T tau_app_flex_idx_2;
+  real_T tau_applied_tmp;
   int32_T b_i;
   int32_T i;
   int32_T i1;
@@ -9450,39 +9451,50 @@ void bit_one_step(const real_T x0[21], const real_T tau_applied[9], const real_T
   /* 'bit_one_step:16' sys = @(y_true, tau_applied, dw_piv) bit_propagator(y_true, c_n, z_n, m_n, r_n1_n, m_w_n, p_n, ...  */
   /* 'bit_one_step:17'     k_d, b_d, g0, unlock, hs_rw_max, tau_applied, w_piv, piv_flag, dw_piv, tau_max_piv, thet_pit_nom); */
   /* 'bit_one_step:18' tau_app_flex = tau_applied(7:9); */
-  /* 'bit_one_step:19' sys_flex = @(y_flex, tau_app_flex, tau_flex) flex_propogate(a_flex, b_flex, tau_app_flex, tau_flex, y_flex); */
+  tau_app_flex_idx_1 = tau_applied[7];
+  tau_app_flex_idx_2 = tau_applied[8];
+
+  /* 'bit_one_step:19' tau_applied(7) = tau_applied(7) + tau_flex(1); */
+  tau_applied_tmp = tau_flex[0] + tau_applied[6];
+  tau_applied[6] = tau_applied_tmp;
+
+  /* 'bit_one_step:20' tau_applied(8) = tau_applied(8) + tau_flex(2) + tau_flex(3); */
+  tau_applied[7] = (tau_flex[1] + tau_applied[7]) + tau_flex[2];
+
+  /* 'bit_one_step:21' tau_applied(9) = tau_applied(9) + tau_flex(4) + tau_flex(5); */
+  tau_applied[8] = (tau_flex[3] + tau_applied[8]) + tau_flex[4];
+
+  /* 'bit_one_step:23' sys_flex = @(y_flex, tau_app_flex, tau_flex) flex_propogate(a_flex, b_flex, tau_app_flex, tau_flex, y_flex); */
   /*  sim */
-  /* 'bit_one_step:23' for step = 1:num_steps */
+  /* 'bit_one_step:27' for step = 1:num_steps */
   i = num_steps;
   if (num_steps - 1 >= 0) {
     real_T b_tau_tmp;
-    real_T c_tau_tmp;
-    real_T d_tau_tmp;
-    dw_piv = tau_flex[0] + tau_applied[6];
-    tau[0] = dw_piv;
-    tau_tmp = tau_flex[1] + tau_applied[7] / 2.0;
+    real_T tau_tmp;
+    tau[0] = tau_applied_tmp;
+    tau_tmp = tau_flex[1] + tau_app_flex_idx_1 / 2.0;
     tau[1] = tau_tmp;
-    b_tau_tmp = tau_flex[2] + tau_applied[7] / 2.0;
-    tau[2] = b_tau_tmp;
-    c_tau_tmp = tau_flex[3] + tau_applied[8] / 2.0;
-    tau[3] = c_tau_tmp;
-    d_tau_tmp = tau_flex[4] + tau_applied[8] / 2.0;
-    tau[4] = d_tau_tmp;
-    b_tau[0] = dw_piv;
+    tau_app_flex_idx_1 = tau_flex[2] + tau_app_flex_idx_1 / 2.0;
+    tau[2] = tau_app_flex_idx_1;
+    b_tau_tmp = tau_flex[3] + tau_app_flex_idx_2 / 2.0;
+    tau[3] = b_tau_tmp;
+    tau_app_flex_idx_2 = tau_flex[4] + tau_app_flex_idx_2 / 2.0;
+    tau[4] = tau_app_flex_idx_2;
+    b_tau[0] = tau_applied_tmp;
     b_tau[1] = tau_tmp;
-    b_tau[2] = b_tau_tmp;
-    b_tau[3] = c_tau_tmp;
-    b_tau[4] = d_tau_tmp;
-    c_tau[0] = dw_piv;
+    b_tau[2] = tau_app_flex_idx_1;
+    b_tau[3] = b_tau_tmp;
+    b_tau[4] = tau_app_flex_idx_2;
+    c_tau[0] = tau_applied_tmp;
     c_tau[1] = tau_tmp;
-    c_tau[2] = b_tau_tmp;
-    c_tau[3] = c_tau_tmp;
-    c_tau[4] = d_tau_tmp;
-    d_tau[0] = dw_piv;
+    c_tau[2] = tau_app_flex_idx_1;
+    c_tau[3] = b_tau_tmp;
+    c_tau[4] = tau_app_flex_idx_2;
+    d_tau[0] = tau_applied_tmp;
     d_tau[1] = tau_tmp;
-    d_tau[2] = b_tau_tmp;
-    d_tau[3] = c_tau_tmp;
-    d_tau[4] = d_tau_tmp;
+    d_tau[2] = tau_app_flex_idx_1;
+    d_tau[3] = b_tau_tmp;
+    d_tau[4] = tau_app_flex_idx_2;
   }
 
   for (step = 0; step < i; step++) {
@@ -9500,66 +9512,66 @@ void bit_one_step(const real_T x0[21], const real_T tau_applied[9], const real_T
 
     /*         %% Propagate the system */
     /* RK4 solver */
-    /* 'bit_one_step:26' dw_piv = (w_piv - y_true(6))/dt; */
-    dw_piv = (w_piv - y_true[5]) / dt;
+    /* 'bit_one_step:30' dw_piv = (w_piv - y_true(6))/dt; */
+    tau_app_flex_idx_1 = (w_piv - y_true[5]) / dt;
 
-    /* 'bit_one_step:28' k1 = sys(y_true, tau_applied, dw_piv) * dt; */
+    /* 'bit_one_step:32' k1 = sys(y_true, tau_applied, dw_piv) * dt; */
     bit_one_step_anonFcn1(unlock, w_piv, piv_flag, tau_max_piv, thet_pit_nom,
-                          y_true, tau_applied, dw_piv, k1);
+                          y_true, tau_applied, tau_app_flex_idx_1, k1);
 
-    /* 'bit_one_step:29' k2 = sys(y_true + (k1/2), tau_applied, dw_piv) * dt; */
+    /* 'bit_one_step:33' k2 = sys(y_true + (k1/2), tau_applied, dw_piv) * dt; */
     for (b_i = 0; b_i < 21; b_i++) {
-      tau_tmp = k1[b_i] * dt;
-      k1[b_i] = tau_tmp;
-      b_y_true[b_i] = y_true[b_i] + tau_tmp / 2.0;
+      tau_app_flex_idx_2 = k1[b_i] * dt;
+      k1[b_i] = tau_app_flex_idx_2;
+      b_y_true[b_i] = y_true[b_i] + tau_app_flex_idx_2 / 2.0;
     }
 
     bit_one_step_anonFcn1(unlock, w_piv, piv_flag, tau_max_piv, thet_pit_nom,
-                          b_y_true, tau_applied, dw_piv, k2);
+                          b_y_true, tau_applied, tau_app_flex_idx_1, k2);
 
-    /* 'bit_one_step:30' k3 = sys(y_true + (k2/2), tau_applied, dw_piv) * dt; */
+    /* 'bit_one_step:34' k3 = sys(y_true + (k2/2), tau_applied, dw_piv) * dt; */
     for (b_i = 0; b_i < 21; b_i++) {
-      tau_tmp = k2[b_i] * dt;
-      k2[b_i] = tau_tmp;
-      b_y_true[b_i] = y_true[b_i] + tau_tmp / 2.0;
+      tau_app_flex_idx_2 = k2[b_i] * dt;
+      k2[b_i] = tau_app_flex_idx_2;
+      b_y_true[b_i] = y_true[b_i] + tau_app_flex_idx_2 / 2.0;
     }
 
     bit_one_step_anonFcn1(unlock, w_piv, piv_flag, tau_max_piv, thet_pit_nom,
-                          b_y_true, tau_applied, dw_piv, k3);
+                          b_y_true, tau_applied, tau_app_flex_idx_1, k3);
 
-    /* 'bit_one_step:31' k4 = sys(y_true + k3, tau_applied, dw_piv) * dt; */
+    /* 'bit_one_step:35' k4 = sys(y_true + k3, tau_applied, dw_piv) * dt; */
     for (b_i = 0; b_i < 21; b_i++) {
-      tau_tmp = k3[b_i] * dt;
-      k3[b_i] = tau_tmp;
-      b_y_true[b_i] = y_true[b_i] + tau_tmp;
+      tau_app_flex_idx_2 = k3[b_i] * dt;
+      k3[b_i] = tau_app_flex_idx_2;
+      b_y_true[b_i] = y_true[b_i] + tau_app_flex_idx_2;
     }
 
     bit_one_step_anonFcn1(unlock, w_piv, piv_flag, tau_max_piv, thet_pit_nom,
-                          b_y_true, tau_applied, dw_piv, varargout_1);
+                          b_y_true, tau_applied, tau_app_flex_idx_1, varargout_1);
 
-    /* 'bit_one_step:33' tdd = ((k1+(2*k2)+(2*k3)+k4)/6); */
-    /* 'bit_one_step:34' y_true = y_true + tdd; */
+    /* 'bit_one_step:37' tdd = ((k1+(2*k2)+(2*k3)+k4)/6); */
+    /* 'bit_one_step:38' y_true = y_true + tdd; */
     for (b_i = 0; b_i < 21; b_i++) {
       y_true[b_i] += (((k1[b_i] + 2.0 * k2[b_i]) + 2.0 * k3[b_i]) +
                       varargout_1[b_i] * dt) / 6.0;
     }
 
-    /* 'bit_one_step:36' th_over = y_true(10:18) > pi; */
-    /* 'bit_one_step:37' th_under = y_true(10:18) < -pi; */
+    /* 'bit_one_step:40' th_over = y_true(10:18) > pi; */
+    /* 'bit_one_step:41' th_under = y_true(10:18) < -pi; */
     for (b_i = 0; b_i < 9; b_i++) {
-      dw_piv = y_true[b_i + 9];
-      th_over[b_i] = (dw_piv > 3.1415926535897931);
-      th_under[b_i] = (dw_piv < -3.1415926535897931);
+      tau_app_flex_idx_1 = y_true[b_i + 9];
+      th_over[b_i] = (tau_app_flex_idx_1 > 3.1415926535897931);
+      th_under[b_i] = (tau_app_flex_idx_1 < -3.1415926535897931);
     }
 
-    /* 'bit_one_step:38' y_true(10:14) = y_true(10:14) -(2*pi*th_over(1:5)) + (2*pi*th_under(1:5)); */
+    /* 'bit_one_step:42' y_true(10:14) = y_true(10:14) -(2*pi*th_over(1:5)) + (2*pi*th_under(1:5)); */
     for (b_i = 0; b_i < 5; b_i++) {
       y_true[b_i + 9] = (y_true[b_i + 9] - 6.2831853071795862 * (real_T)
                          th_over[b_i]) + 6.2831853071795862 * (real_T)
         th_under[b_i];
     }
 
-    /* 'bit_one_step:39' y_true(16:18) = y_true(16:18) -(2*pi*th_over(7:9)) + (2*pi*th_under(7:9)); */
+    /* 'bit_one_step:43' y_true(16:18) = y_true(16:18) -(2*pi*th_over(7:9)) + (2*pi*th_under(7:9)); */
     y_true[15] = (y_true[15] - 6.2831853071795862 * (real_T)th_over[6]) +
       6.2831853071795862 * (real_T)th_under[6];
     y_true[16] = (y_true[16] - 6.2831853071795862 * (real_T)th_over[7]) +
@@ -9573,8 +9585,8 @@ void bit_one_step(const real_T x0[21], const real_T tau_applied[9], const real_T
     /*                y_true(13), y_true(14), y_true(15), y_true(16), y_true(17), y_true(18),... */
     /*                 y_true(19), y_true(20), y_true(21));       */
     /*         %% Propogate flexible system */
-    /* 'bit_one_step:47' kf1 = sys_flex(y_flex, tau_app_flex, tau_flex) * dt; */
-    /* 'bit_one_step:19' @(y_flex, tau_app_flex, tau_flex) flex_propogate(a_flex, b_flex, tau_app_flex, tau_flex, y_flex) */
+    /* 'bit_one_step:51' kf1 = sys_flex(y_flex, tau_app_flex, tau_flex) * dt; */
+    /* 'bit_one_step:23' @(y_flex, tau_app_flex, tau_flex) flex_propogate(a_flex, b_flex, tau_app_flex, tau_flex, y_flex) */
     /* UNTITLED Summary of this function goes here */
     /*    Detailed explanation goes here */
     /* 'flex_propogate:4' tau_yaw = tau_applied(1); */
@@ -9587,47 +9599,8 @@ void bit_one_step(const real_T x0[21], const real_T tau_applied[9], const real_T
     /* 'flex_propogate:12' tau(4) = tau(4) + (tau_pitch/2); */
     /* 'flex_propogate:13' tau(5) = tau(5) + (tau_pitch/2); */
     /* 'flex_propogate:16' eta_dot = (a_flex * x0_flex) + (b_flex * tau); */
-    /* 'bit_one_step:48' kf2 = sys_flex(y_flex + (kf1/2), tau_app_flex, tau_flex) * dt; */
-    /* 'bit_one_step:19' @(y_flex, tau_app_flex, tau_flex) flex_propogate(a_flex, b_flex, tau_app_flex, tau_flex, y_flex) */
-    /* UNTITLED Summary of this function goes here */
-    /*    Detailed explanation goes here */
-    /* 'flex_propogate:4' tau_yaw = tau_applied(1); */
-    /* 'flex_propogate:5' tau_roll = tau_applied(2); */
-    /* 'flex_propogate:6' tau_pitch = tau_applied(3); */
-    /* 'flex_propogate:8' tau = tau_flex; */
-    /* 'flex_propogate:9' tau(1) = tau(1) + tau_yaw; */
-    /* 'flex_propogate:10' tau(2) = tau(2) + (tau_roll/2); */
-    /* 'flex_propogate:11' tau(3) = tau(3) + (tau_roll/2); */
-    /* 'flex_propogate:12' tau(4) = tau(4) + (tau_pitch/2); */
-    /* 'flex_propogate:13' tau(5) = tau(5) + (tau_pitch/2); */
-    /* 'flex_propogate:16' eta_dot = (a_flex * x0_flex) + (b_flex * tau); */
-    for (b_i = 0; b_i < 104; b_i++) {
-      tau_tmp = 0.0;
-      for (i1 = 0; i1 < 104; i1++) {
-        tau_tmp += a_flex[i1][b_i] * y_flex[i1];
-      }
-
-      dw_piv = 0.0;
-      for (i1 = 0; i1 < 5; i1++) {
-        dw_piv += b_b_flex[i1][b_i] * tau[i1];
-      }
-
-      tau_tmp = (tau_tmp + dw_piv) * dt;
-      kf1[b_i] = tau_tmp;
-      b_flex[b_i] = y_flex[b_i] + tau_tmp / 2.0;
-    }
-
-    for (b_i = 0; b_i < 104; b_i++) {
-      tau_tmp = 0.0;
-      for (i1 = 0; i1 < 104; i1++) {
-        tau_tmp += a_flex[i1][b_i] * b_flex[i1];
-      }
-
-      kf2[b_i] = tau_tmp;
-    }
-
-    /* 'bit_one_step:49' kf3 = sys_flex(y_flex + (kf2/2), tau_app_flex, tau_flex) * dt; */
-    /* 'bit_one_step:19' @(y_flex, tau_app_flex, tau_flex) flex_propogate(a_flex, b_flex, tau_app_flex, tau_flex, y_flex) */
+    /* 'bit_one_step:52' kf2 = sys_flex(y_flex + (kf1/2), tau_app_flex, tau_flex) * dt; */
+    /* 'bit_one_step:23' @(y_flex, tau_app_flex, tau_flex) flex_propogate(a_flex, b_flex, tau_app_flex, tau_flex, y_flex) */
     /* UNTITLED Summary of this function goes here */
     /*    Detailed explanation goes here */
     /* 'flex_propogate:4' tau_yaw = tau_applied(1); */
@@ -9641,27 +9614,32 @@ void bit_one_step(const real_T x0[21], const real_T tau_applied[9], const real_T
     /* 'flex_propogate:13' tau(5) = tau(5) + (tau_pitch/2); */
     /* 'flex_propogate:16' eta_dot = (a_flex * x0_flex) + (b_flex * tau); */
     for (b_i = 0; b_i < 104; b_i++) {
-      tau_tmp = 0.0;
-      for (i1 = 0; i1 < 5; i1++) {
-        tau_tmp += b_b_flex[i1][b_i] * b_tau[i1];
+      tau_app_flex_idx_2 = 0.0;
+      for (i1 = 0; i1 < 104; i1++) {
+        tau_app_flex_idx_2 += a_flex[i1][b_i] * y_flex[i1];
       }
 
-      tau_tmp = (kf2[b_i] + tau_tmp) * dt;
-      kf2[b_i] = tau_tmp;
-      b_flex[b_i] = y_flex[b_i] + tau_tmp / 2.0;
+      tau_app_flex_idx_1 = 0.0;
+      for (i1 = 0; i1 < 5; i1++) {
+        tau_app_flex_idx_1 += b_b_flex[i1][b_i] * tau[i1];
+      }
+
+      tau_app_flex_idx_2 = (tau_app_flex_idx_2 + tau_app_flex_idx_1) * dt;
+      kf1[b_i] = tau_app_flex_idx_2;
+      b_flex[b_i] = y_flex[b_i] + tau_app_flex_idx_2 / 2.0;
     }
 
     for (b_i = 0; b_i < 104; b_i++) {
-      tau_tmp = 0.0;
+      tau_app_flex_idx_2 = 0.0;
       for (i1 = 0; i1 < 104; i1++) {
-        tau_tmp += a_flex[i1][b_i] * b_flex[i1];
+        tau_app_flex_idx_2 += a_flex[i1][b_i] * b_flex[i1];
       }
 
-      kf3[b_i] = tau_tmp;
+      kf2[b_i] = tau_app_flex_idx_2;
     }
 
-    /* 'bit_one_step:50' kf4 = sys_flex(y_flex + kf3, tau_app_flex, tau_flex) * dt; */
-    /* 'bit_one_step:19' @(y_flex, tau_app_flex, tau_flex) flex_propogate(a_flex, b_flex, tau_app_flex, tau_flex, y_flex) */
+    /* 'bit_one_step:53' kf3 = sys_flex(y_flex + (kf2/2), tau_app_flex, tau_flex) * dt; */
+    /* 'bit_one_step:23' @(y_flex, tau_app_flex, tau_flex) flex_propogate(a_flex, b_flex, tau_app_flex, tau_flex, y_flex) */
     /* UNTITLED Summary of this function goes here */
     /*    Detailed explanation goes here */
     /* 'flex_propogate:4' tau_yaw = tau_applied(1); */
@@ -9674,32 +9652,66 @@ void bit_one_step(const real_T x0[21], const real_T tau_applied[9], const real_T
     /* 'flex_propogate:12' tau(4) = tau(4) + (tau_pitch/2); */
     /* 'flex_propogate:13' tau(5) = tau(5) + (tau_pitch/2); */
     /* 'flex_propogate:16' eta_dot = (a_flex * x0_flex) + (b_flex * tau); */
-    /* 'bit_one_step:52' eta_dd = ((kf1+(2*kf2)+(2*kf3)+kf4)/6); */
-    /* 'bit_one_step:53' y_flex = y_flex + eta_dd; */
     for (b_i = 0; b_i < 104; b_i++) {
-      tau_tmp = 0.0;
+      tau_app_flex_idx_2 = 0.0;
       for (i1 = 0; i1 < 5; i1++) {
-        tau_tmp += b_b_flex[i1][b_i] * c_tau[i1];
+        tau_app_flex_idx_2 += b_b_flex[i1][b_i] * b_tau[i1];
       }
 
-      tau_tmp = (kf3[b_i] + tau_tmp) * dt;
-      kf3[b_i] = tau_tmp;
-      b_flex[b_i] = y_flex[b_i] + tau_tmp;
+      tau_app_flex_idx_2 = (kf2[b_i] + tau_app_flex_idx_2) * dt;
+      kf2[b_i] = tau_app_flex_idx_2;
+      b_flex[b_i] = y_flex[b_i] + tau_app_flex_idx_2 / 2.0;
     }
 
     for (b_i = 0; b_i < 104; b_i++) {
-      tau_tmp = 0.0;
+      tau_app_flex_idx_2 = 0.0;
       for (i1 = 0; i1 < 104; i1++) {
-        tau_tmp += a_flex[i1][b_i] * b_flex[i1];
+        tau_app_flex_idx_2 += a_flex[i1][b_i] * b_flex[i1];
       }
 
-      dw_piv = 0.0;
+      kf3[b_i] = tau_app_flex_idx_2;
+    }
+
+    /* 'bit_one_step:54' kf4 = sys_flex(y_flex + kf3, tau_app_flex, tau_flex) * dt; */
+    /* 'bit_one_step:23' @(y_flex, tau_app_flex, tau_flex) flex_propogate(a_flex, b_flex, tau_app_flex, tau_flex, y_flex) */
+    /* UNTITLED Summary of this function goes here */
+    /*    Detailed explanation goes here */
+    /* 'flex_propogate:4' tau_yaw = tau_applied(1); */
+    /* 'flex_propogate:5' tau_roll = tau_applied(2); */
+    /* 'flex_propogate:6' tau_pitch = tau_applied(3); */
+    /* 'flex_propogate:8' tau = tau_flex; */
+    /* 'flex_propogate:9' tau(1) = tau(1) + tau_yaw; */
+    /* 'flex_propogate:10' tau(2) = tau(2) + (tau_roll/2); */
+    /* 'flex_propogate:11' tau(3) = tau(3) + (tau_roll/2); */
+    /* 'flex_propogate:12' tau(4) = tau(4) + (tau_pitch/2); */
+    /* 'flex_propogate:13' tau(5) = tau(5) + (tau_pitch/2); */
+    /* 'flex_propogate:16' eta_dot = (a_flex * x0_flex) + (b_flex * tau); */
+    /* 'bit_one_step:56' eta_dd = ((kf1+(2*kf2)+(2*kf3)+kf4)/6); */
+    /* 'bit_one_step:57' y_flex = y_flex + eta_dd; */
+    for (b_i = 0; b_i < 104; b_i++) {
+      tau_app_flex_idx_2 = 0.0;
       for (i1 = 0; i1 < 5; i1++) {
-        dw_piv += b_b_flex[i1][b_i] * d_tau[i1];
+        tau_app_flex_idx_2 += b_b_flex[i1][b_i] * c_tau[i1];
       }
 
-      y_flex[b_i] += (((kf1[b_i] + 2.0 * kf2[b_i]) + 2.0 * kf3[b_i]) + (tau_tmp
-        + dw_piv) * dt) / 6.0;
+      tau_app_flex_idx_2 = (kf3[b_i] + tau_app_flex_idx_2) * dt;
+      kf3[b_i] = tau_app_flex_idx_2;
+      b_flex[b_i] = y_flex[b_i] + tau_app_flex_idx_2;
+    }
+
+    for (b_i = 0; b_i < 104; b_i++) {
+      tau_app_flex_idx_2 = 0.0;
+      for (i1 = 0; i1 < 104; i1++) {
+        tau_app_flex_idx_2 += a_flex[i1][b_i] * b_flex[i1];
+      }
+
+      tau_app_flex_idx_1 = 0.0;
+      for (i1 = 0; i1 < 5; i1++) {
+        tau_app_flex_idx_1 += b_b_flex[i1][b_i] * d_tau[i1];
+      }
+
+      y_flex[b_i] += (((kf1[b_i] + 2.0 * kf2[b_i]) + 2.0 * kf3[b_i]) +
+                      (tau_app_flex_idx_2 + tau_app_flex_idx_1) * dt) / 6.0;
     }
   }
 }
@@ -9771,6 +9783,138 @@ void compute_angular_velocity_C(const real_T x[18], real_T z_n[9][3], real_T
 }
 
 /*
+ * function [omega] = compute_angular_velocity_roll_C(x, z_n)
+ */
+void compute_angular_velocity_roll_C(const real_T x[18], real_T z_n[9][3],
+  real_T omega[3])
+{
+  real_T s8[8][3];
+  real_T d;
+  int32_T b_i;
+  int32_T i;
+  int32_T i1;
+
+  /* UNTITLED2 Summary of this function goes here */
+  /*    Detailed explanation goes here */
+  /* 'compute_angular_velocity_roll_C:4' theta = x(10:18); */
+  /* 'compute_angular_velocity_roll_C:5' dtheta = x(1:8); */
+  /* 'compute_angular_velocity_roll_C:7' s8 = zeros(3,8); */
+  for (i = 0; i < 8; i++) {
+    s8[i][0] = 0.0;
+    s8[i][1] = 0.0;
+    s8[i][2] = 0.0;
+  }
+
+  /* 'compute_angular_velocity_roll_C:8' for i = 1:8 */
+  for (b_i = 0; b_i < 8; b_i++) {
+    real_T b_Cn[8][3];
+    real_T Cn[3][3];
+
+    /* 'compute_angular_velocity_roll_C:9' Cn = axis2rot(z_n(:,i), theta(i)); */
+    axis2rot(&z_n[b_i][0], x[b_i + 9], Cn);
+
+    /* 'compute_angular_velocity_roll_C:10' s8(:,i) = z_n(:,i); */
+    s8[b_i][0] = z_n[b_i][0];
+    s8[b_i][1] = z_n[b_i][1];
+    s8[b_i][2] = z_n[b_i][2];
+
+    /* 'compute_angular_velocity_roll_C:11' s8 = Cn*s8; */
+    for (i = 0; i < 3; i++) {
+      real_T d1;
+      real_T d2;
+      d = Cn[0][i];
+      d1 = Cn[1][i];
+      d2 = Cn[2][i];
+      for (i1 = 0; i1 < 8; i1++) {
+        b_Cn[i1][i] = (d * s8[i1][0] + d1 * s8[i1][1]) + d2 * s8[i1][2];
+      }
+    }
+
+    for (i = 0; i < 8; i++) {
+      s8[i][0] = b_Cn[i][0];
+      s8[i][1] = b_Cn[i][1];
+      s8[i][2] = b_Cn[i][2];
+    }
+  }
+
+  /* 'compute_angular_velocity_roll_C:14' omega = s8 * dtheta; */
+  for (i = 0; i < 3; i++) {
+    d = 0.0;
+    for (i1 = 0; i1 < 8; i1++) {
+      d += s8[i1][i] * x[i1];
+    }
+
+    omega[i] = d;
+  }
+}
+
+/*
+ * function [omega] = compute_angular_velocity_yaw_C(x, z_n)
+ */
+void compute_angular_velocity_yaw_C(const real_T x[18], real_T z_n[9][3], real_T
+  omega[3])
+{
+  real_T s7[7][3];
+  real_T d;
+  int32_T b_i;
+  int32_T i;
+  int32_T i1;
+
+  /* UNTITLED2 Summary of this function goes here */
+  /*    Detailed explanation goes here */
+  /* 'compute_angular_velocity_yaw_C:4' theta = x(10:18); */
+  /* 'compute_angular_velocity_yaw_C:5' dtheta = x(1:7); */
+  /* 'compute_angular_velocity_yaw_C:7' s7 = zeros(3,7); */
+  for (i = 0; i < 7; i++) {
+    s7[i][0] = 0.0;
+    s7[i][1] = 0.0;
+    s7[i][2] = 0.0;
+  }
+
+  /* 'compute_angular_velocity_yaw_C:8' for i = 1:7 */
+  for (b_i = 0; b_i < 7; b_i++) {
+    real_T b_Cn[7][3];
+    real_T Cn[3][3];
+
+    /* 'compute_angular_velocity_yaw_C:9' Cn = axis2rot(z_n(:,i), theta(i)); */
+    axis2rot(&z_n[b_i][0], x[b_i + 9], Cn);
+
+    /* 'compute_angular_velocity_yaw_C:10' s7(:,i) = z_n(:,i); */
+    s7[b_i][0] = z_n[b_i][0];
+    s7[b_i][1] = z_n[b_i][1];
+    s7[b_i][2] = z_n[b_i][2];
+
+    /* 'compute_angular_velocity_yaw_C:11' s7 = Cn*s7; */
+    for (i = 0; i < 3; i++) {
+      real_T d1;
+      real_T d2;
+      d = Cn[0][i];
+      d1 = Cn[1][i];
+      d2 = Cn[2][i];
+      for (i1 = 0; i1 < 7; i1++) {
+        b_Cn[i1][i] = (d * s7[i1][0] + d1 * s7[i1][1]) + d2 * s7[i1][2];
+      }
+    }
+
+    for (i = 0; i < 7; i++) {
+      s7[i][0] = b_Cn[i][0];
+      s7[i][1] = b_Cn[i][1];
+      s7[i][2] = b_Cn[i][2];
+    }
+  }
+
+  /* 'compute_angular_velocity_yaw_C:14' omega = s7 * dtheta; */
+  for (i = 0; i < 3; i++) {
+    d = 0.0;
+    for (i1 = 0; i1 < 7; i1++) {
+      d += s7[i1][i] * x[i1];
+    }
+
+    omega[i] = d;
+  }
+}
+
+/*
  * function [C] = compute_rotation_mat_C(z_n, theta)
  */
 void compute_rotation_mat_C(real_T z_n[9][3], const real_T theta[9], real_T C[3]
@@ -9820,6 +9964,132 @@ void compute_rotation_mat_C(real_T z_n[9][3], const real_T theta[9], real_T C[3]
   }
 
   /* 'compute_rotation_mat_C:8' C = C'; */
+  for (i = 0; i < 3; i++) {
+    b_a[i][0] = C[0][i];
+    b_a[i][1] = C[1][i];
+    b_a[i][2] = C[2][i];
+  }
+
+  for (i = 0; i < 3; i++) {
+    C[i][0] = b_a[i][0];
+    C[i][1] = b_a[i][1];
+    C[i][2] = b_a[i][2];
+  }
+}
+
+/*
+ * function [C] = compute_rotation_mat_roll_C(z_n, theta)
+ */
+void compute_rotation_mat_roll_C(real_T z_n[9][3], const real_T theta[9], real_T
+  C[3][3])
+{
+  real_T b_a[3][3];
+  int32_T b_i;
+  int32_T i;
+  int32_T i1;
+
+  /* UNTITLED3 Summary of this function goes here */
+  /*    Detailed explanation goes here */
+  /* 'compute_rotation_mat_roll_C:4' C = (eye(3)); */
+  for (i = 0; i < 3; i++) {
+    C[i][0] = 0.0;
+    C[i][1] = 0.0;
+    C[i][2] = 0.0;
+  }
+
+  C[0][0] = 1.0;
+  C[1][1] = 1.0;
+  C[2][2] = 1.0;
+
+  /* 'compute_rotation_mat_roll_C:5' for i = 1:8 */
+  for (b_i = 0; b_i < 8; b_i++) {
+    real_T a[3][3];
+
+    /* 'compute_rotation_mat_roll_C:6' C = axis2rot(z_n(:,i), theta(i)) * C; */
+    axis2rot(&z_n[b_i][0], theta[b_i], b_a);
+    for (i = 0; i < 3; i++) {
+      real_T d;
+      real_T d1;
+      real_T d2;
+      d = b_a[0][i];
+      d1 = b_a[1][i];
+      d2 = b_a[2][i];
+      for (i1 = 0; i1 < 3; i1++) {
+        a[i1][i] = (d * C[i1][0] + d1 * C[i1][1]) + d2 * C[i1][2];
+      }
+    }
+
+    for (i = 0; i < 3; i++) {
+      C[i][0] = a[i][0];
+      C[i][1] = a[i][1];
+      C[i][2] = a[i][2];
+    }
+  }
+
+  /* 'compute_rotation_mat_roll_C:8' C = C'; */
+  for (i = 0; i < 3; i++) {
+    b_a[i][0] = C[0][i];
+    b_a[i][1] = C[1][i];
+    b_a[i][2] = C[2][i];
+  }
+
+  for (i = 0; i < 3; i++) {
+    C[i][0] = b_a[i][0];
+    C[i][1] = b_a[i][1];
+    C[i][2] = b_a[i][2];
+  }
+}
+
+/*
+ * function [C] = compute_rotation_mat_yaw_C(z_n, theta)
+ */
+void compute_rotation_mat_yaw_C(real_T z_n[9][3], const real_T theta[9], real_T
+  C[3][3])
+{
+  real_T b_a[3][3];
+  int32_T b_i;
+  int32_T i;
+  int32_T i1;
+
+  /* UNTITLED3 Summary of this function goes here */
+  /*    Detailed explanation goes here */
+  /* 'compute_rotation_mat_yaw_C:4' C = (eye(3)); */
+  for (i = 0; i < 3; i++) {
+    C[i][0] = 0.0;
+    C[i][1] = 0.0;
+    C[i][2] = 0.0;
+  }
+
+  C[0][0] = 1.0;
+  C[1][1] = 1.0;
+  C[2][2] = 1.0;
+
+  /* 'compute_rotation_mat_yaw_C:5' for i = 1:7 */
+  for (b_i = 0; b_i < 7; b_i++) {
+    real_T a[3][3];
+
+    /* 'compute_rotation_mat_yaw_C:6' C = axis2rot(z_n(:,i), theta(i)) * C; */
+    axis2rot(&z_n[b_i][0], theta[b_i], b_a);
+    for (i = 0; i < 3; i++) {
+      real_T d;
+      real_T d1;
+      real_T d2;
+      d = b_a[0][i];
+      d1 = b_a[1][i];
+      d2 = b_a[2][i];
+      for (i1 = 0; i1 < 3; i1++) {
+        a[i1][i] = (d * C[i1][0] + d1 * C[i1][1]) + d2 * C[i1][2];
+      }
+    }
+
+    for (i = 0; i < 3; i++) {
+      C[i][0] = a[i][0];
+      C[i][1] = a[i][1];
+      C[i][2] = a[i][2];
+    }
+  }
+
+  /* 'compute_rotation_mat_yaw_C:8' C = C'; */
   for (i = 0; i < 3; i++) {
     b_a[i][0] = C[0][i];
     b_a[i][1] = C[1][i];
