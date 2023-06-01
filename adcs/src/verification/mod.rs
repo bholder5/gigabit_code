@@ -210,7 +210,8 @@ pub fn test_control() {
     st.update_current_eq_from_gmb();
 
     let mut er = error::Error::new();
-    er.update_pointing_positional_error(&st, na::Matrix3::identity());
+    let mut slew_flag = true;
+    slew_flag = er.update_pointing_positional_error(&st, na::Matrix3::identity(), slew_flag);
     println!("{} {} {}", st.eq_d.ra, st.eq_d.dec, st.eq_d.fr);
     println!("eq desired: {:.5} eq k: {:.5}", st.eq_d.rot, st.eq_k.rot);
     println!(
@@ -225,13 +226,13 @@ pub fn test_control() {
     );
 
     er.err_comb_th = na::Vector3::new(-0.10, 2.0, 0.750);
-    er.update_pointing_velocity_error_terms(&mut st, &true);
+    er.update_pointing_velocity_error_terms(&mut st);
     println!("err_decay {}, crtl_dt {}", er._err_decay_v, er._ctrl_dt);
     println!("rate: {}", er.err_rate);
     println!("{}", er.err_rate_sum);
-    er.update_pointing_velocity_error_terms(&mut st, &true);
+    er.update_pointing_velocity_error_terms(&mut st);
     println!("{}", er.err_rate_sum);
-    er.update_pointing_velocity_error_terms(&mut st, &true);
+    er.update_pointing_velocity_error_terms(&mut st);
     println!("{}", er.err_rate_sum);
 
     //////////////////////////////////////////////////////////////////

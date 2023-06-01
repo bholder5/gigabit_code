@@ -119,7 +119,7 @@ impl Error {
     /// - `self.err_gmb_th: gimbal::Gimbal` the error in gimbal coordinates directly calculated from
     ///  current and desired gimbal coordinates
     /// - `self.err_comb_th: na::Vector3<f64>` the combined error for use in velocity profile calculation
-    pub fn update_pointing_positional_error(&mut self, state: &st::State, phi: na::Matrix3<f64>) {
+    pub fn update_pointing_positional_error(&mut self, state: &st::State, phi: na::Matrix3<f64>, mut slew_flag:bool) -> (bool) {
         trace!("update_positional_pointing_error start");
 
         //rot err in equatorial space
@@ -170,6 +170,7 @@ impl Error {
         if norm_fine_err < self.u_lower {
             self.err_comb_th = phi * err_vec;
             self.err_fine_sum = self.err_fine_sum + (self.err_comb_th * self._ctrl_dt);
+            slew_flag = false;
         } else {
             
             self.err_gmb_th
@@ -178,6 +179,7 @@ impl Error {
             if norm_fine_err > self.u_upper {
                 // calculate the gimbal error
                 self.err_comb_th = _err_gmb.clone();
+                slew_flag = true;
                 // println!("greater than u.upper");
             } else {
                 // println!("between u.lower and u.upper");
@@ -191,6 +193,7 @@ impl Error {
             }
             trace!("update_positional_pointing_error end");
         }
+        return slew_flag
     }
     /// $\phi_{err,sum,k} = \phi_{err,sum,k-1} e^{dt_{ctrl}/\tau_{err}} + \phi_{err}dt$ which
     /// provides a decay term for the error sum to prevent integral windup
@@ -215,7 +218,7 @@ impl Error {
     pub fn update_pointing_velocity_error_terms(
         &mut self,
         state: &mut st::State,
-        slew_flag: &bool,
+        // slew_flag: &bool,
     ) {
         // println!("start of pointing velocity error terms");
         trace!("update_pointing_velocity_error_terms start");
@@ -229,9 +232,9 @@ impl Error {
         let mut _pitch_rate_des: f64 = 0.0;
         let mut _yaw_rate_des: f64 = 0.0;
 
-        if slew_flag == &true {
+        // if slew_flag == &true {
             let g_const: f64 = 1.0;
-            let g_lin: f64 = 0.0200;
+            let g_lin: f64 = 0.001;
 
             let temp1: f64 = g_lin.powi(2) * PI / (4.0 * g_const.powi(2));
             let temp2: f64 = temp1.sqrt();
@@ -259,7 +262,7 @@ impl Error {
                         * stat::function::erf::erf(self.err_comb_th.z.abs() * temp2))
                     + (temp3 * ((-self.err_comb_th.z.powi(2) * temp1).exp() - 1.0)))
                     .sqrt();
-        }
+        // }
 
         let max_accel = 0.02 * self._ctrl_dt;
         let des_roll_accel = _roll_rate_des - self.rate_des.x;
@@ -305,7 +308,7 @@ impl Error {
         trace!("update_pointing_velocity_error_terms end");
         // println!("err_rate_sum {}, err_decay {}, err_rate {}, _ctrl_dt {}", self.err_rate_sum, self._err_decay, self.err_rate, self._ctrl_dt);
         // println!("err_rate_sum {}, err_rate {} _d_theta {} gmm^-1 {} omega {}", self.err_rate_sum, self.err_rate, _d_theta,state.gmb_k.gmm.cholesky().unwrap().inverse(), state.omega);
-
+        // println!("des rate: {}", &self.rate_des);
         self.err_rate_sum = (self.err_rate_sum * self._err_decay_v) + (self.err_rate * self._ctrl_dt)
     }
 }

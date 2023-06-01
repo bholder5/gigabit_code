@@ -102,11 +102,12 @@ fn main() {
 
 
     trace!("START");
-    for _step in 0..1 as usize {
+    for _step in 0..10000000000000000000 as usize {
         
         ///////// beginning of the simulation loop
         /////////////////////////////////////////
         // let now1 = Instant::now();
+        // fc.u = fc.u * 0.0;
         unsafe {
             trace!("bit_one_step start");
             bit_one_step(
@@ -114,18 +115,21 @@ fn main() {
                 tau_applied.as_mut_ptr(),
                 bp.unlock.as_ptr(),
                 ctrl.pivot.omega_request,
-                false as u8,
+                true as u8,
                 bp._dt,
                 bp._num_steps,
                 bp._tau_piv_max,
                 bp.pitch_nom,
                 flex.eta.as_ptr(),
                 fc.u.as_ptr(),
+                true as u8,
                 y_result.as_mut_ptr(),
                 flex_result.as_mut_ptr(),
+                
             );
             trace!("bit_one_step end");
         }
+        
         // println!("bit one step {}", now1.elapsed().as_micros());
         // let now2 = Instant::now();
         if flex.flex_enable{
@@ -153,6 +157,11 @@ fn main() {
         bp.get_orientation_vec(&flex);
         bp.get_orientation_rots(&flex, &mut meas);
         bp.get_rw_speed();
+
+        if &ctrl.slew_flag == &true {
+            bp.pitch_nom = bp.theta[8].clone();
+        }
+        // println!("theta nom {}",&bp.pitch_nom);
 
         sim_state.update_current_equatorial_coordinates(&bp.phi_act);
 
@@ -183,7 +192,7 @@ fn main() {
 
             // println!("{} {} {} {} {}", &gyro_in[0], &gyro_in[1], &gyro_in[2], &gyro_in[3], &gyro_in[4]);
 
-            fc.propogate_control_state(gyro_in.as_slice(), bp._dt, bp._num_steps);
+            fc.propogate_control_state(gyro_in.as_slice(), bp._dt, bp._num_steps, &[ctrl.error.rate_des.z.clone(), ctrl.error.rate_des.x.clone(),ctrl.error.rate_des.x.clone(),ctrl.error.rate_des.y.clone(),ctrl.error.rate_des.y.clone(),]);
 
         }
 
@@ -240,17 +249,18 @@ fn main() {
 
             // update actual torque vector with applied torques
 
-            if step < 1500{
+            // if step < 1500{
                 ctrl.update_ctrl();
                 tau_applied[6] = 1.0*ctrl.rw.tau_applied; //yaw
                 tau_applied[7] = 1.0*ctrl.fmot_roll.tau_applied; //roll
                 tau_applied[8] = 1.0*ctrl.fmot_pitch.tau_applied; //pitch
-            } else {
-                ctrl.rw.tau_applied = 0.0;
-                tau_applied[6] = 0.0*ctrl.rw.tau_applied; //yaw
-                tau_applied[7] = 0.0*ctrl.fmot_roll.tau_applied; //roll
-                tau_applied[8] = 0.0*ctrl.fmot_pitch.tau_applied; 
-            }
+            // } else {
+            //     ctrl.update_ctrl();
+            //     ctrl.rw.tau_applied = 0.0;
+            //     tau_applied[6] = 0.0*ctrl.rw.tau_applied; //yaw
+            //     tau_applied[7] = 0.0*ctrl.fmot_roll.tau_applied; //roll
+            //     tau_applied[8] = 0.0*ctrl.fmot_pitch.tau_applied; 
+            // }
             
 
             // if (step % 1000) < 1{

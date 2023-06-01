@@ -31,20 +31,29 @@ pub struct PassiveControl {
 impl PassiveControl{
     pub fn init_pc() -> PassiveControl{
         let a_flex = init_amat();
-        let b_flex = 1000.0 *init_bmat();
-        let a_rigid = na::Matrix3::<f64>::from_diagonal(&na::Vector3::new(991.0, 364.0, 143.0));
+        let b_flex = 1.0 *init_bmat();
+        let a_rigid = na::Matrix3::<f64>::from_row_slice(&[978.1915, -15.2645, 0.0, -15.2645, 376.8085, 0.0, 0.0, 0.0, 134.0]);
         let b_rigid = a_rigid.try_inverse().unwrap() * BRigid::from_row_slice(&[1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0]);
-        let num_modes: usize = 2;
+        let num_modes: usize = 8;
         let num_states: usize = 2*num_modes;
-        let r = 1.0 * na::Matrix5::<f64>::identity();
+        let r = 0.0001 * na::Matrix5::<f64>::identity();
         let mut ql = 1.0*na::DMatrix::<f64>::identity(num_states+3, num_states+3);
         let mut qr = 1.0 * na::DMatrix::<f64>::identity(num_states+3, num_states+3);
 
-        // let qr_rigid = 0.1 * na::DMatrix::<f64>::identity(3,3);
-        // qr.slice_mut((0,0), (3, 3)).copy_from(&qr_rigid);
+        let qr_rigid = 0.0015* a_rigid.clone();
+        qr.slice_mut((0,0), (3, 3)).copy_from(&qr_rigid);
+        qr.slice_mut((3,3), (2, 2)).copy_from(&na::Matrix2::<f64>::from_diagonal(&na::Vector2::new(0.01, 10.0)));
+        qr.slice_mut((5,5), (2, 2)).copy_from(&na::Matrix2::<f64>::from_diagonal(&na::Vector2::new(0.01, 100.0)));
+        qr.slice_mut((7,7), (2, 2)).copy_from(&na::Matrix2::<f64>::from_diagonal(&na::Vector2::new(0.01, 1.0)));
+        qr.slice_mut((9,9), (2, 2)).copy_from(&na::Matrix2::<f64>::from_diagonal(&na::Vector2::new(0.01, 2.0)));
+        qr.slice_mut((11,11), (2, 2)).copy_from(&na::Matrix2::<f64>::from_diagonal(&na::Vector2::new(0.01, 1.0)));
+        qr.slice_mut((13,13), (2, 2)).copy_from(&na::Matrix2::<f64>::from_diagonal(&na::Vector2::new(0.01, 1.0)));
+        qr.slice_mut((15,15), (2, 2)).copy_from(&na::Matrix2::<f64>::from_diagonal(&na::Vector2::new(0.01, 1.0)));
+        qr.slice_mut((17,17), (2, 2)).copy_from(&na::Matrix2::<f64>::from_diagonal(&na::Vector2::new(0.01, 1.0)));
 
-        // let ql_rigid = 0.1 * na::DMatrix::<f64>::identity(3,3);
-        // ql.slice_mut((0,0), (3, 3)).copy_from(&ql_rigid);
+        // println!("b matrix in passive control {}", &b_flex);
+
+        let ql = 100.0 * &qr.clone().try_inverse().unwrap();
 
 
         let a_cl = na::DMatrix::<f64>::zeros(num_states+3, num_states+3);
@@ -93,7 +102,7 @@ impl PassiveControl{
         // let mut a = DMatrix::<f64>::zeros(self.num_states, self.num_states);
         // let mut b = DMatrix::<f64>::zeros(self.num_states,5);50
 
-        println!("num states {}", &self.num_states);
+        // println!("num states {}", &self.num_states);
 
         let a_use = self.a_flex.slice((0, 0), (self.num_states,self.num_states)).clone();
         let b_use = self.b_flex.slice((0, 0), (self.num_states,5)).clone();
@@ -107,8 +116,8 @@ impl PassiveControl{
         b.slice_mut((0,0), (3, 5)).copy_from(&self.b_rigid);
         b.slice_mut((3,0), (self.num_states, 5)).copy_from(&b_use);
 
-        println!("The b matrix for comparison {}", &b);
-        println!("The a matrix for comparison {}", &a);
+        // println!("The b matrix for comparison {}", &b);
+        // println!("The a matrix for comparison {}", &a);
 
 
         let num_states = &self.num_states + 3;
@@ -118,6 +127,7 @@ impl PassiveControl{
         let mut z = na::DMatrix::<f64>::zeros({2*num_states}, {2*(num_states)});
        
         let qr = self.qr.clone();
+        // println!("qr is {}", &qr);
 
         z.slice_mut((0,0), (num_states,num_states)).copy_from(&a);
         z.slice_mut((0,num_states), (num_states,num_states)).copy_from(&z12);
@@ -184,13 +194,13 @@ impl PassiveControl{
             cn +=1;
         }
     
-        // println!("THIS IS P {:+.5e}", P);
+        // println!("THIS IS P {:+.5e}", p);
         let k = self.r.try_inverse().unwrap() * b.transpose() * p;
         
         for (loc, el) in k.iter().enumerate(){
-            self.c_c[loc] = -el;
+            self.c_c[loc] = el.clone();
         }
-        println!("k is : {:.4}, c is: {:.4}",k, self.c_c);
+        // println!("k is : {:.6}, c is: {:.6}",k, self.c_c);
     
         //////////////////////////////////
         //
@@ -204,8 +214,8 @@ impl PassiveControl{
         //
         
     
-        self.a_cl = a + (b*k);
-        println!("a_cl = {:.5}", &self.a_cl);
+        self.a_cl = a - (b*k);
+        // println!("a_cl = {:.5}", &self.a_cl);
         
     }
     
@@ -220,8 +230,8 @@ impl PassiveControl{
     
         let eye = na::DMatrix::<f64>::identity(nrows_sq as usize, nrows_sq as usize);
     
-        let temp1 = eye.kronecker(&self.a_cl);
-        let temp2 = self.a_cl.conjugate().kronecker(&eye);
+        let temp1 = eye.kronecker(&self.a_cl.transpose());
+        let temp2 = self.a_cl.transpose().conjugate().kronecker(&eye);
         // println!("{} {}", temp1, temp2);
     
         let temp3 = temp1 + temp2;
@@ -238,13 +248,20 @@ impl PassiveControl{
 
         self.b_c = -p.try_inverse().unwrap() * self.c_c.clone().transpose();
         
-        println!("p lyap {:.5}", &self.p_lyap);
-        println!("bc {:.5}", &self.b_c);
+        // println!("p lyap {:.5}", &self.p_lyap);
+        // println!("bc {:.5}", &self.b_c);
     
     }
 
-    pub fn propogate_control_state(&mut self, gyro:  &[f64], dt: f64, num_steps: u16){
-        let gyro_v = na::DVector::from_row_slice(gyro);
+    pub fn propogate_control_state(&mut self, gyro:  &[f64], dt: f64, num_steps: u16, gyro_des: &[f64]){
+        let mut gyro_v = na::DVector::from_row_slice(gyro);
+        let gyro_d = na::DVector::from_row_slice(gyro_des);
+
+        // let mut gyro_v = &gyro;
+
+        // if &gyro_v.norm() > &0.0001 {
+        //     gyro_v = gyro_v * 0.0;
+        // }
         // println!("{}", self.eta);
         // let now = Instant::now();
         let num_states = self.num_states+3;
@@ -253,7 +270,7 @@ impl PassiveControl{
         let mut k3 = na::DVector::<f64>::zeros(num_states);
         let mut k4 = na::DVector::<f64>::zeros(num_states);
 
-        let tau_contrib = self.b_c.clone() * gyro_v;
+        let tau_contrib = self.b_c.clone() * (&gyro_d - &gyro_v);
 
         for step in 0..num_steps{
             let state0 = self.state.clone();
@@ -267,11 +284,11 @@ impl PassiveControl{
             let state_dot = (k1+(2.0*k2)+(2.0*k3)+k4)/6.0;
             self.state = state0 + state_dot;
         }
-        let tau_des = &self.c_c * &self.state;
+        let tau_des = -&self.c_c * &self.state;
+        // println!("state {} tau_des {} gyros {} gyro_des {}", &self.state, &tau_des, &gyro_v, &gyro_d);
         self.u = tau_des.clone();
-        let u_r = na::DVector::from_row_slice(&[tau_des[0], ((tau_des[1] + tau_des[2])/2.0), ((tau_des[3] + tau_des[4])/2.0)]);
-        self.u_rigid = u_r;
+        // let u_r = na::DVector::from_row_slice(&[tau_des[0], ((tau_des[1] + tau_des[2])/2.0), ((tau_des[3] + tau_des[4])/2.0)]);
+        // self.u_rigid = u_r;
         // println!("tau in fc: {} \n tau rigid: {}", tau_des.clone(), self.u_rigid.clone());
     }
-
 }

@@ -125,10 +125,11 @@ impl Ctrl {
         self.state.update_desired_gimbal_rpy();
         let phi = self.state.calculate_coupling_matrix();
         self.state.gmb_k.calculate_inverse_gimbal_mapping_matrix();
+        self.slew_flag = self.error
+            .update_pointing_positional_error(&self.state, phi, self.slew_flag);
         self.error
-            .update_pointing_positional_error(&self.state, phi);
-        self.error
-            .update_pointing_velocity_error_terms(&mut self.state, &self.slew_flag);
+            .update_pointing_velocity_error_terms(&mut self.state);
+        println!("slew flag {}", &self.slew_flag);
 
         self.calculate_applied_torque();
         self.pivot.calculate_pivot_speed(&self.rw);

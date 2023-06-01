@@ -27,7 +27,8 @@ extern void bit_one_step(const real_T x0[21], real_T tau_applied[9],
                          boolean_T piv_flag, real_T dt, uint16_T num_steps,
                          real_T tau_max_piv, real_T thet_pit_nom,
                          const real_T x_flex0[104], const real_T tau_flex[5],
-                         real_T y_true[21], real_T y_flex[104]);
+                         boolean_T flexure_flag, real_T y_true[21],
+                         real_T y_flex[104]);
 
 extern void compute_angular_velocity_C(const real_T x[18], real_T z_n[9][3],
                                        real_T omega[3]);

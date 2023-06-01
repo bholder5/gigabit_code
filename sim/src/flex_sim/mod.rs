@@ -1,12 +1,13 @@
 mod amat;
-mod bmat;
 mod cmat;
 mod kmat;
 
 pub use amat::*;
-pub use bmat::*;
+// pub use bmat::*;
 pub use cmat::*;
 pub use kmat::*;
+
+use adcs::control::flex_control::{init_bmat, BMat};
 
 extern crate nalgebra as na;
 use std::time::{Duration, Instant};
@@ -86,18 +87,112 @@ impl Flex_model{
         self.update_gyro_outputs();
 
     }
+    /// Reorg the cmatrices to reflect the position then rate of a single mode following each other in the 
+    /// state vector rather than all positions followed by all rates
+    pub fn reorg_cmats(&mut self){
+
+        // g1_mat
+        let tmp = self.g1_mat.slice((0,0), (3,52)).clone();
+        let tmp2 = self.g1_mat.slice((0,52), (3,52)).clone();
+
+        let mut g1_mat = self.g1_mat.clone();
+
+        let mut num_col = 0;
+
+        // println!("{:.2}", &self.g1_mat.transpose());
+
+        for col in tmp2.column_iter(){
+            g1_mat.slice_mut((0,num_col*2), (3,1)).copy_from(&col);
+            num_col = num_col + 1;
+        }
+        let mut num_col = 1;
+        for col in tmp.column_iter(){
+            g1_mat.slice_mut((0,(num_col*2)-1), (3,1)).copy_from(&col);
+            num_col = num_col + 1;
+        }
+        // println!("{:.2}", &g1_mat.transpose());
+        self.g1_mat = g1_mat.clone();
+
+        // g2_mat
+        let tmp = self.g1_mat.slice((0,0), (3,52)).clone();
+        let tmp2 = self.g1_mat.slice((0,52), (3,52)).clone();
+
+        let mut g2_mat = self.g2_mat.clone();
+
+        let mut num_col = 0;
+
+        // println!("{:.2}", &self.g2_mat.transpose());
+
+        for col in tmp2.column_iter(){
+            g2_mat.slice_mut((0,num_col*2), (3,1)).copy_from(&col);
+            num_col = num_col + 1;
+        }
+        let mut num_col = 1;
+        for col in tmp.column_iter(){
+            g2_mat.slice_mut((0,(num_col*2)-1), (3,1)).copy_from(&col);
+            num_col = num_col + 1;
+        }
+        // println!("{:.2}", &g2_mat.transpose());
+        self.g2_mat = g2_mat.clone();
+
+        // g1_pos_mat
+        let tmp = self.g1_pos_mat.slice((0,0), (3,52)).clone();
+        let tmp2 = self.g1_pos_mat.slice((0,52), (3,52)).clone();
+
+        let mut g1_pos = self.g1_pos_mat.clone();
+
+        let mut num_col = 0;
+
+        // println!("{:.2}", &self.g1_pos_mat.transpose());
+
+        for col in tmp2.column_iter(){
+            g1_pos.slice_mut((0,num_col*2), (3,1)).copy_from(&col);
+            num_col = num_col + 1;
+        }
+        let mut num_col = 1;
+        for col in tmp.column_iter(){
+            g1_pos.slice_mut((0,(num_col*2)-1), (3,1)).copy_from(&col);
+            num_col = num_col + 1;
+        }
+        // println!("{:.2}", &g1_pos.transpose());
+        self.g1_pos_mat = g1_pos.clone();
+
+        // c_pos_mat
+        let tmp = self.c_pos_mat.slice((0,0), (5,52)).clone();
+        let tmp2 = self.c_pos_mat.slice((0,52), (5,52)).clone();
+
+        let mut c_pos = self.c_pos_mat.clone();
+
+        let mut num_col = 0;
+
+        // println!("{:.2}", &self.c_pos_mat.transpose());
+
+        for col in tmp.column_iter(){
+            c_pos.slice_mut((0,num_col*2), (5,1)).copy_from(&col);
+            num_col = num_col + 1;
+        }
+        let mut num_col = 1;
+        for col in tmp2.column_iter(){
+            c_pos.slice_mut((0,(num_col*2)-1), (5,1)).copy_from(&col);
+            num_col = num_col + 1;
+        }
+        // println!("{:.2}", &c_pos.transpose());
+        self.c_pos_mat = c_pos.clone();
+        // println!("cposmat {:.2}", &self.c_pos_mat.transpose());
+
+    }
 } 
 
 pub fn init_flex_model() -> Flex_model{
     let a_mat = init_amat();
-    let b_mat = 1000.0 * init_bmat();
+    let b_mat = 1.0 * init_bmat();
 
-    // println!("{}", &b_mat);
+    
     let k_mat = init_kmat();
-    let g1_mat = 1000.0 * init_g1mat();
-    let g2_mat = 1000.0 * init_g2mat();
-    let g1_pos_mat = 1000.0 * init_g1_pos_mat();
-    let c_pos_mat = 1000.0 * init_c_pos_mat();
+    let g1_mat = 1.0 * init_g1mat();
+    let g2_mat = 1.0 * init_g2mat();
+    let g1_pos_mat = 1.0 * init_g1_pos_mat();
+    let c_pos_mat = 1.0 * init_c_pos_mat();
     let eta = Eta::zeros();
     let g1_out = na::Vector3::<f64>::zeros();
     let g2_out = na::Vector3::<f64>::zeros();
@@ -106,7 +201,9 @@ pub fn init_flex_model() -> Flex_model{
     let c_pos_out = na::Vector5::<f64>::zeros();
     let flex_enable: bool = true;
 
-    let flex_model = Flex_model{
+    println!("bmat: {}, g1_mat {}, g2mat {}, g1pos_mat {}, c_pos_mat {}", &b_mat, &g1_mat, &g2_mat, &g1_pos_mat, &c_pos_mat);
+
+    let mut flex_model = Flex_model{
         a_mat,
         b_mat,
         k_mat,
@@ -122,5 +219,6 @@ pub fn init_flex_model() -> Flex_model{
         c_pos_out,
         flex_enable,
     };
-    return flex_model
+    flex_model.reorg_cmats();
+    return flex_model;
 }

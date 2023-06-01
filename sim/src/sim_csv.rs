@@ -70,11 +70,17 @@ pub struct Record {
     flx8: f64,
     flx9: f64,
     flx10: f64,
-    flx_p1: f64,
-    flx_p2: f64,
-    flx_p3: f64,
-    flx_p4: f64,
-    flx_p5: f64,
+    // flex measurements
+    flx_yaw_r: f64,
+    flx_yaw_p: f64,
+    flx_bow_r: f64,
+    flx_bow_p: f64,
+    flx_stern_r: f64,
+    flx_stern_p: f64,
+    flx_port_r: f64,
+    flx_port_p: f64,
+    flx_sb_r: f64,
+    flx_sb_p: f64,
     // Ctrl
     err_roll: f64,
     err_pitch: f64,
@@ -140,8 +146,8 @@ pub struct Record {
 
 pub fn push_record(t: &f64, bp: &Params, est: &Estimator, ctrl: &Ctrl, meas: &Meas, sim_st: &State, flex: &fx::Flex_model, flex_c: &fc::PassiveControl) -> Result<(), Box<dyn Error>> {
     // let file_path = "/home/b/sim_data/out.csv";
-    // let file_path = "/home/bholder/data/out.csv";
-    let file_path = "/home/brad/data/out.csv";
+    let file_path = "/home/bholder/data/out.csv";
+    // let file_path = "/home/brad/data/out.csv";
 
     if Path::new(&file_path.clone()).exists() {
         let file = OpenOptions::new()
@@ -185,11 +191,18 @@ pub fn push_record(t: &f64, bp: &Params, est: &Estimator, ctrl: &Ctrl, meas: &Me
             flx8: flex.eta[7],
             flx9: flex.eta[8],
             flx10: flex.eta[9],
-            flx_p1: flex.c_out[0],
-            flx_p2: flex.c_out[1],
-            flx_p3: flex.c_out[2],
-            flx_p4: flex.c_out[3],
-            flx_p5: flex.c_out[4],
+            //
+            // flex measurements
+            flx_yaw_r: flex.c_out[0],
+            flx_yaw_p: flex.c_pos_out[0],
+            flx_bow_r: flex.c_out[1],
+            flx_bow_p: flex.c_pos_out[1],
+            flx_stern_r: flex.c_out[2],
+            flx_stern_p: flex.c_pos_out[2],
+            flx_port_r: flex.c_out[3],
+            flx_port_p: flex.c_pos_out[3],
+            flx_sb_r: flex.c_out[4],
+            flx_sb_p: flex.c_pos_out[4],
             // ctrl
             err_roll_comb: ctrl.error.err_comb_th[0],
             err_pitch_comb: ctrl.error.err_comb_th[1],
@@ -298,11 +311,17 @@ pub fn push_record(t: &f64, bp: &Params, est: &Estimator, ctrl: &Ctrl, meas: &Me
             flx8: flex.eta[7],
             flx9: flex.eta[8],
             flx10: flex.eta[9],
-            flx_p1: flex.c_out[0],
-            flx_p2: flex.c_out[1],
-            flx_p3: flex.c_out[2],
-            flx_p4: flex.c_out[3],
-            flx_p5: flex.c_out[4],
+            // flex measurements
+            flx_yaw_r: flex.c_out[0],
+            flx_yaw_p: flex.c_pos_out[0],
+            flx_bow_r: flex.c_out[1],
+            flx_bow_p: flex.c_pos_out[1],
+            flx_stern_r: flex.c_out[2],
+            flx_stern_p: flex.c_pos_out[2],
+            flx_port_r: flex.c_out[3],
+            flx_port_p: flex.c_pos_out[3],
+            flx_sb_r: flex.c_out[4],
+            flx_sb_p: flex.c_pos_out[4],
             // ctrl
             err_roll_comb: ctrl.error.err_comb_th[0],
             err_pitch_comb: ctrl.error.err_comb_th[1],
@@ -374,8 +393,8 @@ pub fn push_record(t: &f64, bp: &Params, est: &Estimator, ctrl: &Ctrl, meas: &Me
 
 #[allow(dead_code)]
 pub fn read_last_state(mut _t: f64, bp: &mut Params, est: &mut Estimator, ctrl: &mut Ctrl, meas: &mut Meas, sim_st: &mut State, flex: &fx::Flex_model) -> () {
-    // let file_path = "/home/bholder/data/out.csv";
-    let file_path = "/home/brad/data/out.csv";
+    let file_path = "/home/bholder/data/out.csv";
+    // let file_path = "/home/brad/data/out.csv";
 
     if Path::new(&file_path.clone()).exists() {
         let file = OpenOptions::new()

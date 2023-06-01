@@ -336,7 +336,7 @@ pub fn init_bit() -> Params {
     let _dt = 0.0001;
     let _num_steps: u16 = 10;
     let phi_act = [0.0; 3];
-    let unlock = Vector9::from_row_slice(&[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]);
+    let unlock = Vector9::from_row_slice(&[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]);
     let _tau_piv_max: f64 = 20.0;
     let _roll_theta_max: f64 = 6.0 * PI / 180.0;
     let _pitch_theta_max: f64 = -20.0 * PI / 180.0;
