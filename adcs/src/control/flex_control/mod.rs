@@ -7,6 +7,7 @@ pub use amat::*;
 pub use bmat::*;
 
 type BRigid = na::SMatrix<f64, 3, 5>;
+type Matrix1 = na::SMatrix<f64,1,1>;
 
 pub struct PassiveControl {
     num_modes: usize,
@@ -23,6 +24,7 @@ pub struct PassiveControl {
     b_c: na::DMatrix<f64>,
     c_c: na::DMatrix<f64>,
     state: na::DVector<f64>,
+    tau_max: f64,
     pub u: na::DVector<f64>, //the requested torque
     pub u_rigid: na::DVector<f64>,
     pub enable: bool,
@@ -31,25 +33,33 @@ pub struct PassiveControl {
 impl PassiveControl{
     pub fn init_pc() -> PassiveControl{
         let a_flex = init_amat();
-        let b_flex = 1.0 *init_bmat();
-        let a_rigid = na::Matrix3::<f64>::from_row_slice(&[978.1915, -15.2645, 0.0, -15.2645, 376.8085, 0.0, 0.0, 0.0, 134.0]);
+        let b_flex = 1000.0 *init_bmat();
+        let a_rigid = na::Matrix3::<f64>::from_row_slice(&[978.1915, -15.2645, 0.0, -15.2645, 376.8085, 0.0, 0.0, 0.0, 134.0]); //Actual a_rigid
+        // let a_rigid = na::Matrix3::<f64>::from_row_slice(&[2078.1915, -15.2645, 0.0, -15.2645, 376.8085, 0.0, 0.0, 0.0, 134.0]);
         let b_rigid = a_rigid.try_inverse().unwrap() * BRigid::from_row_slice(&[1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0]);
+        // println!("b_rigid: {}", &b_rigid);
         let num_modes: usize = 8;
         let num_states: usize = 2*num_modes;
-        let r = 0.0001 * na::Matrix5::<f64>::identity();
+        let r_scale = 0.0044;
+        let mut r = r_scale * na::Matrix5::<f64>::identity();
+        let r_yaw = Matrix1::from_row_slice(&[(r_scale/2.0)]);
+
+        r.slice_mut((0,0),(1,1)).copy_from(&r_yaw);
         let mut ql = 1.0*na::DMatrix::<f64>::identity(num_states+3, num_states+3);
         let mut qr = 1.0 * na::DMatrix::<f64>::identity(num_states+3, num_states+3);
 
-        let qr_rigid = 0.0015* a_rigid.clone();
+        let qr_rigid = 0.006* a_rigid.clone();
         qr.slice_mut((0,0), (3, 3)).copy_from(&qr_rigid);
-        qr.slice_mut((3,3), (2, 2)).copy_from(&na::Matrix2::<f64>::from_diagonal(&na::Vector2::new(0.01, 10.0)));
-        qr.slice_mut((5,5), (2, 2)).copy_from(&na::Matrix2::<f64>::from_diagonal(&na::Vector2::new(0.01, 100.0)));
-        qr.slice_mut((7,7), (2, 2)).copy_from(&na::Matrix2::<f64>::from_diagonal(&na::Vector2::new(0.01, 1.0)));
-        qr.slice_mut((9,9), (2, 2)).copy_from(&na::Matrix2::<f64>::from_diagonal(&na::Vector2::new(0.01, 2.0)));
-        qr.slice_mut((11,11), (2, 2)).copy_from(&na::Matrix2::<f64>::from_diagonal(&na::Vector2::new(0.01, 1.0)));
-        qr.slice_mut((13,13), (2, 2)).copy_from(&na::Matrix2::<f64>::from_diagonal(&na::Vector2::new(0.01, 1.0)));
-        qr.slice_mut((15,15), (2, 2)).copy_from(&na::Matrix2::<f64>::from_diagonal(&na::Vector2::new(0.01, 1.0)));
-        qr.slice_mut((17,17), (2, 2)).copy_from(&na::Matrix2::<f64>::from_diagonal(&na::Vector2::new(0.01, 1.0)));
+        qr.slice_mut((3,3), (2, 2)).copy_from(&na::Matrix2::<f64>::from_diagonal(&na::Vector2::new(0.000001, 2.0)));
+        qr.slice_mut((5,5), (2, 2)).copy_from(&na::Matrix2::<f64>::from_diagonal(&na::Vector2::new(0.000001, 10.0)));
+        qr.slice_mut((7,7), (2, 2)).copy_from(&na::Matrix2::<f64>::from_diagonal(&na::Vector2::new(0.000001, 10.0)));
+        qr.slice_mut((9,9), (2, 2)).copy_from(&na::Matrix2::<f64>::from_diagonal(&na::Vector2::new(0.000001, 15.0)));
+        qr.slice_mut((11,11), (2, 2)).copy_from(&na::Matrix2::<f64>::from_diagonal(&na::Vector2::new(0.000001, 1.0)));
+        qr.slice_mut((13,13), (2, 2)).copy_from(&na::Matrix2::<f64>::from_diagonal(&na::Vector2::new(0.000001, 15.0)));
+        qr.slice_mut((15,15), (2, 2)).copy_from(&na::Matrix2::<f64>::from_diagonal(&na::Vector2::new(0.000001, 1.0)));
+        qr.slice_mut((17,17), (2, 2)).copy_from(&na::Matrix2::<f64>::from_diagonal(&na::Vector2::new(0.000001, 1.0)));
+        // qr.slice_mut((19,19), (2, 2)).copy_from(&na::Matrix2::<f64>::from_diagonal(&na::Vector2::new(0.1, 1.0)));
+        // qr.slice_mut((21,21), (2, 2)).copy_from(&na::Matrix2::<f64>::from_diagonal(&na::Vector2::new(0.1, 1.0)));
 
         // println!("b matrix in passive control {}", &b_flex);
 
@@ -63,6 +73,7 @@ impl PassiveControl{
         let state = na::DVector::<f64>::zeros(num_states+3);
         let u = na::DVector::<f64>::zeros(5);
         let u_rigid = na::DVector::<f64>::zeros(3);
+        let tau_max = 2.0;
         let enable = true;  
 
 
@@ -81,6 +92,7 @@ impl PassiveControl{
             b_c,
             c_c,
             state,
+            tau_max,
             u,
             u_rigid,
             enable
@@ -112,6 +124,13 @@ impl PassiveControl{
 
         a.slice_mut((3,3), (self.num_states, self.num_states)).copy_from(&a_use);
         // a.slice_mut((0,0), (3, 3)).copy_from(&self.a_rigid);
+
+        for loc in 0..self.num_modes{
+            let loc2 = (loc*2)+1;
+            let val = a[(loc2,loc2)].clone()/10.0;
+            a.slice_mut((loc2,loc2), (1,1)).copy_from(&(Matrix1::from_row_slice(&[val])));
+        }
+        println!("{}", &a);
 
         b.slice_mut((0,0), (3, 5)).copy_from(&self.b_rigid);
         b.slice_mut((3,0), (self.num_states, 5)).copy_from(&b_use);
@@ -270,7 +289,7 @@ impl PassiveControl{
         let mut k3 = na::DVector::<f64>::zeros(num_states);
         let mut k4 = na::DVector::<f64>::zeros(num_states);
 
-        let tau_contrib = self.b_c.clone() * (&gyro_d - &gyro_v);
+        let tau_contrib = self.b_c.clone() * (-&gyro_v + (&gyro_d));
 
         for step in 0..num_steps{
             let state0 = self.state.clone();
@@ -286,6 +305,19 @@ impl PassiveControl{
         }
         let tau_des = -&self.c_c * &self.state;
         // println!("state {} tau_des {} gyros {} gyro_des {}", &self.state, &tau_des, &gyro_v, &gyro_d);
+        ////// BOUND TORQUE
+        let mut tau_bound = tau_des.clone();
+        // println!("trque before: {}", &tau_des);
+        for (loc) in (0..5){
+            let torque = tau_des[loc].clone();
+            let mag = torque.abs();
+            if mag > self.tau_max {
+                tau_bound[loc] = torque.signum() * self.tau_max;
+            }
+
+        }
+        // println!("trque after: {}", &tau_bound);
+        ///////
         self.u = tau_des.clone();
         // let u_r = na::DVector::from_row_slice(&[tau_des[0], ((tau_des[1] + tau_des[2])/2.0), ((tau_des[3] + tau_des[4])/2.0)]);
         // self.u_rigid = u_r;

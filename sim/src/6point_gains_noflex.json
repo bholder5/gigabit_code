@@ -1,0 +1,20 @@
+{
+	"fine": {
+        "kp_roll": 6000.0,
+        "ki_roll": 20000.0,
+        "kip_roll": 600.0,
+        "kp_pitch": 2500.0,
+        "ki_pitch": 1500.0,
+        "kip_pitch": 2000.0,
+        "kp_yaw": 2500.0,
+        "ki_yaw": 8000.0,
+        "kip_yaw": 2000.0
+    },
+    "roll_des": -0.025,
+    "pitch_des": -0.3,
+    "yaw_des": 1.0,
+    "new_targ": false,
+    "latency": true,
+    "ctrl_from_est": true,
+    "est_reset": false
+}

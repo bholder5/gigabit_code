@@ -226,13 +226,13 @@ pub fn test_control() {
     );
 
     er.err_comb_th = na::Vector3::new(-0.10, 2.0, 0.750);
-    er.update_pointing_velocity_error_terms(&mut st);
+    er.update_pointing_velocity_error_terms(&mut st, &slew_flag);
     println!("err_decay {}, crtl_dt {}", er._err_decay_v, er._ctrl_dt);
     println!("rate: {}", er.err_rate);
     println!("{}", er.err_rate_sum);
-    er.update_pointing_velocity_error_terms(&mut st);
+    er.update_pointing_velocity_error_terms(&mut st, &slew_flag);
     println!("{}", er.err_rate_sum);
-    er.update_pointing_velocity_error_terms(&mut st);
+    er.update_pointing_velocity_error_terms(&mut st, &slew_flag);
     println!("{}", er.err_rate_sum);
 
     //////////////////////////////////////////////////////////////////

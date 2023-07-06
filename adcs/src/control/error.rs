@@ -57,7 +57,7 @@ impl Error {
     /// This function generates a new instance of the Error struct with default values
     pub fn new() -> Error {
         let _err_tc_v: f64 = 1.0;
-        let _err_tc_p: f64 = 50.0;
+        let _err_tc_p: f64 = 40.0;
         let _ctrl_dt: f64 = 0.01;
         let _err_decay_v: f64 = E.powf(-_ctrl_dt / _err_tc_v);
         let _err_decay_p: f64 = E.powf(-_ctrl_dt / _err_tc_p);
@@ -69,8 +69,8 @@ impl Error {
         let err_fine_sum = na::Vector3::<f64>::new(0.0, 0.0, 0.0);
         let rate_des = na::Vector3::<f64>::new(0.0, 0.0, 0.0);
         let rot_err = na::Rotation3::<f64>::identity();
-        let u_lower = 0.003;
-        let u_upper = 0.1;
+        let u_lower = 0.005;
+        let u_upper = 0.12;
         let _d_theta = na::Vector3::<f64>::new(0.0, 0.0, 0.0);
 
         let error: Error = Error {
@@ -180,13 +180,14 @@ impl Error {
                 // calculate the gimbal error
                 self.err_comb_th = _err_gmb.clone();
                 slew_flag = true;
-                // println!("greater than u.upper");
+                println!("greater than u.upper {}", &norm_fine_err);
             } else {
-                // println!("between u.lower and u.upper");
+                println!("between u.lower and u.upper {}", &norm_fine_err);
                 let err_weight: f64 =
                     (norm_fine_err - self.u_lower) / (self.u_upper - self.u_lower);
 
                 let comb_err = ((1.0 - err_weight) * (phi * err_vec)) + (err_weight * _err_gmb);
+                self.err_fine_sum = self.err_fine_sum + (((1.0 - err_weight) * (phi * err_vec)) * self._ctrl_dt);
 
                 self.err_comb_th = comb_err;
                 // println!("error weight: {}, combined error: {}\n term1 {} term2 {}", err_weight, comb_err, (1.0 - err_weight) * (phi * err_vec), (err_weight * _err_gmb));
@@ -218,7 +219,7 @@ impl Error {
     pub fn update_pointing_velocity_error_terms(
         &mut self,
         state: &mut st::State,
-        // slew_flag: &bool,
+        slew_flag: &bool,
     ) {
         // println!("start of pointing velocity error terms");
         trace!("update_pointing_velocity_error_terms start");
@@ -235,6 +236,7 @@ impl Error {
         // if slew_flag == &true {
             let g_const: f64 = 1.0;
             let g_lin: f64 = 0.001;
+            let scale = 1.0;
 
             let temp1: f64 = g_lin.powi(2) * PI / (4.0 * g_const.powi(2));
             let temp2: f64 = temp1.sqrt();
@@ -246,7 +248,7 @@ impl Error {
                     * (self.err_comb_th.x.abs()
                         * stat::function::erf::erf(self.err_comb_th.x.abs() * temp2))
                     + (temp3 * ((-self.err_comb_th.x.powi(2) * temp1).exp() - 1.0)))
-                    .sqrt();
+                    .sqrt() * scale;
 
             _pitch_rate_des = self.err_comb_th.y.signum()
                 * (2.0
@@ -254,14 +256,14 @@ impl Error {
                     * (self.err_comb_th.y.abs()
                         * stat::function::erf::erf(self.err_comb_th.y.abs() * temp2))
                     + (temp3 * ((-self.err_comb_th.y.powi(2) * temp1).exp() - 1.0)))
-                    .sqrt();
+                    .sqrt() * scale;
             _yaw_rate_des = self.err_comb_th.z.signum()
                 * (2.0
                     * g_const
                     * (self.err_comb_th.z.abs()
                         * stat::function::erf::erf(self.err_comb_th.z.abs() * temp2))
                     + (temp3 * ((-self.err_comb_th.z.powi(2) * temp1).exp() - 1.0)))
-                    .sqrt();
+                    .sqrt() * scale;
         // }
 
         let max_accel = 0.02 * self._ctrl_dt;

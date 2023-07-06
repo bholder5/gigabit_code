@@ -102,11 +102,12 @@ fn main() {
 
 
     trace!("START");
-    for _step in 0..10000000000000000000 as usize {
+    let now1 = Instant::now();
+    for _step in 0..100000000000 as usize {
         
         ///////// beginning of the simulation loop
         /////////////////////////////////////////
-        // let now1 = Instant::now();
+        let now1 = Instant::now();
         // fc.u = fc.u * 0.0;
         unsafe {
             trace!("bit_one_step start");
@@ -130,8 +131,7 @@ fn main() {
             trace!("bit_one_step end");
         }
         
-        // println!("bit one step {}", now1.elapsed().as_micros());
-        // let now2 = Instant::now();
+        
         if flex.flex_enable{
             // flex.propogate_flex(&[tau_applied[6] + fc.u_rigid[0], tau_applied[7]+fc.u_rigid[1], tau_applied[8]+fc.u_rigid[2]], bp._dt, bp._num_steps, &fc);
         // flex.propogate_flex(&[1., 1., 1.], bp._dt, bp._num_steps);
@@ -191,9 +191,14 @@ fn main() {
             ]; 
 
             // println!("{} {} {} {} {}", &gyro_in[0], &gyro_in[1], &gyro_in[2], &gyro_in[3], &gyro_in[4]);
+            if &ctrl.slew_flag==&true{
+                fc.propogate_control_state(gyro_in.as_slice(), bp._dt, bp._num_steps, &[ctrl.error.rate_des.z.clone(), ctrl.error.rate_des.x.clone(),ctrl.error.rate_des.x.clone(),ctrl.error.rate_des.y.clone(),ctrl.error.rate_des.y.clone(),]);
+            } else {
+                let sc: f64 = 0.1;
+                fc.propogate_control_state(gyro_in.as_slice(), bp._dt, bp._num_steps, &[sc*ctrl.error.rate_des.z.clone(), sc*ctrl.error.rate_des.x.clone(),sc*ctrl.error.rate_des.x.clone(),sc*ctrl.error.rate_des.y.clone(),sc*ctrl.error.rate_des.y.clone(),]);
 
-            fc.propogate_control_state(gyro_in.as_slice(), bp._dt, bp._num_steps, &[ctrl.error.rate_des.z.clone(), ctrl.error.rate_des.x.clone(),ctrl.error.rate_des.x.clone(),ctrl.error.rate_des.y.clone(),ctrl.error.rate_des.y.clone(),]);
-
+            }
+            
         }
 
         if (step % 1000) < 1 {
@@ -273,5 +278,6 @@ fn main() {
         js::read_gains(&mut ctrl, &mut bp, &mut est); // read in gains from json file (for tuning)
 
     }
+    println!("bit one step {}", now1.elapsed().as_micros());
     trace!("END");
 }

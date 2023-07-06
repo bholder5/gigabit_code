@@ -333,8 +333,8 @@ pub fn init_bit() -> Params {
     let omega_m = na::Vector3::<f64>::zeros();
     let omega_m_roll = na::Vector3::<f64>::zeros();
     let omega_m_yaw = na::Vector3::<f64>::zeros();
-    let _dt = 0.0001;
-    let _num_steps: u16 = 10;
+    let _dt = 0.0002;
+    let _num_steps: u16 = 5;
     let phi_act = [0.0; 3];
     let unlock = Vector9::from_row_slice(&[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]);
     let _tau_piv_max: f64 = 20.0;

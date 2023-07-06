@@ -128,7 +128,7 @@ impl Ctrl {
         self.slew_flag = self.error
             .update_pointing_positional_error(&self.state, phi, self.slew_flag);
         self.error
-            .update_pointing_velocity_error_terms(&mut self.state);
+            .update_pointing_velocity_error_terms(&mut self.state, &self.slew_flag);
         println!("slew flag {}", &self.slew_flag);
 
         self.calculate_applied_torque();

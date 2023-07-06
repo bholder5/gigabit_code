@@ -114,14 +114,14 @@ impl Flex_model{
         self.g1_mat = g1_mat.clone();
 
         // g2_mat
-        let tmp = self.g1_mat.slice((0,0), (3,52)).clone();
-        let tmp2 = self.g1_mat.slice((0,52), (3,52)).clone();
+        let tmp = self.g2_mat.slice((0,0), (3,52)).clone();
+        let tmp2 = self.g2_mat.slice((0,52), (3,52)).clone();
 
         let mut g2_mat = self.g2_mat.clone();
 
         let mut num_col = 0;
 
-        // println!("{:.2}", &self.g2_mat.transpose());
+        // println!("{:.5}", &self.g2_mat.transpose());
 
         for col in tmp2.column_iter(){
             g2_mat.slice_mut((0,num_col*2), (3,1)).copy_from(&col);
@@ -132,7 +132,7 @@ impl Flex_model{
             g2_mat.slice_mut((0,(num_col*2)-1), (3,1)).copy_from(&col);
             num_col = num_col + 1;
         }
-        // println!("{:.2}", &g2_mat.transpose());
+        // println!("{:.5}", &g2_mat.transpose());
         self.g2_mat = g2_mat.clone();
 
         // g1_pos_mat
@@ -185,14 +185,14 @@ impl Flex_model{
 
 pub fn init_flex_model() -> Flex_model{
     let a_mat = init_amat();
-    let b_mat = 1.0 * init_bmat();
+    let b_mat = 1000.0 * init_bmat();
 
     
     let k_mat = init_kmat();
-    let g1_mat = 1.0 * init_g1mat();
-    let g2_mat = 1.0 * init_g2mat();
-    let g1_pos_mat = 1.0 * init_g1_pos_mat();
-    let c_pos_mat = 1.0 * init_c_pos_mat();
+    let g1_mat = 1000.0 * init_g1mat();
+    let g2_mat = 1000.0 * init_g2mat();
+    let g1_pos_mat = 1000.0 * init_g1_pos_mat();
+    let c_pos_mat = 1000.0 * init_c_pos_mat();
     let eta = Eta::zeros();
     let g1_out = na::Vector3::<f64>::zeros();
     let g2_out = na::Vector3::<f64>::zeros();
@@ -201,7 +201,7 @@ pub fn init_flex_model() -> Flex_model{
     let c_pos_out = na::Vector5::<f64>::zeros();
     let flex_enable: bool = true;
 
-    println!("bmat: {}, g1_mat {}, g2mat {}, g1pos_mat {}, c_pos_mat {}", &b_mat, &g1_mat, &g2_mat, &g1_pos_mat, &c_pos_mat);
+    // println!("bmat: {}, g1_mat {}, g2mat {}, g1pos_mat {}, c_pos_mat {}", &b_mat, &g1_mat, &g2_mat, &g1_pos_mat, &c_pos_mat);
 
     let mut flex_model = Flex_model{
         a_mat,
@@ -220,5 +220,7 @@ pub fn init_flex_model() -> Flex_model{
         flex_enable,
     };
     flex_model.reorg_cmats();
+    // println!("bmat: {}, g1_mat {}, g2mat {}, g1pos_mat {}, c_pos_mat {}", &flex_model.b_mat, &flex_model.g1_mat.transpose(), &flex_model.g2_mat.transpose(), &flex_model.g1_pos_mat.transpose(), &flex_model.c_pos_mat.transpose());
+
     return flex_model;
 }
