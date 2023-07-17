@@ -98,6 +98,10 @@ pub struct StepperMotor {
     pub gain2: f64,
     /// stepper motor time constant
     pub _ts: f64,
+    /// Reaction WHeel Moment of Inertia
+    pub _i_rw: f64,
+    /// Flight train spring constant
+    pub _k_flight_train: f64,
 }
 
 impl StepperMotor {
@@ -137,9 +141,9 @@ impl StepperMotor {
 
     pub fn pivot_new() -> StepperMotor {
         let gain1: f64 = 0.00002;
-        let k_flight_train: f64 = 0.001745329251994;
-        let i_rw: f64 = 4.5;
-        let gain2: f64 = 0.001 * (2.0 * ((gain1 / (i_rw * k_flight_train)).sqrt()));
+        let _k_flight_train: f64 = 0.001745329251994;
+        let _i_rw: f64 = 4.5;
+        let gain2: f64 = 0.001 * (2.0 * ((gain1 / (_i_rw * _k_flight_train)).sqrt()));
 
         let pivot: StepperMotor = StepperMotor {
             omega: 0.0,
@@ -149,7 +153,14 @@ impl StepperMotor {
             gain1,
             gain2,
             _ts: 0.001,
+            _i_rw,
+            _k_flight_train,
         };
         pivot
+    }
+    
+    pub fn update_piv_gains(&mut self, gn1: &f64, gn2: &f64){
+        self.gain1 = gn1.clone();
+        self.gain2 = 0.001 * (gn2.clone() * ((self.gain1 / (self._i_rw * self._k_flight_train)).sqrt()));
     }
 }

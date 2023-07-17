@@ -1,0 +1,29 @@
+{
+	"fine": {
+        "kp_roll": 500.0,
+        "ki_roll": 20000.0,
+        "kip_roll": 6000.0,
+        "kp_pitch": 650.0,
+        "ki_pitch": 770.0,
+        "kip_pitch": 1400.0,
+        "kp_yaw": 45.0,
+        "ki_yaw": 250.0,
+        "kip_yaw": 250.0,
+        "piv_g_1": 0.00002,
+        "piv_g_2": 2.0,
+        "int_decay_spd": 1.0,
+        "int_decay_pos": 80.0,
+        "v_prof_scale": 2.25
+    },
+    "roll_des": -0.020,
+    "pitch_des": -0.3,
+    "yaw_des": -1.0,
+    "new_targ": false,
+    "latency": true,
+    "ctrl_from_est": true,
+    "est_reset": false,
+    "flex_reset": false,
+    "flex_ctrl_enable": true,
+    "flex_sim_enable": true
+
+}

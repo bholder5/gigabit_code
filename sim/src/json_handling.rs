@@ -12,7 +12,9 @@
 //!
 
 use adcs::control::Ctrl;
+use adcs::control::flex_control::PassiveControl;
 use adcs::estimation::Estimator;
+use crate::flex_sim::Flex_model;
 use crate::initialization::Params;
 
 // use std::fmt;
@@ -38,6 +40,11 @@ pub struct Gain_json {
     kip_roll: f64,
     kip_pitch: f64,
     kip_yaw: f64,
+    piv_g_1: f64,
+    piv_g_2: f64,
+    int_decay_spd: f64,
+    int_decay_pos: f64,
+    v_prof_scale: f64,
 }
 #[derive(Debug, Deserialize, Default)]
 pub struct Read_json {
@@ -49,9 +56,12 @@ pub struct Read_json {
     latency: bool,
     ctrl_from_est: bool,
     est_reset: bool,
+    flex_reset: bool,
+    flex_ctrl_enable: bool,
+    flex_sim_enable: bool,
 }
 
-pub fn read_gains(ctrl: &mut Ctrl, bp: &mut Params, est: &mut Estimator) -> () {
+pub fn read_gains(ctrl: &mut Ctrl, bp: &mut Params, est: &mut Estimator, flx_ctrl: &mut PassiveControl, flex_sim: &mut Flex_model) -> () {
     let path = "sim/src/gains.json";
 
     #[allow(unused_assignments)]
@@ -67,9 +77,13 @@ pub fn read_gains(ctrl: &mut Ctrl, bp: &mut Params, est: &mut Estimator) -> () {
                     let kp_vec = [u.fine.kp_roll, u.fine.kp_pitch, u.fine.kp_yaw];
                     let ki_vec = [u.fine.ki_roll, u.fine.ki_pitch, u.fine.ki_yaw];
                     let kip_vec = [u.fine.kip_roll, u.fine.kip_pitch, u.fine.kip_yaw];
+                    ctrl.pivot.update_piv_gains(&u.fine.piv_g_1, &u.fine.piv_g_2);
+                    ctrl.error.update_decay(&u.fine.int_decay_spd, &u.fine.int_decay_pos);
 
                     ctrl.fine_gains
                         .update_gain_matrices(&kp_vec, &kip_vec, &ki_vec);
+
+                    ctrl.error.scale = u.fine.v_prof_scale;
 
                     if u.new_targ {
                         ctrl.state.gmb_d.roll = u.roll_des;
@@ -84,6 +98,22 @@ pub fn read_gains(ctrl: &mut Ctrl, bp: &mut Params, est: &mut Estimator) -> () {
                     bp.latency = u.latency;
                     bp.ctrl_from_est = u.ctrl_from_est;
                     est.reset = u.est_reset;
+
+                    if u.flex_reset {
+                        flx_ctrl.reset();
+                    }
+
+                    if u.flex_ctrl_enable {
+                        flx_ctrl.enable = true;
+                    } else if ! u.flex_ctrl_enable{
+                        flx_ctrl.enable = false;
+                    }
+
+                    if u.flex_sim_enable {
+                        flex_sim.flex_enable = true;
+                    } else {
+                        flex_sim.flex_enable = false;
+                    }
 
                 }
                 Err(err) => {

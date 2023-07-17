@@ -51,13 +51,15 @@ pub struct Error {
     pub u_upper: f64,
     /// the mapped gimbal rates from omega decomposed using the gmm_i
     pub _d_theta: na::Vector3<f64>,
+    /// scale factor for tuning the speed profile
+    pub scale: f64,
 }
 
 impl Error {
     /// This function generates a new instance of the Error struct with default values
     pub fn new() -> Error {
         let _err_tc_v: f64 = 1.0;
-        let _err_tc_p: f64 = 40.0;
+        let _err_tc_p: f64 = 80.0;
         let _ctrl_dt: f64 = 0.01;
         let _err_decay_v: f64 = E.powf(-_ctrl_dt / _err_tc_v);
         let _err_decay_p: f64 = E.powf(-_ctrl_dt / _err_tc_p);
@@ -72,6 +74,7 @@ impl Error {
         let u_lower = 0.005;
         let u_upper = 0.12;
         let _d_theta = na::Vector3::<f64>::new(0.0, 0.0, 0.0);
+        let scale = 2.25;
 
         let error: Error = Error {
             err_b_th,
@@ -90,8 +93,14 @@ impl Error {
             u_lower,
             u_upper,
             _d_theta,
+            scale,
         };
         error
+    }
+
+    pub fn update_decay(&mut self, _err_tc_v: &f64, _err_tc_p: &f64){
+        self._err_decay_v = E.powf(-self._ctrl_dt / _err_tc_v);
+        self._err_decay_p = E.powf(-self._ctrl_dt / _err_tc_p);
     }
 
     /// Function that updates the positional error terms for control calculations
@@ -235,8 +244,9 @@ impl Error {
 
         // if slew_flag == &true {
             let g_const: f64 = 1.0;
-            let g_lin: f64 = 0.001;
-            let scale = 1.0;
+            let g_lin: f64 =
+             0.001;
+            
 
             let temp1: f64 = g_lin.powi(2) * PI / (4.0 * g_const.powi(2));
             let temp2: f64 = temp1.sqrt();
@@ -248,7 +258,7 @@ impl Error {
                     * (self.err_comb_th.x.abs()
                         * stat::function::erf::erf(self.err_comb_th.x.abs() * temp2))
                     + (temp3 * ((-self.err_comb_th.x.powi(2) * temp1).exp() - 1.0)))
-                    .sqrt() * scale;
+                    .sqrt() * self.scale;
 
             _pitch_rate_des = self.err_comb_th.y.signum()
                 * (2.0
@@ -256,14 +266,14 @@ impl Error {
                     * (self.err_comb_th.y.abs()
                         * stat::function::erf::erf(self.err_comb_th.y.abs() * temp2))
                     + (temp3 * ((-self.err_comb_th.y.powi(2) * temp1).exp() - 1.0)))
-                    .sqrt() * scale;
+                    .sqrt() * self.scale;
             _yaw_rate_des = self.err_comb_th.z.signum()
                 * (2.0
                     * g_const
                     * (self.err_comb_th.z.abs()
                         * stat::function::erf::erf(self.err_comb_th.z.abs() * temp2))
                     + (temp3 * ((-self.err_comb_th.z.powi(2) * temp1).exp() - 1.0)))
-                    .sqrt() * scale;
+                    .sqrt() * self.scale;
         // }
 
         let max_accel = 0.02 * self._ctrl_dt;

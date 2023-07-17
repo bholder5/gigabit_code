@@ -74,7 +74,7 @@ impl PassiveControl{
         let u = na::DVector::<f64>::zeros(5);
         let u_rigid = na::DVector::<f64>::zeros(3);
         let tau_max = 2.0;
-        let enable = true;  
+        let enable = false;  
 
 
         let passive_control = PassiveControl {
@@ -99,6 +99,11 @@ impl PassiveControl{
         };
         return passive_control
 
+    }
+
+
+    pub fn reset(&mut self){
+        self.state = na::DVector::<f64>::zeros(self.num_states+3);
     }
     
     

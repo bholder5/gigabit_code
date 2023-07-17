@@ -79,7 +79,7 @@ fn main() {
     let mut y_result: [f64; 21] = [0.; 21];
     let mut flex_result: [f64; 104] = [0.; 104];
 
-    js::read_gains(&mut ctrl, &mut bp, &mut est); // read in gains from json file (for tuning)
+    js::read_gains(&mut ctrl, &mut bp, &mut est, &mut fc, &mut flex); // read in gains from json file (for tuning)
                                // ctrl.update_gain_matrices();
                                // ctrl.update_desired_orientation_matrix();
     // sc::read_last_state(t, &mut bp, &mut est, &mut ctrl, &mut meas, &mut sim_state);
@@ -194,7 +194,7 @@ fn main() {
             if &ctrl.slew_flag==&true{
                 fc.propogate_control_state(gyro_in.as_slice(), bp._dt, bp._num_steps, &[ctrl.error.rate_des.z.clone(), ctrl.error.rate_des.x.clone(),ctrl.error.rate_des.x.clone(),ctrl.error.rate_des.y.clone(),ctrl.error.rate_des.y.clone(),]);
             } else {
-                let sc: f64 = 0.1;
+                let sc: f64 = 0.05;
                 fc.propogate_control_state(gyro_in.as_slice(), bp._dt, bp._num_steps, &[sc*ctrl.error.rate_des.z.clone(), sc*ctrl.error.rate_des.x.clone(),sc*ctrl.error.rate_des.x.clone(),sc*ctrl.error.rate_des.y.clone(),sc*ctrl.error.rate_des.y.clone(),]);
 
             }
@@ -275,7 +275,7 @@ fn main() {
 
         // record the data
         sc::push_record(&t, &bp, &est, &ctrl, &meas, &sim_state, &flex, &fc).unwrap();
-        js::read_gains(&mut ctrl, &mut bp, &mut est); // read in gains from json file (for tuning)
+        js::read_gains(&mut ctrl, &mut bp, &mut est, &mut fc, &mut flex); // read in gains from json file (for tuning)
 
     }
     println!("bit one step {}", now1.elapsed().as_micros());

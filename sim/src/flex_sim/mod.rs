@@ -199,7 +199,7 @@ pub fn init_flex_model() -> Flex_model{
     let c_out = na::Vector5::<f64>::zeros();
     let g1_pos_out = na::Vector3::<f64>::zeros();
     let c_pos_out = na::Vector5::<f64>::zeros();
-    let flex_enable: bool = true;
+    let flex_enable: bool = false;
 
     // println!("bmat: {}, g1_mat {}, g2mat {}, g1pos_mat {}, c_pos_mat {}", &b_mat, &g1_mat, &g2_mat, &g1_pos_mat, &c_pos_mat);
 
