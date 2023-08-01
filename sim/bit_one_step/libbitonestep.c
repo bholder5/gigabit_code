@@ -542,7 +542,7 @@ static void bit_one_step_anonFcn1(const real_T k_d[9], const real_T unlock[9],
   x[0] = (y_true[20] >= 0.0);
   x[1] = (y_true[20] >= 0.0);
   vec_idx_2 = tau_applied[6];
-  x[2] = (y_true[20] >= 28.274333882308138);
+  x[2] = (y_true[20] >= 56.548667764616276);
   y = true;
   z_n_tmp = 0;
   exitg1 = false;
@@ -564,7 +564,7 @@ static void bit_one_step_anonFcn1(const real_T k_d[9], const real_T unlock[9],
   } else {
     x[0] = (y_true[20] <= -0.0);
     x[1] = (y_true[20] <= -0.0);
-    x[2] = (y_true[20] <= -28.274333882308138);
+    x[2] = (y_true[20] <= -56.548667764616276);
     y = true;
     z_n_tmp = 0;
     exitg1 = false;
@@ -6177,8 +6177,8 @@ void bit_one_step(const real_T x0[21], real_T tau_applied[9], const real_T
   /* 'init_func:54' bear_c_cst = 0.; */
   /* 'init_func:56' k_d = [0.,0.,0.,0.,0.,0.1*pi/180.0,0.,bear_k_cst,bear_k_cst]'; */
   /* 'init_func:57' b_d = [0.,0.,0.,0.,0.,0.,0.,0.,0.]'; */
-  /* 'init_func:59' w_rw_max = 2.0*pi; */
-  /* 'init_func:60' w_rw_nom = pi; */
+  /* 'init_func:59' w_rw_max = 4.0*pi; */
+  /* 'init_func:60' w_rw_nom = 2*pi; */
   /* 'init_func:61' hs_rw = i_rw * w_rw_nom * z_n(:,7); */
   /* 'init_func:62' hs_rw_max = i_rw * w_rw_max * z_n(:,7); */
   /*  theta_0 = [0.,0.4*pi/180.0,0.4*pi/180.0,0.1*pi/180.0,0.1*pi/180.0,0.1*pi/180.0,0.,0.1,-40*pi/180]'; */

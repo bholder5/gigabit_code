@@ -42,12 +42,6 @@ extern crate serde_derive;
 
 fn main() {
 
-    let mut fc = flex_control::PassiveControl::init_pc();
-    fc.care();
-    fc.lyap();
-
-
-
     init_log();
     // the verification function for all tihngs in the control module.
     // test_control();
@@ -61,6 +55,7 @@ fn main() {
 
     let mut est = Estimator::new();
     let mut ctrl = Ctrl::new();
+    let mut fc = flex_control::PassiveControl::init_pc(&ctrl.fine_gains);
     let mut sim_state = state::State::new();
     let mut meas = ms::Meas::new();
     let mut late_meas = ms::Meas::new();
@@ -103,7 +98,7 @@ fn main() {
 
     trace!("START");
     let now1 = Instant::now();
-    for _step in 0..100000000000 as usize {
+    for _step in 0..100000000 as usize {
         
         ///////// beginning of the simulation loop
         /////////////////////////////////////////
@@ -191,13 +186,13 @@ fn main() {
             ]; 
 
             // println!("{} {} {} {} {}", &gyro_in[0], &gyro_in[1], &gyro_in[2], &gyro_in[3], &gyro_in[4]);
-            if &ctrl.slew_flag==&true{
-                fc.propogate_control_state(gyro_in.as_slice(), bp._dt, bp._num_steps, &[ctrl.error.rate_des.z.clone(), ctrl.error.rate_des.x.clone(),ctrl.error.rate_des.x.clone(),ctrl.error.rate_des.y.clone(),ctrl.error.rate_des.y.clone(),]);
-            } else {
-                let sc: f64 = 0.05;
+            // if &ctrl.slew_flag==&true{
+            //     fc.propogate_control_state(gyro_in.as_slice(), bp._dt, bp._num_steps, &[ctrl.error.rate_des.z.clone(), ctrl.error.rate_des.x.clone(),ctrl.error.rate_des.x.clone(),ctrl.error.rate_des.y.clone(),ctrl.error.rate_des.y.clone(),]);
+            // } else {
+                let sc: f64 = 1.0;
                 fc.propogate_control_state(gyro_in.as_slice(), bp._dt, bp._num_steps, &[sc*ctrl.error.rate_des.z.clone(), sc*ctrl.error.rate_des.x.clone(),sc*ctrl.error.rate_des.x.clone(),sc*ctrl.error.rate_des.y.clone(),sc*ctrl.error.rate_des.y.clone(),]);
 
-            }
+            // }
             
         }
 
@@ -256,6 +251,7 @@ fn main() {
 
             // if step < 1500{
                 ctrl.update_ctrl();
+                ctrl.pivot.calculate_pivot_speed(&ctrl.rw, &fc.u[0]);
                 tau_applied[6] = 1.0*ctrl.rw.tau_applied; //yaw
                 tau_applied[7] = 1.0*ctrl.fmot_roll.tau_applied; //roll
                 tau_applied[8] = 1.0*ctrl.fmot_pitch.tau_applied; //pitch
@@ -276,6 +272,11 @@ fn main() {
         // record the data
         sc::push_record(&t, &bp, &est, &ctrl, &meas, &sim_state, &flex, &fc).unwrap();
         js::read_gains(&mut ctrl, &mut bp, &mut est, &mut fc, &mut flex); // read in gains from json file (for tuning)
+        if fc.update {
+            let mut new_fc = flex_control::PassiveControl::init_pc(&ctrl.fine_gains);
+            let mut fc = new_fc.clone();
+
+        }
 
     }
     println!("bit one step {}", now1.elapsed().as_micros());

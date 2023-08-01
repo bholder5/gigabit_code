@@ -189,9 +189,9 @@ impl Error {
                 // calculate the gimbal error
                 self.err_comb_th = _err_gmb.clone();
                 slew_flag = true;
-                println!("greater than u.upper {}", &norm_fine_err);
+                // println!("greater than u.upper {}", &norm_fine_err);
             } else {
-                println!("between u.lower and u.upper {}", &norm_fine_err);
+                // println!("between u.lower and u.upper {}", &norm_fine_err);
                 let err_weight: f64 =
                     (norm_fine_err - self.u_lower) / (self.u_upper - self.u_lower);
 
@@ -244,8 +244,7 @@ impl Error {
 
         // if slew_flag == &true {
             let g_const: f64 = 1.0;
-            let g_lin: f64 =
-             0.001;
+            let g_lin: f64 = 1000.0;
             
 
             let temp1: f64 = g_lin.powi(2) * PI / (4.0 * g_const.powi(2));
@@ -319,7 +318,7 @@ impl Error {
         self.err_rate = na::Vector3::<f64>::from_row_slice(&err_gmb_rate);
         trace!("update_pointing_velocity_error_terms end");
         // println!("err_rate_sum {}, err_decay {}, err_rate {}, _ctrl_dt {}", self.err_rate_sum, self._err_decay, self.err_rate, self._ctrl_dt);
-        // println!("err_rate_sum {}, err_rate {} _d_theta {} gmm^-1 {} omega {}", self.err_rate_sum, self.err_rate, _d_theta,state.gmb_k.gmm.cholesky().unwrap().inverse(), state.omega);
+        println!("err_rate_sum {}, err_rate {} _d_theta {} gmm^-1 {} omega {}", self.err_rate_sum, self.err_rate, _d_theta,self.err_comb_th, state.omega);
         // println!("des rate: {}", &self.rate_des);
         self.err_rate_sum = (self.err_rate_sum * self._err_decay_v) + (self.err_rate * self._ctrl_dt)
     }

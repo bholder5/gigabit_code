@@ -1,22 +1,22 @@
 {
     "fine": {
-        "kp_roll": 200.0,
-        "ki_roll": 320.0,
-        "kip_roll": 75.0,
-        "kp_pitch": 150.0,
-        "ki_pitch": 300.0,
-        "kip_pitch": 60.0,
-        "kp_yaw": 25.0,
-        "ki_yaw": 550.0,
-        "kip_yaw": 10.0,
-        "piv_g_1": 0.0005,
-        "piv_g_2": 0.0010,
+        "kp_roll": 645.0,
+        "ki_roll": 15000.0,
+        "kip_roll": 1050.0,
+        "kp_pitch": 570.0,
+        "ki_pitch": 10000.0,
+        "kip_pitch": 1000.0,
+        "kp_yaw": 655.0,
+        "ki_yaw": 3000.0,
+        "kip_yaw": 1030.0,
+        "piv_g_1": 0.00045,
+        "piv_g_2": 0.00090,
         "int_decay_spd": 1.0,
         "int_decay_pos": 600.0,
-        "v_prof_scale": 1.350
+        "v_prof_scale": 0.02 
     },
-    "roll_des": -0.020,
-    "pitch_des": -0.3,
+    "roll_des": -0.005,
+    "pitch_des": -0.35,
     "yaw_des": -1.0,
     "new_targ": false,
     "latency": true,
@@ -24,5 +24,6 @@
     "est_reset": false,
     "flex_reset": false,
     "flex_ctrl_enable": false,
+    "flex_ctrl_update": false,
     "flex_sim_enable": true
 }

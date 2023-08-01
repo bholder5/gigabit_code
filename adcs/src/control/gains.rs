@@ -51,7 +51,7 @@ impl Gains {
     /// Function to instantiate a new Gains struct with default values
     pub fn new() -> Gains {
         let kp_vec = [0.10, 0.10, 3.0];
-        let ki_vec = [0.00001, 0.000, 0.0001];
+        let ki_vec = [0.00001, 0.002, 0.0001];
         let kip_vec = [0.010, 0.0010, 0.01];
         let kp = na::Matrix3::<f64>::from_partial_diagonal(&kp_vec);
         let kip = na::Matrix3::<f64>::from_partial_diagonal(&kip_vec);

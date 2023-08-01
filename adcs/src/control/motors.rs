@@ -119,16 +119,16 @@ impl StepperMotor {
     /// # Results
     ///
     /// - `omega_request` - the desired pivot speed
-    pub fn calculate_pivot_speed(&mut self, rw: &TorqueMotor) {
+    pub fn calculate_pivot_speed(&mut self, rw: &TorqueMotor, flex_torque: &f64) {
         trace!("calculate_pivot_speed start");
         let temp1: f64 = -self.gain1 * (self.omega_rw_nom - rw.omega);
         // println!("copntribution from temp1 {:}", temp1);
-        let temp2: f64 = -self.gain2 * rw.tau_applied;
-        // println!("copntribution from temp2 {:}", temp2);
+        let temp2: f64 = -self.gain2 * (rw.tau_applied + flex_torque);
+        // println!("copntribution from temp2 {:} {:} {:}", temp2, rw.tau_applied, flex_torque);
         let req = -(temp1 + temp2);
 
-        if req.abs() > 0.2 {
-            self.omega_request = req.signum() * 0.2;
+        if req.abs() > 0.3 {
+            self.omega_request = req.signum() * 0.3;
         } else {
             self.omega_request = req;
         }
@@ -149,7 +149,7 @@ impl StepperMotor {
             omega: 0.0,
             omega_max: 0.0,
             omega_request: 0.0,
-            omega_rw_nom: PI,
+            omega_rw_nom: 2.0*PI,
             gain1,
             gain2,
             _ts: 0.001,

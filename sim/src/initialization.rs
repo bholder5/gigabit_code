@@ -291,11 +291,11 @@ pub fn init_bit() -> Params {
     // ----------------------------------
     let theta = Vector9::from_row_slice(&[
         0.,
-        0.00 * 0.4 * PI / 180.0,
-        0.00 * 0.25 * PI / 180.0,
-        0.00 * 0.12 * PI / 180.0,
-        0.00 * 0.1 * PI / 180.0,
-        0.00 * -0.8 * PI / 180.0,
+        1.00 * 1.0 * PI / 180.0,
+        1.00 * 0.0 * PI / 180.0,
+        1.00 * 0.0 * PI / 180.0,
+        1.00 * 0.0125 * PI / 180.0,
+        1.00 * -0.4 * PI / 180.0,
         0.0,
         0.0,
         1.0 * -40.0 * PI / 180.0,
@@ -303,7 +303,7 @@ pub fn init_bit() -> Params {
     let d_theta_dt = Vector9::from_row_slice(&[0., 0., 0., 0., 0., 0., 0., 0., 0.]); // joint angle rates [rad/s]
     let dthet_thet = Vector18::from_row_slice(&[d_theta_dt.as_slice(), theta.as_slice()].concat());
 
-    let omega_rw: f64 = PI;
+    let omega_rw: f64 = 2.0*PI;
     let _i_z_rw: f64 = 4.5;
 
     let mut x = Vector21::zeros();
@@ -311,7 +311,7 @@ pub fn init_bit() -> Params {
         x[_step] = d_theta_dt[_step];
         x[_step + 9] = theta[_step];
     }
-    x[20] = PI * _i_z_rw;
+    x[20] = 2.0*PI * _i_z_rw;
     // let x0 = Vector21::from_row_slice(&d_theta_dt_0, &theta_0, &h_rw_0);
 
     let _zn = [

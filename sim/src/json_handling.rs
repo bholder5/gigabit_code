@@ -58,6 +58,7 @@ pub struct Read_json {
     est_reset: bool,
     flex_reset: bool,
     flex_ctrl_enable: bool,
+    flex_ctrl_update: bool,
     flex_sim_enable: bool,
 }
 
@@ -82,6 +83,12 @@ pub fn read_gains(ctrl: &mut Ctrl, bp: &mut Params, est: &mut Estimator, flx_ctr
 
                     ctrl.fine_gains
                         .update_gain_matrices(&kp_vec, &kip_vec, &ki_vec);
+
+                    if u.flex_ctrl_update {
+                        flx_ctrl.update = true;
+                    } else {
+                        flx_ctrl.update = false;
+                    }
 
                     ctrl.error.scale = u.fine.v_prof_scale;
 
