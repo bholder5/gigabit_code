@@ -85,12 +85,12 @@ impl Ctrl {
         let gains = self.fine_gains.clone();
 
         gains.kp.ad_mul_to(&self.error.err_rate, &mut tau_requested);
-        // println!("{:} x {:} = {:}", &gains.kp, &self.error.err_rate, &tau_requested);
-
+        
         gains.ki.mul_to(&self.error.err_rate_sum, &mut temp2);
 
         gains.kip.mul_to(&self.error.err_fine_sum, &mut temp3);
         // println!("{:} x {:} = {:}", &gains.ki, &self.error.err_rate_sum, &temp2);
+        // println!("KP: {:.3}, KI: {:.3}, KIP: {:.3}", &tau_requested[2], &temp2[2], &temp3[2]);
         tau_requested = tau_requested + temp2 + temp3;
         // println!("tau_requested {}", &tau_requested);
 

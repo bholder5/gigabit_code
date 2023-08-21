@@ -15,6 +15,7 @@ use adcs::control::flex_control::PassiveControl;
 
 pub type Eta = na::SMatrix<f64, 104, 1>;
 pub type HEta = na::SMatrix<f64, 52, 1>;
+pub type Matrix1 = na::SMatrix<f64, 1, 1>;
 
 pub struct Flex_model {
     // //
@@ -193,7 +194,14 @@ pub fn init_flex_model() -> Flex_model{
     let g2_mat = 1000.0 * init_g2mat();
     let g1_pos_mat = 1000.0 * init_g1_pos_mat();
     let c_pos_mat = 1000.0 * init_c_pos_mat();
-    let eta = Eta::zeros();
+    let mut eta = Eta::zeros();
+
+    let val = 0.0;
+    eta.slice_mut((6,0), (1,1)).copy_from(&(Matrix1::from_row_slice(&[val])));
+    eta.slice_mut((8,0), (1,1)).copy_from(&(Matrix1::from_row_slice(&[val])));
+    eta.slice_mut((10,0), (1,1)).copy_from(&(Matrix1::from_row_slice(&[val])));
+    eta.slice_mut((12,0), (1,1)).copy_from(&(Matrix1::from_row_slice(&[val])));
+
     let g1_out = na::Vector3::<f64>::zeros();
     let g2_out = na::Vector3::<f64>::zeros();
     let c_out = na::Vector5::<f64>::zeros();

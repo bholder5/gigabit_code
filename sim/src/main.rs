@@ -242,9 +242,9 @@ fn main() {
 
             // Disturbance generation
             wind.generate();
-            tau_applied[0] = wind.tau[0].clone();
-            tau_applied[1] = wind.tau[1].clone();
-            tau_applied[2] = wind.tau[2].clone();
+            tau_applied[0] = wind.tau[0].clone() - bp.damp[0] * bp.d_theta_dt[0];
+            tau_applied[1] = wind.tau[1].clone() - bp.damp[1] * bp.d_theta_dt[1];
+            tau_applied[2] = wind.tau[2].clone() - bp.damp[2] * bp.d_theta_dt[2];
 
 
             // update actual torque vector with applied torques
@@ -272,7 +272,8 @@ fn main() {
         // record the data
         sc::push_record(&t, &bp, &est, &ctrl, &meas, &sim_state, &flex, &fc).unwrap();
         js::read_gains(&mut ctrl, &mut bp, &mut est, &mut fc, &mut flex); // read in gains from json file (for tuning)
-        if fc.update {
+        if fc.update | (_step == 0){
+            println!("Success");
             let mut new_fc = flex_control::PassiveControl::init_pc(&ctrl.fine_gains);
             let mut fc = new_fc.clone();
 

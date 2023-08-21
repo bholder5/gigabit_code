@@ -71,7 +71,7 @@ impl Error {
         let err_fine_sum = na::Vector3::<f64>::new(0.0, 0.0, 0.0);
         let rate_des = na::Vector3::<f64>::new(0.0, 0.0, 0.0);
         let rot_err = na::Rotation3::<f64>::identity();
-        let u_lower = 0.005;
+        let u_lower = 0.001;
         let u_upper = 0.12;
         let _d_theta = na::Vector3::<f64>::new(0.0, 0.0, 0.0);
         let scale = 2.25;
@@ -243,6 +243,8 @@ impl Error {
         let mut _yaw_rate_des: f64 = 0.0;
 
         // if slew_flag == &true {
+            // let g_const: f64 = 0.350;
+            // let g_lin: f64 = 1400.0;
             let g_const: f64 = 1.0;
             let g_lin: f64 = 1000.0;
             
@@ -257,7 +259,7 @@ impl Error {
                     * (self.err_comb_th.x.abs()
                         * stat::function::erf::erf(self.err_comb_th.x.abs() * temp2))
                     + (temp3 * ((-self.err_comb_th.x.powi(2) * temp1).exp() - 1.0)))
-                    .sqrt() * self.scale;
+                    .sqrt() * self.scale * 0.25;
 
             _pitch_rate_des = self.err_comb_th.y.signum()
                 * (2.0
@@ -265,7 +267,7 @@ impl Error {
                     * (self.err_comb_th.y.abs()
                         * stat::function::erf::erf(self.err_comb_th.y.abs() * temp2))
                     + (temp3 * ((-self.err_comb_th.y.powi(2) * temp1).exp() - 1.0)))
-                    .sqrt() * self.scale;
+                    .sqrt() * self.scale * 0.5;
             _yaw_rate_des = self.err_comb_th.z.signum()
                 * (2.0
                     * g_const
@@ -274,15 +276,15 @@ impl Error {
                     + (temp3 * ((-self.err_comb_th.z.powi(2) * temp1).exp() - 1.0)))
                     .sqrt() * self.scale;
         // }
-
-        let max_accel = 0.02 * self._ctrl_dt;
+        // println!("{}", &_yaw_rate_des);
+        let max_accel = 0.1 * self._ctrl_dt;
         let des_roll_accel = _roll_rate_des - self.rate_des.x;
 
         if des_roll_accel.abs() > max_accel {
             if des_roll_accel < 0.0 {
-                _roll_rate_des = self.rate_des.x - max_accel;
+                _roll_rate_des = _d_theta.x - max_accel;
             } else {
-                _roll_rate_des = self.rate_des.x + max_accel;
+                _roll_rate_des = _d_theta.x + max_accel;
             }
         }
 
@@ -290,9 +292,9 @@ impl Error {
 
         if des_pitch_accel.abs() > max_accel {
             if des_pitch_accel < 0.0 {
-                _pitch_rate_des = self.rate_des.y - max_accel;
+                _pitch_rate_des = _d_theta.y - max_accel;
             } else {
-                _pitch_rate_des = self.rate_des.y + max_accel;
+                _pitch_rate_des = _d_theta.y + max_accel;
             }
         }
 
@@ -300,9 +302,9 @@ impl Error {
 
         if des_yaw_accel.abs() > max_accel {
             if des_yaw_accel < 0.0 {
-                _yaw_rate_des = self.rate_des.z - max_accel;
+                _yaw_rate_des = _d_theta.z - max_accel;
             } else {
-                _yaw_rate_des = self.rate_des.z + max_accel;
+                _yaw_rate_des = _d_theta.z + max_accel;
             }
             // println!("{} {} {} {}", max_accel, des_yaw_accel, _yaw_rate_des, self.rate_des.z);
         }
@@ -318,8 +320,8 @@ impl Error {
         self.err_rate = na::Vector3::<f64>::from_row_slice(&err_gmb_rate);
         trace!("update_pointing_velocity_error_terms end");
         // println!("err_rate_sum {}, err_decay {}, err_rate {}, _ctrl_dt {}", self.err_rate_sum, self._err_decay, self.err_rate, self._ctrl_dt);
-        println!("err_rate_sum {}, err_rate {} _d_theta {} gmm^-1 {} omega {}", self.err_rate_sum, self.err_rate, _d_theta,self.err_comb_th, state.omega);
-        // println!("des rate: {}", &self.rate_des);
+        // println!("err_rate_sum {}, err_rate {} _d_theta {} gmm^-1 {} omega {}", self.err_rate_sum, self.err_rate, _d_theta,self.err_comb_th, state.omega);
+        // println!("des rate: {}, error {}", &self.rate_des[2], &self.err_comb_th.z);
         self.err_rate_sum = (self.err_rate_sum * self._err_decay_v) + (self.err_rate * self._ctrl_dt)
     }
 }

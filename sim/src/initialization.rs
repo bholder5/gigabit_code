@@ -62,6 +62,7 @@ pub struct Params {
     pub pitch_nom: f64,
     pub latency: bool,
     pub ctrl_from_est: bool,
+    pub damp: Vector9,
     // //
 }
 
@@ -291,11 +292,11 @@ pub fn init_bit() -> Params {
     // ----------------------------------
     let theta = Vector9::from_row_slice(&[
         0.,
-        1.00 * 1.0 * PI / 180.0,
-        1.00 * 0.0 * PI / 180.0,
-        1.00 * 0.0 * PI / 180.0,
-        1.00 * 0.0125 * PI / 180.0,
-        1.00 * -0.4 * PI / 180.0,
+        1.00 * 0.1 * PI / 180.0,
+        0.00 * 0.0 * PI / 180.0,
+        0.00 * 0.0 * PI / 180.0,
+        0.00 * 0.0125 * PI / 180.0,
+        0.00 * -0.4 * PI / 180.0,
         0.0,
         0.0,
         1.0 * -40.0 * PI / 180.0,
@@ -344,6 +345,7 @@ pub fn init_bit() -> Params {
     let pitch_nom: f64 = -40.0 * PI / 180.0;
     let latency = true;
     let ctrl_from_est = true;
+    let damp = Vector9::from_row_slice(&[10000., 10000., 10000., 0., 0., 0., 0., 0., 0.]);
     // let gps = Gps::new();
     // define params struct_
     let _params = Params {
@@ -369,6 +371,7 @@ pub fn init_bit() -> Params {
         pitch_nom,
         latency,
         ctrl_from_est,
+        damp,
     };
     info!("Bit initialized: \n {:?}", _params);
     return _params;

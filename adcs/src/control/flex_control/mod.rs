@@ -40,11 +40,11 @@ impl PassiveControl{
         let b_flex = 1000.0 *init_bmat();
         let m_rigid = na::Matrix3::<f64>::from_row_slice(&[978.1915, -15.2645, 0.0, -15.2645, 376.8085, 0.0, 0.0, 0.0, 134.0]); //Actual a_rigid
         let mut qr_rigid = na::Matrix6::<f64>::from_row_slice(&[
-            0.001,      0.0, 0.0,      0.0, 0.0,   0.0,
+            0.0001,      0.0, 0.0,      0.0, 0.0,   0.0,
             0.0, 978.1915, 0.0, -15.2645, 0.0,   0.0,
-            0.0,      0.0, 0.001,      0.0, 0.0,   0.0,
+            0.0,      0.0, 0.0001,      0.0, 0.0,   0.0,
             0.0, -15.2645, 0.0, 376.8085, 0.0,   0.0,
-            0.0,      0.0, 0.0,      0.0, 0.001,   0.0,
+            0.0,      0.0, 0.0,      0.0, 0.0001,   0.0,
             0.0,      0.0, 0.0,      0.0, 0.0, 134.0]);
 
 
@@ -56,9 +56,9 @@ impl PassiveControl{
         let kp_rigid = m_rigid.try_inverse().unwrap() * kp_mat;
         // println!("k_rigid {} ki_mat {}", k_rigid, ki_mat);
         let kp1 = kp_rigid[0].clone();
-        let kp2 = kp_rigid[1].clone();
+        let kp2 = 1.0*kp_rigid[1].clone();
         let kp3 = kp_rigid[3].clone();
-        let kp4 = kp_rigid[4].clone();
+        let kp4 = 1.0*kp_rigid[4].clone();
         let kp5 = kp_rigid[8].clone();
 
         let yaw_kd = gains.kp[0].clone();
@@ -68,11 +68,11 @@ impl PassiveControl{
 
         let kd_rigid = m_rigid.try_inverse().unwrap() * kd_mat;
         // println!("k_rigid {} ki_mat {}", k_rigid, ki_mat);
-        let kd1 = 0.0*kd_rigid[0].clone();
-        let kd2 = 0.0*kd_rigid[1].clone();
-        let kd3 = 0.0*kd_rigid[3].clone();
-        let kd4 = 0.0*kd_rigid[4].clone();
-        let kd5 = 0.0*kd_rigid[8].clone();
+        let kd1 = 1.0*kd_rigid[0].clone();
+        let kd2 = 1.0*kd_rigid[1].clone();
+        let kd3 = 1.0*kd_rigid[3].clone();
+        let kd4 = 1.0*kd_rigid[4].clone();
+        let kd5 = 1.0*kd_rigid[8].clone();
 
         let a_rigid = na::Matrix6::<f64>::from_row_slice(&[
             0.0, 1.0, 0.0, 0.0, 0.0, 0.0,
@@ -99,32 +99,37 @@ impl PassiveControl{
         // println!("b_rigid: {}", &b_rigid);
         let num_modes: usize = 10;
         let num_states: usize = 2*num_modes;
-        let r_scale = 0.010450;
+        let r_scale = 1.0;
         let mut r = r_scale * na::Matrix5::<f64>::identity();
-        let r_yaw = Matrix1::from_row_slice(&[(r_scale*2.0)]);
+        let r_yaw = Matrix1::from_row_slice(&[(r_scale*0.3)]);
+        let r_pitch = Matrix1::from_row_slice(&[(r_scale*2.0)]);
 
         r.slice_mut((0,0),(1,1)).copy_from(&r_yaw);
+        r.slice_mut((3,3),(1,1)).copy_from(&r_pitch);
+        r.slice_mut((4,4),(1,1)).copy_from(&r_pitch);
+
         let mut ql = 1.0*na::DMatrix::<f64>::identity(num_states+6, num_states+6);
         let mut qr = 1.0 * na::DMatrix::<f64>::identity(num_states+6, num_states+6);
 
-        qr.slice_mut((0,0), (6, 6)).copy_from(&(2.6*qr_rigid));
-        println!("check 1 ");
+        qr.slice_mut((0,0), (6, 6)).copy_from(&(0.01*qr_rigid));
+        // println!("check 1 ");
         // qr.slice_mut((3,3), (2, 2)).copy_from(&na::Matrix2::<f64>::from_diagonal(&na::Vector2::new(0.000001, 100.0)));
         // qr.slice_mut((5,5), (2, 2)).copy_from(&na::Matrix2::<f64>::from_diagonal(&na::Vector2::new(0.000001, 1000.0)));
-        qr.slice_mut((6,6), (2, 2)).copy_from(&na::Matrix2::<f64>::from_diagonal(&na::Vector2::new(0.000001, 100.0)));
-        qr.slice_mut((8,8), (2, 2)).copy_from(&na::Matrix2::<f64>::from_diagonal(&na::Vector2::new(0.000001, 1000.0)));
-        qr.slice_mut((10,10), (2, 2)).copy_from(&na::Matrix2::<f64>::from_diagonal(&na::Vector2::new(0.000001, 100.0)));
-        qr.slice_mut((12,12), (2, 2)).copy_from(&na::Matrix2::<f64>::from_diagonal(&na::Vector2::new(0.000001, 100.0)));
-        qr.slice_mut((14,14), (2, 2)).copy_from(&na::Matrix2::<f64>::from_diagonal(&na::Vector2::new(0.000001, 100.0)));
-        qr.slice_mut((16,16), (2, 2)).copy_from(&na::Matrix2::<f64>::from_diagonal(&na::Vector2::new(0.000001, 1500.0)));
-        qr.slice_mut((18,18), (2, 2)).copy_from(&na::Matrix2::<f64>::from_diagonal(&na::Vector2::new(0.000001, 500.0)));
-        qr.slice_mut((20,20), (2, 2)).copy_from(&na::Matrix2::<f64>::from_diagonal(&na::Vector2::new(0.000001, 100.0)));
-        qr.slice_mut((22,22), (2, 2)).copy_from(&na::Matrix2::<f64>::from_diagonal(&na::Vector2::new(0.000001, 100.0)));
-        qr.slice_mut((24,24), (2, 2)).copy_from(&na::Matrix2::<f64>::from_diagonal(&na::Vector2::new(0.000001, 100.0)));
+        qr.slice_mut((6,6), (2, 2)).copy_from(&na::Matrix2::<f64>::from_diagonal(&na::Vector2::new(0.000001, 1.0)));
+        qr.slice_mut((8,8), (2, 2)).copy_from(&na::Matrix2::<f64>::from_diagonal(&na::Vector2::new(0.000001, 1.0)));
+        qr.slice_mut((10,10), (2, 2)).copy_from(&na::Matrix2::<f64>::from_diagonal(&na::Vector2::new(0.000001, 1.0)));
+        qr.slice_mut((12,12), (2, 2)).copy_from(&na::Matrix2::<f64>::from_diagonal(&na::Vector2::new(0.000001, 1.0)));
+        qr.slice_mut((14,14), (2, 2)).copy_from(&na::Matrix2::<f64>::from_diagonal(&na::Vector2::new(0.000001, 1.0)));
+        qr.slice_mut((16,16), (2, 2)).copy_from(&na::Matrix2::<f64>::from_diagonal(&na::Vector2::new(0.000001, 1.0)));
+        qr.slice_mut((18,18), (2, 2)).copy_from(&na::Matrix2::<f64>::from_diagonal(&na::Vector2::new(0.000001, 1.0)));
+        qr.slice_mut((20,20), (2, 2)).copy_from(&na::Matrix2::<f64>::from_diagonal(&na::Vector2::new(0.000001, 1.0)));
+        qr.slice_mut((22,22), (2, 2)).copy_from(&na::Matrix2::<f64>::from_diagonal(&na::Vector2::new(0.000001, 1.0)));
+        qr.slice_mut((24,24), (2, 2)).copy_from(&na::Matrix2::<f64>::from_diagonal(&na::Vector2::new(0.000001, 1.0)));
 
         // println!("b matrix in passive control {}", &b_flex);
 
         let ql = 100.0 * &qr.clone().try_inverse().unwrap();
+        // println!("{}", &ql);
 
 
         let a_cl = na::DMatrix::<f64>::zeros(num_states+6, num_states+6);
@@ -134,7 +139,7 @@ impl PassiveControl{
         let state = na::DVector::<f64>::zeros(num_states+6);
         let u = na::DVector::<f64>::zeros(5);
         let u_rigid = na::DVector::<f64>::zeros(3);
-        let tau_max = 5.0;
+        let tau_max = 40.0;
         let enable = false;
         let update = false;  
 
