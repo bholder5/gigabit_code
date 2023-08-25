@@ -53,6 +53,10 @@ pub struct Error {
     pub _d_theta: na::Vector3<f64>,
     /// scale factor for tuning the speed profile
     pub scale: f64,
+    /// blended velocity scale 
+    pub scale_blend: f64,
+    /// the blend scalar describing where in between fine pointing and slewing
+    pub err_weight: f64,
 }
 
 impl Error {
@@ -71,10 +75,12 @@ impl Error {
         let err_fine_sum = na::Vector3::<f64>::new(0.0, 0.0, 0.0);
         let rate_des = na::Vector3::<f64>::new(0.0, 0.0, 0.0);
         let rot_err = na::Rotation3::<f64>::identity();
-        let u_lower = 0.001;
-        let u_upper = 0.12;
+        let u_lower = 0.0005;
+        let u_upper = 0.07;
         let _d_theta = na::Vector3::<f64>::new(0.0, 0.0, 0.0);
         let scale = 2.25;
+        let scale_blend = 1.0;
+        let err_weight = 1.0;
 
         let error: Error = Error {
             err_b_th,
@@ -94,6 +100,8 @@ impl Error {
             u_upper,
             _d_theta,
             scale,
+            scale_blend,
+            err_weight,
         };
         error
     }
@@ -137,7 +145,6 @@ impl Error {
         // parameterize the rotation error into euler angles
         let _rot_err_eul = _rot_err.inverse().euler_angles();
         
-
         let err_vec = na::Vector3::<f64>::new(_rot_err_eul.0, _rot_err_eul.1, _rot_err_eul.2);
         // println!("des ra {}, dec {}, fr {}", &state.eq_d.ra, &state.eq_d.dec, &state.eq_d.fr);
         // println!("cur ra {}, dec {}, fr {}", &state.eq_k.ra, &state.eq_k.dec, &state.eq_k.fr);
@@ -180,6 +187,8 @@ impl Error {
             self.err_comb_th = phi * err_vec;
             self.err_fine_sum = self.err_fine_sum + (self.err_comb_th * self._ctrl_dt);
             slew_flag = false;
+            self.err_weight = 0.0;
+            self.scale_blend = self.scale.clone();
         } else {
             
             self.err_gmb_th
@@ -189,14 +198,20 @@ impl Error {
                 // calculate the gimbal error
                 self.err_comb_th = _err_gmb.clone();
                 slew_flag = true;
+                self.err_weight = 1.0;
+                self.scale_blend = 0.05;
                 // println!("greater than u.upper {}", &norm_fine_err);
             } else {
                 // println!("between u.lower and u.upper {}", &norm_fine_err);
                 let err_weight: f64 =
                     (norm_fine_err - self.u_lower) / (self.u_upper - self.u_lower);
 
+                self.err_weight = err_weight;
+
                 let comb_err = ((1.0 - err_weight) * (phi * err_vec)) + (err_weight * _err_gmb);
                 self.err_fine_sum = self.err_fine_sum + (((1.0 - err_weight) * (phi * err_vec)) * self._ctrl_dt);
+
+                self.scale_blend = ((1.0 - err_weight) * (self.scale)) + (err_weight * 0.05);
 
                 self.err_comb_th = comb_err;
                 // println!("error weight: {}, combined error: {}\n term1 {} term2 {}", err_weight, comb_err, (1.0 - err_weight) * (phi * err_vec), (err_weight * _err_gmb));
@@ -259,7 +274,7 @@ impl Error {
                     * (self.err_comb_th.x.abs()
                         * stat::function::erf::erf(self.err_comb_th.x.abs() * temp2))
                     + (temp3 * ((-self.err_comb_th.x.powi(2) * temp1).exp() - 1.0)))
-                    .sqrt() * self.scale * 0.25;
+                    .sqrt() * self.scale_blend * 0.25;
 
             _pitch_rate_des = self.err_comb_th.y.signum()
                 * (2.0
@@ -267,14 +282,14 @@ impl Error {
                     * (self.err_comb_th.y.abs()
                         * stat::function::erf::erf(self.err_comb_th.y.abs() * temp2))
                     + (temp3 * ((-self.err_comb_th.y.powi(2) * temp1).exp() - 1.0)))
-                    .sqrt() * self.scale * 0.5;
+                    .sqrt() * self.scale_blend * 0.5;
             _yaw_rate_des = self.err_comb_th.z.signum()
                 * (2.0
                     * g_const
                     * (self.err_comb_th.z.abs()
                         * stat::function::erf::erf(self.err_comb_th.z.abs() * temp2))
                     + (temp3 * ((-self.err_comb_th.z.powi(2) * temp1).exp() - 1.0)))
-                    .sqrt() * self.scale;
+                    .sqrt() * self.scale_blend;
         // }
         // println!("{}", &_yaw_rate_des);
         let max_accel = 0.1 * self._ctrl_dt;

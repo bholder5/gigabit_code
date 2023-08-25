@@ -144,7 +144,7 @@ pub struct Record {
     gyro_bs_bias_yaw_act: f64,
 }
 
-pub fn push_record(t: &f64, bp: &Params, est: &Estimator, ctrl: &Ctrl, meas: &Meas, sim_st: &State, flex: &fx::Flex_model, flex_c: &fc::PassiveControl) -> Result<(), Box<dyn Error>> {
+pub fn push_record(t: &f64, bp: &Params, est: &Estimator, ctrl: &Ctrl, meas: &Meas, sim_st: &State, flex: &fx::Flex_model, flex_c: &fc::DampingControl) -> Result<(), Box<dyn Error>> {
     // let file_path = "/home/b/sim_data/out.csv";
     let file_path = "/home/bholder/data/out.csv";
     // let file_path = "/home/brad/data/out.csv";

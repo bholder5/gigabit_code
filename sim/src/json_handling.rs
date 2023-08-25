@@ -12,7 +12,7 @@
 //!
 
 use adcs::control::Ctrl;
-use adcs::control::flex_control::PassiveControl;
+use adcs::control::flex_control::DampingControl;
 use adcs::estimation::Estimator;
 use crate::flex_sim::Flex_model;
 use crate::initialization::Params;
@@ -62,7 +62,7 @@ pub struct Read_json {
     flex_sim_enable: bool,
 }
 
-pub fn read_gains(ctrl: &mut Ctrl, bp: &mut Params, est: &mut Estimator, flx_ctrl: &mut PassiveControl, flex_sim: &mut Flex_model) -> () {
+pub fn read_gains(ctrl: &mut Ctrl, bp: &mut Params, est: &mut Estimator, flx_ctrl: &mut DampingControl, flex_sim: &mut Flex_model) -> () {
     let path = "sim/src/gains.json";
 
     #[allow(unused_assignments)]

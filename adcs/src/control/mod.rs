@@ -7,6 +7,7 @@ pub mod gains;
 pub mod motors;
 pub mod state;
 pub mod flex_control;
+pub mod lqr;
 
 use error as er;
 use gains as gns;
@@ -45,6 +46,8 @@ pub struct Ctrl {
     pub state: st::State,
     /// flag to signal if the gondola should be slewing
     pub slew_flag: bool,
+    /// Lqr controller
+    pub lqr: lqr::LQRController,
 }
 
 impl Ctrl {
@@ -152,6 +155,7 @@ impl Ctrl {
             error: er::Error::new(),
             state: st::State::new(),
             slew_flag: true,
+            lqr: lqr::LQRController::init(),
         };
         info!("Ctrl struct initialized");
         debug!("Control initialized: \n {:?}", ctrl);

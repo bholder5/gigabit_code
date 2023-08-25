@@ -55,7 +55,7 @@ fn main() {
 
     let mut est = Estimator::new();
     let mut ctrl = Ctrl::new();
-    let mut fc = flex_control::PassiveControl::init_pc(&ctrl.fine_gains);
+    let mut fc = flex_control::DampingControl::init_pc(&ctrl.fine_gains);
     let mut sim_state = state::State::new();
     let mut meas = ms::Meas::new();
     let mut late_meas = ms::Meas::new();
@@ -98,7 +98,7 @@ fn main() {
 
     trace!("START");
     let now1 = Instant::now();
-    for _step in 0..100000000 as usize {
+    for _step in 0..0 as usize {
         
         ///////// beginning of the simulation loop
         /////////////////////////////////////////
@@ -177,20 +177,34 @@ fn main() {
 
         if fc.enable{
             // need to input the gyro data from rigid modes
-            let gyro_in = [
+            
+            let mut gyro_in = [
+                late_meas.gyro_of.om_axial,
+                late_meas.gyro_bow.om_axial,
+                late_meas.gyro_stern.om_axial,
+                late_meas.gyro_port.om_axial,
+                late_meas.gyro_sb.om_axial
+            ];
+
+            if bp.latency {
+                 
+            } else {
+                gyro_in = [
                 meas.gyro_of.om_axial,
                 meas.gyro_bow.om_axial,
                 meas.gyro_stern.om_axial,
                 meas.gyro_port.om_axial,
                 meas.gyro_sb.om_axial
             ]; 
+            }
 
             // println!("{} {} {} {} {}", &gyro_in[0], &gyro_in[1], &gyro_in[2], &gyro_in[3], &gyro_in[4]);
             // if &ctrl.slew_flag==&true{
             //     fc.propogate_control_state(gyro_in.as_slice(), bp._dt, bp._num_steps, &[ctrl.error.rate_des.z.clone(), ctrl.error.rate_des.x.clone(),ctrl.error.rate_des.x.clone(),ctrl.error.rate_des.y.clone(),ctrl.error.rate_des.y.clone(),]);
             // } else {
                 let sc: f64 = 1.0;
-                fc.propogate_control_state(gyro_in.as_slice(), bp._dt, bp._num_steps, &[sc*ctrl.error.rate_des.z.clone(), sc*ctrl.error.rate_des.x.clone(),sc*ctrl.error.rate_des.x.clone(),sc*ctrl.error.rate_des.y.clone(),sc*ctrl.error.rate_des.y.clone(),]);
+                fc.err_weight = ctrl.error.err_weight.clone();
+                fc.propogate(gyro_in.as_slice(), bp._dt, bp._num_steps, &[sc*ctrl.error.rate_des.z.clone(), sc*ctrl.error.rate_des.x.clone(),sc*ctrl.error.rate_des.x.clone(),sc*ctrl.error.rate_des.y.clone(),sc*ctrl.error.rate_des.y.clone(),]);
 
             // }
             
@@ -274,7 +288,7 @@ fn main() {
         js::read_gains(&mut ctrl, &mut bp, &mut est, &mut fc, &mut flex); // read in gains from json file (for tuning)
         if fc.update | (_step == 0){
             println!("Success");
-            let mut new_fc = flex_control::PassiveControl::init_pc(&ctrl.fine_gains);
+            let mut new_fc = flex_control::DampingControl::init_pc(&ctrl.fine_gains);
             let mut fc = new_fc.clone();
 
         }
