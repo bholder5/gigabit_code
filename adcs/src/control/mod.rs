@@ -96,11 +96,24 @@ impl Ctrl {
         // println!("KP: {:.3}, KI: {:.3}, KIP: {:.3}", &tau_requested[2], &temp2[2], &temp3[2]);
         tau_requested = tau_requested + temp2 + temp3;
         // println!("tau_requested {}", &tau_requested);
+        self.lqr.assem_err_vec(&self.state, &self.error);
+        self.lqr.calculate_control();
 
-        self.fmot_roll.tau_request = 1.0*tau_requested[0];
-        self.fmot_pitch.tau_request = 1.0*tau_requested[1];
+        let err_weight = 0.0*self.error.err_weight;
+
+        let mut tau_req_blend = na::Vector3::zeros();
+        let lqr_input = self.lqr.get_control_input();
+
+        tau_req_blend[0] = (1.0-err_weight) * lqr_input[1] + (err_weight) * tau_requested[0];
+        tau_req_blend[1] = (1.0-err_weight) * lqr_input[2] + (err_weight) * tau_requested[1];
+        tau_req_blend[2] = ((1.0-err_weight) * -lqr_input[0]) + (err_weight) * tau_requested[2];
+
+        println!("pid {:.4} lqr {:.4} blend {:.4} weight {:.7}", tau_requested[2], lqr_input[0], tau_req_blend[2], err_weight);
+
+        self.fmot_roll.tau_request = 1.0*tau_req_blend[0];
+        self.fmot_pitch.tau_request = 1.0*tau_req_blend[1];
         // reverse rw torque because opposite acts on gondola (for simulation)
-        self.rw.tau_request = -1.0*tau_requested[2];
+        self.rw.tau_request = -1.0*tau_req_blend[2];
 
         self.fmot_roll.bound_requested_torque();
         self.fmot_pitch.bound_requested_torque();
@@ -132,7 +145,7 @@ impl Ctrl {
             .update_pointing_positional_error(&self.state, phi, self.slew_flag);
         self.error
             .update_pointing_velocity_error_terms(&mut self.state, &self.slew_flag);
-        println!("slew flag {}", &self.slew_flag);
+        // println!("slew flag {}", &self.slew_flag);
 
         self.calculate_applied_torque();
         // self.pivot.calculate_pivot_speed(&self.rw);

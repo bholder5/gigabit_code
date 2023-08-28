@@ -37,6 +37,9 @@ use std::time::{Duration, Instant};
 extern crate csv;
 extern crate serde;
 extern crate time;
+extern crate nalgebra;
+
+use nalgebra as na;
 // #[macro_use]
 extern crate serde_derive;
 
@@ -89,16 +92,16 @@ fn main() {
     let mut first_LIS = true;
 
     // Initialize with an achievable target
-    ctrl.state.gmb_d.roll = 0.1;
-    ctrl.state.gmb_d.pitch = -0.6;
-    ctrl.state.gmb_d.yaw = 1.0;
+    ctrl.state.gmb_d.roll = 0.05;
+    ctrl.state.gmb_d.pitch = -0.7;
+    ctrl.state.gmb_d.yaw = 0.0;
     ctrl.state.gmb_d.calculate_rotation_matrix();
     ctrl.state.update_desired_eq_from_gmb();
 
 
     trace!("START");
     let now1 = Instant::now();
-    for _step in 0..0 as usize {
+    for _step in 0..10000000 as usize {
         
         ///////// beginning of the simulation loop
         /////////////////////////////////////////
@@ -110,7 +113,7 @@ fn main() {
                 bp.x.as_ptr(),
                 tau_applied.as_mut_ptr(),
                 bp.unlock.as_ptr(),
-                ctrl.pivot.omega_request,
+                ctrl.lqr.control_input[3],
                 true as u8,
                 bp._dt,
                 bp._num_steps,
@@ -153,9 +156,10 @@ fn main() {
         bp.get_orientation_rots(&flex, &mut meas);
         bp.get_rw_speed();
 
-        if &ctrl.slew_flag == &true {
-            bp.pitch_nom = bp.theta[8].clone();
-        }
+        // if &ctrl.slew_flag == &true {
+        //     bp.pitch_nom = bp.theta[8].clone();
+        //     println!("pitch nom {}", bp.pitch_nom);
+        // }
         // println!("theta nom {}",&bp.pitch_nom);
 
         sim_state.update_current_equatorial_coordinates(&bp.phi_act);
@@ -172,8 +176,16 @@ fn main() {
             ctrl.state.gps = meas.gps.clone();
         }
 
-        
+        est.piv_speed = ctrl.lqr.control_input[3];
+
         est.propogate();
+        ctrl.state.omega_gond = na::Vector5::<f64>::from_row_slice(&[
+            late_meas.gyro_of.om_axial,
+            late_meas.gyro_bow.om_axial,
+            late_meas.gyro_stern.om_axial,
+            late_meas.gyro_port.om_axial,
+            late_meas.gyro_sb.om_axial
+        ]);
 
         if fc.enable{
             // need to input the gyro data from rigid modes
@@ -236,6 +248,10 @@ fn main() {
                         .gmb_k
                         .update_gimbal_coordinates(&[meas.roll, meas.pitch, meas.yaw_p]);
                 }
+                ctrl.state.piv_angle = est.piv_angle;
+                ctrl.state.piv_speed = ctrl.pivot.omega_request;
+                ctrl.state.rw_hs = bp.x[20];
+                ctrl.state.rw_hs_nom = ctrl.pivot.omega_rw_nom*ctrl.pivot._i_rw;
             } else {
                 ctrl.state.eq_k = sim_state.eq_k.clone();
                 ctrl.state.omega[0] = bp.omega_m[0].clone();

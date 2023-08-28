@@ -13,6 +13,7 @@ use crate::control::state as st;
 
 #[allow(unused_imports)]
 use log::{debug, error, info, trace, warn};
+use na::Rotation;
 
 #[derive(Debug)]
 /// The error struct contains all the various components related to
@@ -27,6 +28,8 @@ pub struct Error {
     pub err_comb_th: na::Vector3<f64>,
     /// The error in gimbal rates (roll, pitch, yaw)
     pub err_rate: na::Vector3<f64>,
+    /// err rate lqr (gondola gyros)
+    pub err_rate_lqr: na::Vector3<f64>,
     /// Integrated gimbal rate error (roll, pitch, yaw)
     pub err_rate_sum: na::Vector3<f64>,
      /// Integrated gimbal fine error (roll, pitch, yaw)
@@ -71,12 +74,13 @@ impl Error {
         let err_b_th = st::gimbal::Gimbal::new();
         let err_comb_th = na::Vector3::<f64>::new(0.0, 0.0, 0.0);
         let err_rate = na::Vector3::<f64>::new(0.0, 0.0, 0.0);
+        let err_rate_lqr = na::Vector3::<f64>::new(0.0, 0.0, 0.0);
         let err_rate_sum = na::Vector3::<f64>::new(0.0, 0.0, 0.0);
         let err_fine_sum = na::Vector3::<f64>::new(0.0, 0.0, 0.0);
         let rate_des = na::Vector3::<f64>::new(0.0, 0.0, 0.0);
         let rot_err = na::Rotation3::<f64>::identity();
-        let u_lower = 0.0005;
-        let u_upper = 0.07;
+        let u_lower = 0.05;
+        let u_upper = 0.1;
         let _d_theta = na::Vector3::<f64>::new(0.0, 0.0, 0.0);
         let scale = 2.25;
         let scale_blend = 1.0;
@@ -87,6 +91,7 @@ impl Error {
             err_gmb_th,
             err_comb_th,
             err_rate,
+            err_rate_lqr,
             err_rate_sum,
             err_fine_sum,
             rate_des,
@@ -138,7 +143,7 @@ impl Error {
     /// - `self.err_comb_th: na::Vector3<f64>` the combined error for use in velocity profile calculation
     pub fn update_pointing_positional_error(&mut self, state: &st::State, phi: na::Matrix3<f64>, mut slew_flag:bool) -> (bool) {
         trace!("update_positional_pointing_error start");
-
+        // let phi = phi.try_inverse().unwrap();
         //rot err in equatorial space
         let _rot_err = state.eq_d.rot * state.eq_k.rot.inverse();
 
@@ -158,6 +163,10 @@ impl Error {
         // println!("norm fine error: {}", norm_fine_err);
 
         let mapped_err = state.gmb_k.gmm_i * err_vec;
+        // let mut state_d = state.gmb_d.clone();
+        // state_d.calculate_gimbal_mapping_matrix();
+        // state_d.calculate_inverse_gimbal_mapping_matrix();
+        // let mapped_err = state_k.gmm_i * err_vec;
 
         self.err_b_th.roll = mapped_err[0];
         self.err_b_th.pitch = mapped_err[1];
@@ -170,6 +179,8 @@ impl Error {
             state.gmb_d.pitch - state.gmb_k.pitch,
             state.gmb_d.yaw - state.gmb_k.yaw,
         );
+
+
         // println!("gmb err {:?}", &_err_gmb);
         for ind in 0..3 {
             if _err_gmb[ind].abs() > PI {
@@ -179,7 +190,7 @@ impl Error {
                     + (2.0 * PI * (under as u8 as f64));
             }
         }
-
+        let err_mat_phi = phi*err_vec;
         //decay the fine suym error regarless of error but only integrate it if error is in fine error bracket
         self.err_fine_sum = self.err_fine_sum * self._err_decay_p;
 
@@ -199,7 +210,7 @@ impl Error {
                 self.err_comb_th = _err_gmb.clone();
                 slew_flag = true;
                 self.err_weight = 1.0;
-                self.scale_blend = 0.05;
+                self.scale_blend = 0.000003;
                 // println!("greater than u.upper {}", &norm_fine_err);
             } else {
                 // println!("between u.lower and u.upper {}", &norm_fine_err);
@@ -216,7 +227,9 @@ impl Error {
                 self.err_comb_th = comb_err;
                 // println!("error weight: {}, combined error: {}\n term1 {} term2 {}", err_weight, comb_err, (1.0 - err_weight) * (phi * err_vec), (err_weight * _err_gmb));
             }
+            // self.err_comb_th = phi*_err_gmb.clone();
             trace!("update_positional_pointing_error end");
+            // println!("yaw gmb {:.4} vec {:.4} comb {:.4}",_err_gmb, err_vec, self.err_comb_th);
         }
         return slew_flag
     }
@@ -274,7 +287,7 @@ impl Error {
                     * (self.err_comb_th.x.abs()
                         * stat::function::erf::erf(self.err_comb_th.x.abs() * temp2))
                     + (temp3 * ((-self.err_comb_th.x.powi(2) * temp1).exp() - 1.0)))
-                    .sqrt() * self.scale_blend * 0.25;
+                    .sqrt() * self.scale_blend * 0.5;
 
             _pitch_rate_des = self.err_comb_th.y.signum()
                 * (2.0
@@ -331,6 +344,15 @@ impl Error {
             (_pitch_rate_des - _d_theta.y),
             (_yaw_rate_des - _d_theta.z),
         ];
+
+        let err_gmb_rate2: [f64; 3] = [
+            (_roll_rate_des - state.omega_gond[1]),
+            (_pitch_rate_des - state.omega_gond[3]),
+            (_yaw_rate_des - state.omega_gond[0]),
+        ];
+
+        self.err_rate_lqr =na::Vector3::<f64>::from_row_slice(&err_gmb_rate2);
+
 
         self.err_rate = na::Vector3::<f64>::from_row_slice(&err_gmb_rate);
         trace!("update_pointing_velocity_error_terms end");

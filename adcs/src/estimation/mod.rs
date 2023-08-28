@@ -26,6 +26,9 @@ pub struct Estimator {
     //Correction terms
     pub corr: correction::Correction,
     pub reset: bool,
+    /// piv estimation terms for lqr
+    pub piv_angle: f64,
+    pub piv_speed: f64,
     
 }
 impl Estimator {
@@ -41,6 +44,8 @@ impl Estimator {
         let prop = propogation::Propogation::new();
         let corr = correction::Correction::new();
         let reset = true;
+        let piv_angle = 0.0;
+        let piv_speed: f64 = 0.0;
         // DEFINE SYSTEMATIC TERMS
         // ----------------------------------
 
@@ -51,12 +56,16 @@ impl Estimator {
             prop,
             corr,
             reset,
+            piv_angle,
+            piv_speed,
         };
         info!("Estimation initialized: \n {:?}", est);
         return est;
     }
     pub fn propogate(&mut self) {
         self.prop.propogate(&mut self.eq_hat_k, &self.gyros_bs);
+        self.piv_angle = 0.999999999*self.piv_angle + 0.001*self.piv_speed;
+        // print!("piv angle {:.3} piv speed {:.5} \n", self.piv_angle, self.piv_speed);
     }
     pub fn correct_estimate(&mut self) {
         self.corr.correct_estimate(&mut self.eq_hat_k, &mut self.prop, &mut self.gyros_bs);

@@ -20,6 +20,8 @@ use {equitorial as eq, gimbal as gb, horizontal as hor};
 pub struct State {
     /// The angular velocity of the telescope boresight
     pub omega: na::Vector3<f64>,
+    /// The angular velocity of the telescope boresight
+    pub omega_gond: na::Vector5<f64>,
     /// The joint velocity of the gimbal yaw pitch roll in 321 order
     pub dtheta: na::Vector3<f64>,
     /// The longitude, latitude and sidereal time
@@ -40,6 +42,10 @@ pub struct State {
     pub ceh: na::Rotation3<f64>,
     /// offset from imbalance between horizontal frame and body fized frame
     _b2h_offset: na::Rotation3<f64>,
+    pub piv_angle: f64,
+    pub piv_speed: f64,
+    pub rw_hs_nom: f64,
+    pub rw_hs: f64,
 }
 
 impl State {
@@ -55,6 +61,7 @@ impl State {
     /// - `returns state::state::State` -
     pub fn new() -> State {
         let omega = na::Vector3::<f64>::zeros();
+        let omega_gond = na::Vector5::<f64>::zeros();
         let dtheta = na::Vector3::<f64>::zeros();
         let gps = gps::Gps::new();
         let eq_k = eq::Equatorial::new();
@@ -65,9 +72,14 @@ impl State {
         let gmb_d = gb::Gimbal::new();
         let ceh = na::Rotation3::<f64>::identity();
         let _b2h_offset = na::Rotation3::<f64>::identity();
+        let piv_angle = 0.0;
+        let piv_speed: f64 = 0.0;
+        let rw_hs_nom = 0.0;
+        let rw_hs: f64 = 0.0;
 
         let state: State = State {
             omega,
+            omega_gond,
             dtheta,
             gps,
             eq_k,
@@ -78,6 +90,10 @@ impl State {
             gmb_d,
             ceh,
             _b2h_offset,
+            piv_angle,
+            piv_speed,
+            rw_hs_nom,
+            rw_hs,
         };
         state
     }
