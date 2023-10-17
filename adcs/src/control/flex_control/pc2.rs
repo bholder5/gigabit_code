@@ -4,12 +4,12 @@ use crate::control::gains::{Gains};
 use crate::control::flex_control as fc;
 use crate::control::lqr;
 
-type BRigid = na::SMatrix<f64, 8, 4>;
+type BRigid = na::SMatrix<f64, 16, 4>;
 type BRigid2 = na::SMatrix<f64, 3, 4>;
 type Matrix1 = na::SMatrix<f64,1,1>;
-type Vector8 = na::SMatrix<f64, 8, 1>;
-type Matrix48 = na::SMatrix<f64, 4, 8>;
-type Matrix8 = na::SMatrix<f64, 8, 8>;
+type Vector16 = na::SMatrix<f64, 16, 1>;
+type Matrix416 = na::SMatrix<f64, 4, 16>;
+type Matrix16 = na::SMatrix<f64, 16, 16>;
 
 
 #[derive(Clone)]
@@ -18,8 +18,8 @@ pub struct PassiveControl {
     num_states: usize,
     a_flex: na::SMatrix<f64, 104, 104>,
     b_flex: na::SMatrix<f64, 104, 5>,
-    a: na::SMatrix<f64,8,8>,
-    b: na::SMatrix<f64, 8,4>,
+    a: na::SMatrix<f64,16,16>,
+    b: na::SMatrix<f64, 16,4>,
     qr: na::DMatrix<f64>,
     r: na::SMatrix<f64, 4, 4>,
     ql: na::DMatrix<f64>,
@@ -39,43 +39,72 @@ impl PassiveControl{
     pub fn init_pc_p() -> PassiveControl{
         let a_flex = fc::amat::init_amat();
         let b_flex = 1000.0 *fc::bmat::init_bmat();
-        let a = lqr::amat::init_amat_pos();
+        let a = lqr::amat::init_amat_pf();
         // println!("a {}", &a);
-        let b = lqr::bmat::init_bmat_pos();
+        let b = lqr::bmat::init_bmat_pf();
         // println!("b {}", &b);
-        let an = lqr::amat::init_amat_neg();
+        let an = lqr::amat::init_amat_nf();
         // println!("a {}", &a);
-        let bn = lqr::bmat::init_bmat_neg();
+        let bn = lqr::bmat::init_bmat_nf();
 
-        let qr_rigid = 10.0*Matrix8::from_diagonal(&Vector8::from_row_slice(
+        let qr_rigid = 0.05*Matrix16::from_diagonal(&Vector16::from_row_slice(
             &[
-            1.0, //piv angl
-            10000.0, // yaw angle
-            10000.0, // roll angle
-            1000.0, // pitch angle
-            200000000.0, //yaw speed
-            200000000.0, // roll speed
-            20000000.0, // pitch speed
-            0.00001,
+                1.0,
+                1.0,
+                1.0, //t4
+                1.0, //t5
+                1.0, //piv angl
+                454.0, // yaw angle
+                454.0, // roll angle
+                254.0, // pitch angle
+                10.0,
+                10.0,
+                10.0, //dt4
+                10.0, //dt5
+                525.0, //yaw speed
+                525.0, // roll speed
+                200.0, // pitch speed
+                0.0001,
             ]));
 
-        let r =  0.01 * na::Matrix4::from_diagonal(&na::Vector4::from_row_slice(
+            // let qr_rigid = Matrix16::identity();
+        // let qr_rigid = 0.10*Matrix16::from_diagonal(&Vector16::from_row_slice(
+        //     &[
+        //         10000000.0,
+        //         10000000.0,
+        //         10000000.0,
+        //         10000000.0, //dt4
+        //         10000000.0, //dt5
+        //         20000000.0, //yaw speed
+        //         20000000.0, // roll speed
+        //         2000000.0, // pitch speed
+        //         1000000.0,
+        //         10000000.1, //t4
+        //         10000000.1, //t5
+        //         10000000.0, // yaw angle
+        //         10000000.0, // roll angle
+        //         10000000.0, // pitch angle
+        //         10000000.0,
+        //         0.0001,
+        //     ]));
+
+        let r =  10.1 * na::Matrix4::from_diagonal(&na::Vector4::from_row_slice(
             &[
-            0.02, //RW
-            0.1, // Roll
+            0.01, //RW
+            0.05, // Roll
             0.1, // Pitch
-            10000.0 // piv
+            1000.0 // piv
         ]));
    
         // println!("b_rigid: {}", &b_rigid);
         let num_modes: usize = 0;
-        let num_rigid: usize = 8;
+        let num_rigid: usize = 16;
         let num_states: usize = 2*num_modes+num_rigid;
 
         let mut ql = 1.0*na::DMatrix::<f64>::identity(num_states, num_states);
         let mut qr = 1.0 * na::DMatrix::<f64>::identity(num_states, num_states);
 
-        qr.slice_mut((0,0), (8, 8)).copy_from(&(qr_rigid));
+        qr.slice_mut((0,0), (16, 16)).copy_from(&(qr_rigid));
         // println!("check 1 ");
         // qr.slice_mut((3,3), (2, 2)).copy_from(&na::Matrix2::<f64>::from_diagonal(&na::Vector2::new(0.000001, 100.0)));
         // qr.slice_mut((5,5), (2, 2)).copy_from(&na::Matrix2::<f64>::from_diagonal(&na::Vector2::new(0.000001, 1000.0)));
@@ -92,8 +121,27 @@ impl PassiveControl{
 
         // println!("b matrix in passive control {}", &b_flex);
 
-        // let ql = qr.clone().try_inverse().unwrap();
-        let ql = qr.clone();
+        let ql_rigid = 500.1*Matrix16::from_diagonal(&Vector16::from_row_slice(
+            &[
+                1.0,
+                1.0,
+                1.1, //t4
+                1.1, //t5
+                1.0, //piv angl
+                3540.0, // yaw angle
+                3540.0, // roll angle
+                2540.0, // pitch angle
+                10.0,
+                10.0,
+                10.0, //dt4
+                10.0, //dt5
+                5250.0, //yaw speed
+                5250.0, // roll speed
+                2000.0, // pitch speed
+                0.0001,
+            ]));
+
+            ql.slice_mut((0,0), (16, 16)).copy_from(&(a*a*a*a));
         // println!("{}", &ql);
 
 
@@ -144,43 +192,93 @@ impl PassiveControl{
     pub fn init_pc_n() -> PassiveControl{
         let a_flex = fc::amat::init_amat();
         let b_flex = 1000.0 *fc::bmat::init_bmat();
-        let a = lqr::amat::init_amat_neg();
+        let a = lqr::amat::init_amat_nf();
         // println!("a {}", &a);
-        let b = lqr::bmat::init_bmat_neg();
+        let b = lqr::bmat::init_bmat_nf();
         // println!("b {}", &b);
-        let an = lqr::amat::init_amat_neg();
+        let an = lqr::amat::init_amat_nf();
         // println!("a {}", &a);
-        let bn = lqr::bmat::init_bmat_neg();
+        let bn = lqr::bmat::init_bmat_nf();
 
-        let qr_rigid = 10.0*Matrix8::from_diagonal(&Vector8::from_row_slice(
+        // let qr_rigid = 1.0*Matrix16::from_diagonal(&Vector16::from_row_slice(
+        //     &[
+        //         1.0,
+        //         1.0,
+        //         1.0, //t4
+        //         1.0, //t5
+        //         1.0, //piv angl
+        //         45.0, // yaw angle
+        //         45.0, // roll angle
+        //         45.0, // pitch angle
+        //         1.0,
+        //         1.0,
+        //         1.0, //dt4
+        //         1.0, //dt5
+        //         52.0, //yaw speed
+        //         52.0, // roll speed
+        //         20.0, // pitch speed
+        //         0.001,
+        //     ]));
+
+        let qr_rigid = 0.05*Matrix16::from_diagonal(&Vector16::from_row_slice(
             &[
-            1.0, //piv angl
-            10000.0, // yaw angle
-            10000.0, // roll angle
-            1000.0, // pitch angle
-            200000000.0, //yaw speed
-            200000000.0, // roll speed
-            20000000.0, // pitch speed
-            0.00001,
+                1.0,
+                1.0,
+                1.0, //t4
+                1.0, //t5
+                1.0, //piv angl
+                454.0, // yaw angle
+                454.0, // roll angle
+                254.0, // pitch angle
+                10.0,
+                10.0,
+                10.0, //dt4
+                10.0, //dt5
+                525.0, //yaw speed
+                525.0, // roll speed
+                200.0, // pitch speed
+                0.0001,
             ]));
 
-        let r =  0.020 * na::Matrix4::from_diagonal(&na::Vector4::from_row_slice(
+        
+
+        // let qr_rigid = 0.10*Matrix16::from_diagonal(&Vector16::from_row_slice(
+        //     &[
+        //         10000000.0,
+        //         10000000.0,
+        //         10000000.0,
+        //         10000000.0, //dt4
+        //         10000000.0, //dt5
+        //         20000000.0, //yaw speed
+        //         20000000.0, // roll speed
+        //         2000000.0, // pitch speed
+        //         10000000.0,
+        //         10000000.1, //t4
+        //         10000000.1, //t5
+        //         10000000.0, // yaw angle
+        //         10000000.0, // roll angle
+        //         10000000.0,
+        //         10000000.0, // pitch angle
+        //         0.0001,
+        //     ]));
+
+        let r =  10.0 * na::Matrix4::from_diagonal(&na::Vector4::from_row_slice(
             &[
-            0.02, //RW
-            0.1, // Roll
+            0.01, //RW
+            0.05, // Roll
             0.1, // Pitch
-            100000.0 // piv
+            100.0 // piv
         ]));
    
         // println!("b_rigid: {}", &b_rigid);
         let num_modes: usize = 0;
-        let num_rigid: usize = 8;
+        let num_rigid: usize = 16;
         let num_states: usize = 2*num_modes+num_rigid;
 
         let mut ql = 1.0*na::DMatrix::<f64>::identity(num_states, num_states);
         let mut qr = 1.0 * na::DMatrix::<f64>::identity(num_states, num_states);
 
-        qr.slice_mut((0,0), (8, 8)).copy_from(&(qr_rigid));
+        qr.slice_mut((0,0), (16, 16)).copy_from(&(qr_rigid));
         // println!("check 1 ");
         // qr.slice_mut((3,3), (2, 2)).copy_from(&na::Matrix2::<f64>::from_diagonal(&na::Vector2::new(0.000001, 100.0)));
         // qr.slice_mut((5,5), (2, 2)).copy_from(&na::Matrix2::<f64>::from_diagonal(&na::Vector2::new(0.000001, 1000.0)));
@@ -196,8 +294,27 @@ impl PassiveControl{
         // qr.slice_mut((24,24), (2, 2)).copy_from(&na::Matrix2::<f64>::from_diagonal(&na::Vector2::new(0.000001, 1.0)));
 
         // println!("b matrix in passive control {}", &b_flex);
+        let ql_rigid = 500.1*Matrix16::from_diagonal(&Vector16::from_row_slice(
+            &[
+                1.0,
+                1.0,
+                1.1, //t4
+                1.1, //t5
+                1.0, //piv angl
+                3540.0, // yaw angle
+                3540.0, // roll angle
+                2540.0, // pitch angle
+                10.0,
+                10.0,
+                10.0, //dt4
+                10.0, //dt5
+                5250.0, //yaw speed
+                5250.0, // roll speed
+                2000.0, // pitch speed
+                0.0001,
+            ]));
 
-        let ql = qr.clone();
+            ql.slice_mut((0,0), (16, 16)).copy_from(&(a*a*a*a));
         // println!("{}", &ql);
 
 
@@ -269,14 +386,14 @@ impl PassiveControl{
 
         // println!("num states {}", &self.num_states);
 
-        let a_use = self.a_flex.slice((0, 0), (self.num_modes*2,self.num_modes * 2)).clone();
-        let b_use = self.b_flex.slice((0, 0), (self.num_states,5)).clone();
+        // let a_use = self.a_flex.slice((0, 0), (self.num_modes*2,self.num_modes * 2)).clone();
+        // let b_use = self.b_flex.slice((0, 0), (self.num_states,5)).clone();
 
         let mut a = na::DMatrix::zeros(self.num_states, self.num_states);
         let mut b = na::DMatrix::zeros(self.num_states, 4);
 
         // a.slice_mut((8,8), (self.num_states, self.num_states)).copy_from(&a_use);
-        a.slice_mut((0,0), (8, 8)).copy_from(&self.a);
+        a.slice_mut((0,0), (16, 16)).copy_from(&self.a);
 
         for loc in 0..self.num_modes{
             let loc2 = (loc*2)+1;
@@ -285,7 +402,7 @@ impl PassiveControl{
         }
         // println!("{}", &a);
 
-        b.slice_mut((0,0), (8, 4)).copy_from(&self.b);
+        b.slice_mut((0,0), (16, 4)).copy_from(&self.b);
         // b.slice_mut((6,0), (self.num_states, 5)).copy_from(&b_use);
 
         // println!("The b matrix for comparison {}", &b);
@@ -299,7 +416,7 @@ impl PassiveControl{
         let mut z = na::DMatrix::<f64>::zeros({2*num_states}, {2*(num_states)});
        
         let qr = qr.clone();
-        // println!("qr is {}", &qr);
+        println!("qr is {}", &qr);
 
         z.slice_mut((0,0), (num_states,num_states)).copy_from(&a);
         z.slice_mut((0,num_states), (num_states,num_states)).copy_from(&z12);
@@ -372,7 +489,7 @@ impl PassiveControl{
         for (loc, el) in k.iter().enumerate(){
             self.c_c[loc] = el.clone();
         }
-        // println!("k is : {:.6}, c is: {:.6}",k, self.c_c);
+        println!("k is : {:.3}, c is: {:.3}",k, self.c_c);
     
         //////////////////////////////////
         //
@@ -387,7 +504,7 @@ impl PassiveControl{
         
     
         self.a_cl = a - (b*k);
-        // println!("a_cl = {:.5}", &self.a_cl);
+        println!("a_cl = {:.5}", &self.a_cl);
         
     }
     
@@ -420,8 +537,8 @@ impl PassiveControl{
         // println!("Testing\n");
         self.b_c = -p.try_inverse().unwrap() * self.c_c.clone().transpose();
         
-        // println!("p lyap {:.5}", &self.p_lyap);
-        // println!("bc {:.5}", &self.b_c);
+        println!("p lyap {:.3}", &self.p_lyap);
+        println!("bc {:.3}", &self.b_c);
     
     }
 
@@ -458,7 +575,7 @@ impl PassiveControl{
             self.state = state0 + state_dot;
         }
         // let tau_des = -&self.c_c * &self.state;
-        let tau_des = -&self.c_c * &self.state;
+        let tau_des = &self.c_c * &self.state;
         // println!("Testing\n");
         // println!("state {} tau_des {} gyros {} gyro_des {}", &self.state, &tau_des, &gyro_v, &gyro_d);
         ////// BOUND TORQUE

@@ -227,7 +227,7 @@ impl Error {
                 self.err_comb_th = comb_err;
                 // println!("error weight: {}, combined error: {}\n term1 {} term2 {}", err_weight, comb_err, (1.0 - err_weight) * (phi * err_vec), (err_weight * _err_gmb));
             }
-            // self.err_comb_th = phi*_err_gmb.clone();
+            // self.err_comb_th = _err_gmb.clone();
             trace!("update_positional_pointing_error end");
             // println!("yaw gmb {:.4} vec {:.4} comb {:.4}",_err_gmb, err_vec, self.err_comb_th);
         }
@@ -281,28 +281,33 @@ impl Error {
             let temp2: f64 = temp1.sqrt();
             let temp3: f64 = (2.0 * g_const) / (g_lin * PI);
 
-            _roll_rate_des = self.err_comb_th.x.signum()
-                * (2.0
-                    * g_const
-                    * (self.err_comb_th.x.abs()
-                        * stat::function::erf::erf(self.err_comb_th.x.abs() * temp2))
-                    + (temp3 * ((-self.err_comb_th.x.powi(2) * temp1).exp() - 1.0)))
-                    .sqrt() * self.scale_blend * 0.5;
+            // _roll_rate_des = self.err_comb_th.x.signum()
+            //     * (2.0
+            //         * g_const
+            //         * (self.err_comb_th.x.abs()
+            //             * stat::function::erf::erf(self.err_comb_th.x.abs() * temp2))
+            //         + (temp3 * ((-self.err_comb_th.x.powi(2) * temp1).exp() - 1.0)))
+            //         .sqrt() * self.scale_blend;
 
-            _pitch_rate_des = self.err_comb_th.y.signum()
-                * (2.0
-                    * g_const
-                    * (self.err_comb_th.y.abs()
-                        * stat::function::erf::erf(self.err_comb_th.y.abs() * temp2))
-                    + (temp3 * ((-self.err_comb_th.y.powi(2) * temp1).exp() - 1.0)))
-                    .sqrt() * self.scale_blend * 0.5;
-            _yaw_rate_des = self.err_comb_th.z.signum()
-                * (2.0
-                    * g_const
-                    * (self.err_comb_th.z.abs()
-                        * stat::function::erf::erf(self.err_comb_th.z.abs() * temp2))
-                    + (temp3 * ((-self.err_comb_th.z.powi(2) * temp1).exp() - 1.0)))
-                    .sqrt() * self.scale_blend;
+            // _pitch_rate_des = self.err_comb_th.y.signum()
+            //     * (2.0
+            //         * g_const
+            //         * (self.err_comb_th.y.abs()
+            //             * stat::function::erf::erf(self.err_comb_th.y.abs() * temp2))
+            //         + (temp3 * ((-self.err_comb_th.y.powi(2) * temp1).exp() - 1.0)))
+            //         .sqrt() * self.scale_blend ;
+            // _yaw_rate_des = self.err_comb_th.z.signum()
+            //     * (2.0
+            //         * g_const
+            //         * (self.err_comb_th.z.abs()
+            //             * stat::function::erf::erf(self.err_comb_th.z.abs() * temp2))
+            //         + (temp3 * ((-self.err_comb_th.z.powi(2) * temp1).exp() - 1.0)))
+            //         .sqrt() * self.scale_blend;
+
+            _roll_rate_des = self.err_comb_th.x.signum() * self.err_comb_th.x.abs() * self.scale_blend;
+
+            _pitch_rate_des = self.err_comb_th.y.signum() * self.err_comb_th.y.abs() * self.scale_blend;
+            _yaw_rate_des = self.err_comb_th.z.signum() * self.err_comb_th.z.abs() * self.scale_blend;
         // }
         // println!("{}", &_yaw_rate_des);
         let max_accel = 0.1 * self._ctrl_dt;

@@ -201,8 +201,8 @@ pub fn push_record(t: &f64, bp: &Params, est: &Estimator, ctrl: &Ctrl, meas: &Me
             flx_stern_p: flex.c_pos_out[2],
             flx_port_r: flex.c_out[3],
             flx_port_p: flex.c_pos_out[3],
-            flx_sb_r: flex.c_out[4],
-            flx_sb_p: flex.c_pos_out[4],
+            flx_sb_r: 0.0, //flex.c_out[4],
+            flx_sb_p: 0.0, //flex.c_pos_out[4],
             // ctrl
             err_roll_comb: ctrl.error.err_comb_th[0],
             err_pitch_comb: ctrl.error.err_comb_th[1],
@@ -255,8 +255,8 @@ pub fn push_record(t: &f64, bp: &Params, est: &Estimator, ctrl: &Ctrl, meas: &Me
             tau_flex_yaw: flex_c.u[0],
             tau_flex_bow: flex_c.u[1],
             tau_flex_stern: flex_c.u[2],
-            tau_flex_port: flex_c.u[3],
-            tau_flex_sb: flex_c.u[4],
+            tau_flex_port: 0.0, //flex_c.u[3],
+            tau_flex_sb: 0.0, //flex_c.u[4],
             //Estimation
             ra_hat: est.eq_hat_k.ra,
             dec_hat: est.eq_hat_k.dec,
@@ -320,8 +320,8 @@ pub fn push_record(t: &f64, bp: &Params, est: &Estimator, ctrl: &Ctrl, meas: &Me
             flx_stern_p: flex.c_pos_out[2],
             flx_port_r: flex.c_out[3],
             flx_port_p: flex.c_pos_out[3],
-            flx_sb_r: flex.c_out[4],
-            flx_sb_p: flex.c_pos_out[4],
+            flx_sb_r: 0.0,//flex.c_out[4],
+            flx_sb_p: 0.0,//flex.c_pos_out[4],
             // ctrl
             err_roll_comb: ctrl.error.err_comb_th[0],
             err_pitch_comb: ctrl.error.err_comb_th[1],
@@ -373,8 +373,8 @@ pub fn push_record(t: &f64, bp: &Params, est: &Estimator, ctrl: &Ctrl, meas: &Me
             tau_flex_yaw: flex_c.u[0],
             tau_flex_bow: flex_c.u[1],
             tau_flex_stern: flex_c.u[2],
-            tau_flex_port: flex_c.u[3],
-            tau_flex_sb: flex_c.u[4],
+            tau_flex_port: 0.0, // flex_c.u[3],
+            tau_flex_sb: 0.0,//flex_c.u[4],
             // Estimation
             ra_hat: est.eq_hat_k.ra,
             dec_hat: est.eq_hat_k.dec,

@@ -2,8 +2,10 @@ extern crate nalgebra as na;
 use crate::control::state as st;
 use crate::control::error as er;
 
-mod amat;
-mod bmat;
+pub mod amat;
+pub mod bmat;
+pub mod pos;
+pub mod neg;
 
 pub type Vector8 = na::SMatrix<f64, 8, 1>;
 pub type Matrix48 = na::SMatrix<f64, 4, 8>;
@@ -40,22 +42,22 @@ impl LQRController {
         // println!("a {}", &a);
         let bn = bmat::init_bmat_neg();
 
-        let q = 2.0*Matrix8::from_diagonal(&Vector8::from_row_slice(
+        let q = 1.0*Matrix8::from_diagonal(&Vector8::from_row_slice(
             &[
-            1.0, //piv angl
-            250.0, // yaw angle
-            250.0, // roll angle
-            550.0, // pitch angle
-            1000.0, //yaw speed
-            1000.0, // roll speed
-            1000.0, // pitch speed
-            0.000001,
+            100.0, //piv angl
+            1950.0, // yaw angle
+            1950.0, // roll angle
+            150.0, // pitch angle
+            75000.0, //yaw speed
+            100000.0, // roll speed
+            10000.0, // pitch speed
+            0.00000001,
             ]) //momentum RW
         );
 
         let r =  1.0*na::Matrix4::from_diagonal(&na::Vector4::from_row_slice(
             &[
-            0.0125, //RW
+            0.02, //RW
             0.1, // Roll
             0.1, // Pitch
             100000000000.0 // piv
@@ -149,15 +151,15 @@ impl LQRController {
         err.slice_mut((3,0), (1,1)).copy_from(&Matrix1::from_row_slice(&[pitch_err]));
 
         // yaw anglular rate
-        let yaw_rate_err = error.err_rate.z + 0.0*state.piv_speed;
+        let yaw_rate_err = error.err_rate_lqr.z + 0.0*state.piv_speed;
         err.slice_mut((4,0), (1,1)).copy_from(&Matrix1::from_row_slice(&[yaw_rate_err]));
 
         // roll anglular rate
-        let roll_rate_err = error.err_rate.x;
+        let roll_rate_err = error.err_rate_lqr.x;
         err.slice_mut((5,0), (1,1)).copy_from(&Matrix1::from_row_slice(&[roll_rate_err]));
 
         // pitch anglular rate
-        let pitch_rate_err = error.err_rate.y;
+        let pitch_rate_err = error.err_rate_lqr.y;
         err.slice_mut((6,0), (1,1)).copy_from(&Matrix1::from_row_slice(&[pitch_rate_err]));
 
         // rw hs error

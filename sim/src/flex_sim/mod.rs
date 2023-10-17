@@ -7,7 +7,7 @@ pub use amat::*;
 pub use cmat::*;
 pub use kmat::*;
 
-use adcs::control::flex_control::{init_bmat, BMat};
+use adcs::control::flex_control::bmat::{init_bmat,BMat};
 
 extern crate nalgebra as na;
 use std::time::{Duration, Instant};

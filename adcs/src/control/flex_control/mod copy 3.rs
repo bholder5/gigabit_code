@@ -3,18 +3,16 @@ use crate::control::gains::{Gains};
 
 mod amat;
 pub mod bmat;
-// mod pc;
-mod pc_matlab;
+mod pc;
+mod pc1;
 
-pub use pc_matlab::*;
+pub use pc::*;
 #[derive(Clone)]
 pub struct DampingControl{
     pc_p: PassiveControl,
     pc_n: PassiveControl,
     pub err_weight: f64,
     pub u: na::DVector<f64>, //the requested torque
-    pub piv_speed: f64,
-    pub i_yaw: f64,
     pub enable: bool,
     pub update: bool,
     pub roll: f64,
@@ -30,15 +28,14 @@ impl DampingControl{
     }
 
     pub fn get_control_input(&mut self){
-        let vec_pos = na::DVector::<f64>::from_row_slice(&[0.0,self.roll_torque,0.0]);
-        let vec_pitch = 1.0*na::DVector::<f64>::from_row_slice(&[0.0,0.0,self.pitch_k * (self.pitch+0.6981317007977318)]);
+        let vec_pos = na::DVector::<f64>::from_row_slice(&[0.0,self.roll_torque,0.0, 0.0]);
+        let vec_pitch = 1.0*na::DVector::<f64>::from_row_slice(&[0.0,0.0,self.pitch_k * (self.pitch+0.6981317007977318), 0.0]);
         let cont_pos = self.pc_p.u.clone() + vec_pos.clone();
         let cont_neg = self.pc_n.u.clone() - vec_pos.clone();
         
         let weight = (self.roll + 0.1)/0.2;
-        let u: na::DVector<f64> = (weight * cont_pos) + ((1.0-weight)*cont_neg);
-        
-
+        let control_in: na::DVector<f64> = (weight * cont_pos) + ((1.0-weight)*cont_neg);
+        self.u = control_in + vec_pitch.clone();
         println!("tau: {} \n pitch {} \n vec_pos {} \n weight {}",self.u, self.pitch, vec_pos+vec_pitch, weight);
     }
 
@@ -50,9 +47,7 @@ impl DampingControl{
     pub fn init_pc(gains: &Gains) -> DampingControl {
         let pc_p = PassiveControl::init_pc_p();
         let pc_n = PassiveControl::init_pc_n();
-        let u = na::DVector::<f64>::zeros(3);
-        let piv_speed = 0.0;
-        let i_yaw = 979.0;
+        let u = na::DVector::<f64>::zeros(5);
         let err_weight = 0.0;
         let enable = true;
         let update = false;
@@ -66,8 +61,6 @@ impl DampingControl{
             pc_n,
             err_weight,
             u,
-            piv_speed,
-            i_yaw,
             enable,
             update,
             roll,

@@ -101,7 +101,7 @@ fn main() {
 
     trace!("START");
     let now1 = Instant::now();
-    for _step in 0..10000000 as usize {
+    for _step in 0..100000000 as usize {
         
         ///////// beginning of the simulation loop
         /////////////////////////////////////////
@@ -113,14 +113,14 @@ fn main() {
                 bp.x.as_ptr(),
                 tau_applied.as_mut_ptr(),
                 bp.unlock.as_ptr(),
-                ctrl.lqr.control_input[3],
+                ctrl.pivot.omega_request,
                 true as u8,
                 bp._dt,
                 bp._num_steps,
                 bp._tau_piv_max,
                 bp.pitch_nom,
                 flex.eta.as_ptr(),
-                fc.u.as_ptr(),
+                na::Vector5::<f64>::zeros().as_ptr(),//fc.u.as_ptr(),
                 true as u8,
                 y_result.as_mut_ptr(),
                 flex_result.as_mut_ptr(),
@@ -193,9 +193,11 @@ fn main() {
             let mut gyro_in = [
                 late_meas.gyro_of.om_axial,
                 late_meas.gyro_bow.om_axial,
-                late_meas.gyro_stern.om_axial,
+                // late_meas.gyro_stern.om_axial,
                 late_meas.gyro_port.om_axial,
-                late_meas.gyro_sb.om_axial
+                // fc.u[3],
+                // bp.omega_rw * 4.5
+                // late_meas.gyro_sb.om_axial
             ];
 
             if bp.latency {
@@ -204,9 +206,11 @@ fn main() {
                 gyro_in = [
                 meas.gyro_of.om_axial,
                 meas.gyro_bow.om_axial,
-                meas.gyro_stern.om_axial,
+                // meas.gyro_stern.om_axial,
                 meas.gyro_port.om_axial,
-                meas.gyro_sb.om_axial
+                // fc.u[3],
+                // bp.omega_rw * 4.5
+                // meas.gyro_sb.om_axial
             ]; 
             }
 
@@ -216,7 +220,7 @@ fn main() {
             // } else {
                 let sc: f64 = 1.0;
                 fc.err_weight = ctrl.error.err_weight.clone();
-                fc.propogate(gyro_in.as_slice(), bp._dt, bp._num_steps, &[sc*ctrl.error.rate_des.z.clone(), sc*ctrl.error.rate_des.x.clone(),sc*ctrl.error.rate_des.x.clone(),sc*ctrl.error.rate_des.y.clone(),sc*ctrl.error.rate_des.y.clone(),]);
+                fc.propogate(gyro_in.as_slice(), bp._dt, bp._num_steps, &[sc*ctrl.error.rate_des.z.clone(), sc*ctrl.error.rate_des.x.clone(),sc*ctrl.error.rate_des.y.clone()]);
 
             // }
             
@@ -252,6 +256,8 @@ fn main() {
                 ctrl.state.piv_speed = ctrl.pivot.omega_request;
                 ctrl.state.rw_hs = bp.x[20];
                 ctrl.state.rw_hs_nom = ctrl.pivot.omega_rw_nom*ctrl.pivot._i_rw;
+                fc.roll = ctrl.state.gmb_d.roll;
+                fc.pitch = ctrl.state.gmb_d.pitch;
             } else {
                 ctrl.state.eq_k = sim_state.eq_k.clone();
                 ctrl.state.omega[0] = bp.omega_m[0].clone();
@@ -260,6 +266,8 @@ fn main() {
                 ctrl.state
                 .gmb_k
                 .update_gimbal_coordinates(&[bp.x[16], bp.x[17], -sim_state.hor.az.clone()]);
+                fc.roll = ctrl.state.gmb_d.roll;
+                fc.pitch = ctrl.state.gmb_d.pitch;
             }
 
             // grab_vec3(&mut ctrl.state.omega, &bp.omega_m);
@@ -281,10 +289,16 @@ fn main() {
 
             // if step < 1500{
                 ctrl.update_ctrl();
-                ctrl.pivot.calculate_pivot_speed(&ctrl.rw, &fc.u[0]);
-                tau_applied[6] = 1.0*ctrl.rw.tau_applied; //yaw
-                tau_applied[7] = 1.0*ctrl.fmot_roll.tau_applied; //roll
-                tau_applied[8] = 1.0*ctrl.fmot_pitch.tau_applied; //pitch
+                // ctrl.pivot.calculate_pivot_speed(&ctrl.rw, &fc.u[0]);
+                fc.get_control_input();
+                // tau_applied[6] = 1.0*ctrl.rw.tau_applied; //yaw
+                // tau_applied[7] = 1.0*ctrl.fmot_roll.tau_applied; //roll
+                // tau_applied[8] = 1.0*ctrl.fmot_pitch.tau_applied; //pitch
+                tau_applied[6] = fc.u[0] + ctrl.rw.tau_applied; //yaw
+                tau_applied[7] = fc.u[1] + ctrl.fmot_roll.tau_applied; //roll
+                tau_applied[8] = fc.u[2] + ctrl.fmot_pitch.tau_applied; //pitch
+                println!("{} \n{} \n{}\n", tau_applied[6], tau_applied[7], tau_applied[8]);
+                
             // } else {
             //     ctrl.update_ctrl();
             //     ctrl.rw.tau_applied = 0.0;
@@ -302,12 +316,12 @@ fn main() {
         // record the data
         sc::push_record(&t, &bp, &est, &ctrl, &meas, &sim_state, &flex, &fc).unwrap();
         js::read_gains(&mut ctrl, &mut bp, &mut est, &mut fc, &mut flex); // read in gains from json file (for tuning)
-        if fc.update | (_step == 0){
-            println!("Success");
-            let mut new_fc = flex_control::DampingControl::init_pc(&ctrl.fine_gains);
-            let mut fc = new_fc.clone();
+        // if fc.update | (_step == 0){
+        //     println!("Success");
+        //     let mut new_fc = flex_control::DampingControl::init_pc(&ctrl.fine_gains);
+        //     let mut fc = new_fc.clone();
 
-        }
+        // }
 
     }
     println!("bit one step {}", now1.elapsed().as_micros());
