@@ -87,40 +87,42 @@ fn main() {
     tau_applied[7] = ctrl.fmot_roll.tau_applied.clone(); //roll
     tau_applied[8] = ctrl.fmot_pitch.tau_applied.clone(); //pitch
 
+    
     sc::push_record(&t, &bp, &est, &ctrl, &meas, &sim_state, &flex, &fc).unwrap();
 
     let mut first_LIS = true;
 
     // Initialize with an achievable target
-    ctrl.state.gmb_d.roll = 0.05;
+    ctrl.state.gmb_d.roll = 0.1;
     ctrl.state.gmb_d.pitch = -0.7;
-    ctrl.state.gmb_d.yaw = 0.0;
+    ctrl.state.gmb_d.yaw = 0.2;
     ctrl.state.gmb_d.calculate_rotation_matrix();
     ctrl.state.update_desired_eq_from_gmb();
 
 
     trace!("START");
     let now1 = Instant::now();
-    for _step in 0..100000000 as usize {
+    for _step in 0..4000000 as usize {
         
         ///////// beginning of the simulation loop
         /////////////////////////////////////////
         let now1 = Instant::now();
         // fc.u = fc.u * 0.0;
+        println!("yaw:{} \nrol: {} \n pit: {}\n rw: {}\n bow: {}\nstn: {}\nprt: {}\n sb: {}\n t: {}\n", tau_applied[6], tau_applied[7], tau_applied[8], fc.u[0], fc.u[1], fc.u[2], fc.u[3], fc.u[4], &t);
         unsafe {
             trace!("bit_one_step start");
             bit_one_step(
                 bp.x.as_ptr(),
                 tau_applied.as_mut_ptr(),
                 bp.unlock.as_ptr(),
-                ctrl.pivot.omega_request,
+                ctrl.pivot.omega_request/1.0,
                 true as u8,
                 bp._dt,
                 bp._num_steps,
                 bp._tau_piv_max,
                 bp.pitch_nom,
                 flex.eta.as_ptr(),
-                na::Vector5::<f64>::zeros().as_ptr(),//fc.u.as_ptr(),
+                fc.u.as_ptr(),
                 true as u8,
                 y_result.as_mut_ptr(),
                 flex_result.as_mut_ptr(),
@@ -193,11 +195,11 @@ fn main() {
             let mut gyro_in = [
                 late_meas.gyro_of.om_axial,
                 late_meas.gyro_bow.om_axial,
-                // late_meas.gyro_stern.om_axial,
+                late_meas.gyro_stern.om_axial,
                 late_meas.gyro_port.om_axial,
                 // fc.u[3],
                 // bp.omega_rw * 4.5
-                // late_meas.gyro_sb.om_axial
+                late_meas.gyro_sb.om_axial
             ];
 
             if bp.latency {
@@ -206,11 +208,11 @@ fn main() {
                 gyro_in = [
                 meas.gyro_of.om_axial,
                 meas.gyro_bow.om_axial,
-                // meas.gyro_stern.om_axial,
+                meas.gyro_stern.om_axial,
                 meas.gyro_port.om_axial,
                 // fc.u[3],
                 // bp.omega_rw * 4.5
-                // meas.gyro_sb.om_axial
+                meas.gyro_sb.om_axial
             ]; 
             }
 
@@ -220,8 +222,12 @@ fn main() {
             // } else {
                 let sc: f64 = 1.0;
                 fc.err_weight = ctrl.error.err_weight.clone();
-                fc.propogate(gyro_in.as_slice(), bp._dt, bp._num_steps, &[sc*ctrl.error.rate_des.z.clone(), sc*ctrl.error.rate_des.x.clone(),sc*ctrl.error.rate_des.y.clone()]);
-
+                fc.pitch = &ctrl.state.gmb_d.pitch - &bp.pitch_nom;
+                println!("err weight {}", fc.err_weight);
+                // println!("fc call: t:{}", &t);
+                if fc.err_weight < 0.05{
+                    fc.propogate(gyro_in.as_slice(), bp._dt, bp._num_steps, &[sc*ctrl.error.rate_des.z.clone(), sc*ctrl.error.rate_des.x.clone(),sc*ctrl.error.rate_des.y.clone()]);
+                }
             // }
             
         }
@@ -237,7 +243,7 @@ fn main() {
             est.correct_estimate();  
         }
         
-        if (step % 100) < 1 {  
+        if (step % 10) < 1 {  
             if bp.ctrl_from_est {
                 ctrl.state.eq_k = est.eq_hat_k.clone();
                 ctrl.state.omega[0] = est.gyros_bs.omega_k[0].clone();
@@ -291,13 +297,61 @@ fn main() {
                 ctrl.update_ctrl();
                 // ctrl.pivot.calculate_pivot_speed(&ctrl.rw, &fc.u[0]);
                 fc.get_control_input();
+                // ctrl.pivot.calculate_pivot_speed(&ctrl.rw, &fc.u[0]);
                 // tau_applied[6] = 1.0*ctrl.rw.tau_applied; //yaw
                 // tau_applied[7] = 1.0*ctrl.fmot_roll.tau_applied; //roll
                 // tau_applied[8] = 1.0*ctrl.fmot_pitch.tau_applied; //pitch
-                tau_applied[6] = fc.u[0] + ctrl.rw.tau_applied; //yaw
-                tau_applied[7] = fc.u[1] + ctrl.fmot_roll.tau_applied; //roll
-                tau_applied[8] = fc.u[2] + ctrl.fmot_pitch.tau_applied; //pitch
-                println!("{} \n{} \n{}\n", tau_applied[6], tau_applied[7], tau_applied[8]);
+                let tau_req_yaw = ctrl.rw.tau_applied ; //yaw
+                let tau_req_roll = ctrl.fmot_roll.tau_applied + fc.ff_r; //roll
+                let tau_req_pitch = ctrl.fmot_pitch.tau_applied + fc.ff_p; //pitch
+                // fc.u = fc.u;
+                
+                // let diff_yaw = tau_req_yaw - tau_applied[6];
+                // let diff_roll = tau_req_roll - tau_applied[7];
+                // let diff_pitch = tau_req_pitch - tau_applied[8];
+                
+
+                // if diff_yaw.abs() > 0.2 {
+                //     tau_applied[6] = tau_applied[6] + 0.2*diff_yaw.signum();
+                // } else {
+                    tau_applied[6] = tau_req_yaw;
+                // }
+
+                // let thrsh = 0.5;
+
+                // if diff_roll.abs() > thrsh {
+                //     tau_applied[7] = tau_applied[7] + thrsh*diff_roll.signum();
+                // } else {
+                    tau_applied[7] = tau_req_roll;
+                // }
+
+                // if diff_pitch.abs() > thrsh {
+                //     tau_applied[8] = tau_applied[8] + thrsh*diff_pitch.signum();
+                // } else {
+                    tau_applied[8] = tau_req_pitch;
+                // }
+
+                // if tau_applied[6].abs() > 10.0{
+                //     tau_applied[6] = tau_applied[6].signum() * 10.0;
+                // }
+                // if tau_applied[7].abs() > 10.0{
+                //     tau_applied[7] = tau_applied[7].signum() * 10.0;
+                // }
+                // if tau_applied[8].abs() > 10.0{
+                //     tau_applied[8] = tau_applied[8].signum() * 10.0;
+                // }
+
+                let mut ctrl_rw_act = ctrl.rw.clone();
+                ctrl_rw_act.tau_applied = tau_applied[6].clone();
+
+                ctrl.pivot.calculate_pivot_speed(&ctrl_rw_act, &0.0);
+
+                // tau_applied[6] = fc.u[0] + ctrl.rw.tau_applied; //yaw
+                // tau_applied[7] = fc.u[1] + ctrl.fmot_roll.tau_applied; //roll
+                // tau_applied[8] = fc.u[2] + ctrl.fmot_pitch.tau_applied; //pitch
+                // println!("{} \n{} \n{}\n {}\n ", tau_applied[6], diff_yaw, fc.u[0], &ctrl.rw.tau_applied);
+
+                // println!("yaw:{} \nrol: {} \n pit: {}\n rw: {}\n bow: {}\nstn: {}\nprt: {}\n sb: {}\n t: {}\n", tau_applied[6], tau_applied[7], tau_applied[8], fc.u[0], fc.u[1], fc.u[2], fc.u[3], fc.u[4], &t);
                 
             // } else {
             //     ctrl.update_ctrl();

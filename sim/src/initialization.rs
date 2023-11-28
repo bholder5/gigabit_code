@@ -292,7 +292,7 @@ pub fn init_bit() -> Params {
     // ----------------------------------
     let theta = Vector9::from_row_slice(&[
         0.,
-        1.00 * 0.5 * PI / 180.0,
+        0.00 * 0.5 * PI / 180.0,
         0.00 * 0.0 * PI / 180.0,
         0.00 * 0.5 * PI / 180.0,
         0.00 * 0.0125 * PI / 180.0,
@@ -345,7 +345,8 @@ pub fn init_bit() -> Params {
     let pitch_nom: f64 = -40.0 * PI / 180.0;
     let latency = true;
     let ctrl_from_est = true;
-    let damp = Vector9::from_row_slice(&[10000., 10000., 10000., 0., 0., 0., 0., 0., 0.]);
+    // let damp = Vector9::from_row_slice(&[10000., 10000., 10000., 0., 0., 0., 0., 0., 0.]);
+    let damp = Vector9::from_row_slice(&[0., 0., 0., 0., 0., 0., 0., 0., 0.]);
     // let gps = Gps::new();
     // define params struct_
     let _params = Params {

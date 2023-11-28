@@ -60,6 +60,8 @@ pub struct Error {
     pub scale_blend: f64,
     /// the blend scalar describing where in between fine pointing and slewing
     pub err_weight: f64,
+    /// flag to ignore pitch and rooll when slewing.
+    pub ign_pr: bool,
 }
 
 impl Error {
@@ -80,11 +82,12 @@ impl Error {
         let rate_des = na::Vector3::<f64>::new(0.0, 0.0, 0.0);
         let rot_err = na::Rotation3::<f64>::identity();
         let u_lower = 0.05;
-        let u_upper = 0.1;
+        let u_upper = 0.25;
         let _d_theta = na::Vector3::<f64>::new(0.0, 0.0, 0.0);
         let scale = 2.25;
         let scale_blend = 1.0;
         let err_weight = 1.0;
+        let ign_pr = true;
 
         let error: Error = Error {
             err_b_th,
@@ -107,6 +110,7 @@ impl Error {
             scale,
             scale_blend,
             err_weight,
+            ign_pr, //flag to ignore pitch and roll
         };
         error
     }
@@ -160,7 +164,14 @@ impl Error {
         // println!("current gimbal roll {}, pitch {}, yaw {}", &state.gmb_k.roll, &state.gmb_k.pitch, &state.gmb_k.yaw);
 
         let norm_fine_err = err_vec.norm();
-        // println!("norm fine error: {}", norm_fine_err);
+
+        let _err_tc_v = (2.0 + (2.0/ (1.0+E.powf(60.0*&norm_fine_err.powf(2.0))))).powf(1.0);
+        println!("err_decay{}", &_err_tc_v);
+
+        self._err_decay_p = E.powf(-self._ctrl_dt / _err_tc_v);
+        self._err_decay_v = E.powf(-self._ctrl_dt / _err_tc_v);
+
+        println!("norm fine error: {}", norm_fine_err);
 
         let mapped_err = state.gmb_k.gmm_i * err_vec;
         // let mut state_d = state.gmb_d.clone();
@@ -195,11 +206,14 @@ impl Error {
         self.err_fine_sum = self.err_fine_sum * self._err_decay_p;
 
         if norm_fine_err < self.u_lower {
-            self.err_comb_th = phi * err_vec;
+            // self.err_comb_th = phi * err_vec;
+            self.err_comb_th = phi * mapped_err;
             self.err_fine_sum = self.err_fine_sum + (self.err_comb_th * self._ctrl_dt);
             slew_flag = false;
             self.err_weight = 0.0;
-            self.scale_blend = self.scale.clone();
+            self.scale_blend = 1.0;
+            
+            self.ign_pr = false;
         } else {
             
             self.err_gmb_th
@@ -207,22 +221,34 @@ impl Error {
 
             if norm_fine_err > self.u_upper {
                 // calculate the gimbal error
+                if _err_gmb.z.abs() > 0.015{
+                    _err_gmb.x = 0.0;
+                    _err_gmb.y = 0.0;
+                    self.ign_pr = true;
+                }
                 self.err_comb_th = _err_gmb.clone();
                 slew_flag = true;
                 self.err_weight = 1.0;
-                self.scale_blend = 0.000003;
+                self.scale_blend = 1.0;
+
+                
                 // println!("greater than u.upper {}", &norm_fine_err);
             } else {
+                if _err_gmb.z.abs() < 0.025{
+                    // self.ign_pr = false;
+                }
                 // println!("between u.lower and u.upper {}", &norm_fine_err);
                 let err_weight: f64 =
                     (norm_fine_err - self.u_lower) / (self.u_upper - self.u_lower);
 
                 self.err_weight = err_weight;
 
-                let comb_err = ((1.0 - err_weight) * (phi * err_vec)) + (err_weight * _err_gmb);
+                // let comb_err = ((1.0 - err_weight) * (phi * err_vec)) + (err_weight * _err_gmb);
+                let comb_err = ((1.0 - err_weight) * (phi * mapped_err)) + (err_weight * _err_gmb);
                 self.err_fine_sum = self.err_fine_sum + (((1.0 - err_weight) * (phi * err_vec)) * self._ctrl_dt);
 
-                self.scale_blend = ((1.0 - err_weight) * (self.scale)) + (err_weight * 0.05);
+                // self.scale_blend = ((1.0 - err_weight) * (self.scale)) + (err_weight * 0.05);
+                self.scale_blend = 1.0;
 
                 self.err_comb_th = comb_err;
                 // println!("error weight: {}, combined error: {}\n term1 {} term2 {}", err_weight, comb_err, (1.0 - err_weight) * (phi * err_vec), (err_weight * _err_gmb));
@@ -273,13 +299,13 @@ impl Error {
         // if slew_flag == &true {
             // let g_const: f64 = 0.350;
             // let g_lin: f64 = 1400.0;
-            let g_const: f64 = 1.0;
-            let g_lin: f64 = 1000.0;
+            // let g_const: f64 = 1.0;
+            // let g_lin: f64 = 1000.0;
             
 
-            let temp1: f64 = g_lin.powi(2) * PI / (4.0 * g_const.powi(2));
-            let temp2: f64 = temp1.sqrt();
-            let temp3: f64 = (2.0 * g_const) / (g_lin * PI);
+            // let temp1: f64 = g_lin.powi(2) * PI / (4.0 * g_const.powi(2));
+            // let temp2: f64 = temp1.sqrt();
+            // let temp3: f64 = (2.0 * g_const) / (g_lin * PI);
 
             // _roll_rate_des = self.err_comb_th.x.signum()
             //     * (2.0
@@ -304,13 +330,32 @@ impl Error {
             //         + (temp3 * ((-self.err_comb_th.z.powi(2) * temp1).exp() - 1.0)))
             //         .sqrt() * self.scale_blend;
 
-            _roll_rate_des = self.err_comb_th.x.signum() * self.err_comb_th.x.abs() * self.scale_blend;
 
-            _pitch_rate_des = self.err_comb_th.y.signum() * self.err_comb_th.y.abs() * self.scale_blend;
-            _yaw_rate_des = self.err_comb_th.z.signum() * self.err_comb_th.z.abs() * self.scale_blend;
+            let max_v = 0.0015;
+            let slope = 400.0;
+            _roll_rate_des = max_v*self.err_comb_th.x.signum()
+                        * stat::function::erf::erf(self.err_comb_th.x.abs() * slope);
+
+            let max_v = 0.002;
+            let slope = 500.0;
+
+
+            _pitch_rate_des = max_v*self.err_comb_th.y.signum()
+                    * stat::function::erf::erf(self.err_comb_th.y.abs() * slope);
+
+            let max_v = 0.04;
+            let slope = 3.0;
+            
+            _yaw_rate_des = max_v*self.err_comb_th.z.signum()
+                    * stat::function::erf::erf(self.err_comb_th.z.abs() * slope);
+
+            // _roll_rate_des = self.err_comb_th.x.signum() * self.err_comb_th.x.abs() * self.scale_blend;
+
+            // _pitch_rate_des = self.err_comb_th.y.signum() * self.err_comb_th.y.abs() * self.scale_blend;
+            // _yaw_rate_des = self.err_comb_th.z.signum() * self.err_comb_th.z.abs() * self.scale_blend;
         // }
         // println!("{}", &_yaw_rate_des);
-        let max_accel = 0.1 * self._ctrl_dt;
+        let max_accel = 0.01 * self._ctrl_dt;
         let des_roll_accel = _roll_rate_des - self.rate_des.x;
 
         if des_roll_accel.abs() > max_accel {
@@ -344,12 +389,18 @@ impl Error {
 
         self.rate_des = na::Vector3::new(_roll_rate_des, _pitch_rate_des, _yaw_rate_des);
 
-        let err_gmb_rate: [f64; 3] = [
+        let mut err_gmb_rate: [f64; 3] = [
             (_roll_rate_des - _d_theta.x),
             (_pitch_rate_des - _d_theta.y),
             (_yaw_rate_des - _d_theta.z),
         ];
 
+        // if self.ign_pr{
+        //     err_gmb_rate[1] = err_gmb_rate[1]/10.0;
+        //     err_gmb_rate[0] = err_gmb_rate[0]/10.0;
+        //     println!("IGNORING PITCH AND ROLL");
+        // }
+        
         let err_gmb_rate2: [f64; 3] = [
             (_roll_rate_des - state.omega_gond[1]),
             (_pitch_rate_des - state.omega_gond[3]),

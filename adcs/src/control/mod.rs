@@ -148,7 +148,7 @@ impl Ctrl {
         // println!("slew flag {}", &self.slew_flag);
 
         self.calculate_applied_torque();
-        self.pivot.calculate_pivot_speed(&self.rw, &0.0);
+        // self.pivot.calculate_pivot_speed(&self.rw, &0.0);
         trace!("update_ctrl end");
     }
 
