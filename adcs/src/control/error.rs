@@ -344,7 +344,7 @@ impl Error {
                     * stat::function::erf::erf(self.err_comb_th.y.abs() * slope);
 
             let max_v = 0.04;
-            let slope = 3.0;
+            let slope = 4.0;
             
             _yaw_rate_des = max_v*self.err_comb_th.z.signum()
                     * stat::function::erf::erf(self.err_comb_th.z.abs() * slope);

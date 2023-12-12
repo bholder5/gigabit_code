@@ -102,7 +102,7 @@ fn main() {
 
     trace!("START");
     let now1 = Instant::now();
-    for _step in 0..4000000 as usize {
+    for _step in 0..500000 as usize {
         
         ///////// beginning of the simulation loop
         /////////////////////////////////////////
