@@ -5,7 +5,7 @@ import pandas as pd
 from scipy.optimize import minimize
 import os
 import csv
-
+import time
 
 def generate_random_parameters():
     # Generate 12 random parameters
@@ -25,8 +25,10 @@ def call_rust_function():
     # Rust command to run
     rust_command = "cargo run --release -p sim"
 
-    # Execute the command in the Rust project directory
-    subprocess.run(rust_command, shell=True, cwd=rust_project_dir)
+    with open(os.devnull, 'w') as nullfile:
+        subprocess.run(rust_command, shell=True, cwd=rust_project_dir, stdout=nullfile, stderr=nullfile)
+
+# Call the function
 
 
 def analyze_output():
@@ -89,6 +91,8 @@ def objective_function(params):
     # Call MATLAB, Rust, and analyze_output functions here with 'params'
     # Calculate and return the value of 'sigma' to minimize
     # Example: (replace with actual calls)
+    start = time.time()
+
     call_matlab_function(params)
     call_rust_function()
     analysis_results = analyze_output()
@@ -98,9 +102,13 @@ def objective_function(params):
     sig_dec = analysis_results['dec']['sigma']
     sig_fr = analysis_results['fr']['sigma']
     
+    sig_ra = 206265 * sig_ra
+    sig_dec = 206265 * sig_dec
+    sig_fr = 206265 * sig_fr
+    
     # You can perform calculations with sig_ra, sig_dec, and sig_fr here if needed
     # Example calculation:
-    sigma = 100000*(sig_ra + sig_dec + sig_fr)
+    sigma = (sig_ra**2 + sig_dec**2 + sig_fr**2)
     
      # Save parameters and sigmas to a results file
     results_file = 'results.csv'
@@ -122,26 +130,26 @@ def objective_function(params):
         row = params_list + [sig_ra, sig_dec, sig_fr]
         writer.writerow(row)
     
-    
-    
+    end = time.time()
+    print("Time Elapsed: {}", end - start)
     return sigma
 
 # Initialize starting parameters
 initial_params = [450.0, 800.0, 1000.0, 1500.0, 7500.0, 1000.0, 0.005, 0.4, 0.1, 0.01, 0.001, 0.1]  # Replace with your initial parameter values
 
 param_bounds = [
-    (0.0001, 10000),  # Parameter 1
-    (0.0001, 10000),  # Parameter 2
-    (0.0001, 10000),  # Parameter 3
-    (0.0001, 10000),  # Parameter 4
-    (0.0001, 10000),  # Parameter 5
-    (0.0001, 10000),  # Parameter 6
-    (0.0001, 10000),  # Parameter 7
-    (0.0001, 10000),  # Parameter 8
-    (0.0001, 10000),  # Parameter 9
-    (0.0001, 10000),  # Parameter 10
-    (0.0001, 10000),  # Parameter 11
-    (0.0001, 10000)   # Parameter 12
+    (0.01, 10000),  # Parameter 1
+    (0.01, 10000),  # Parameter 2
+    (0.01, 10000),  # Parameter 3
+    (0.01, 10000),  # Parameter 4
+    (0.01, 10000),  # Parameter 5
+    (0.01, 10000),  # Parameter 6
+    (0.00001, 10),  # Parameter 7
+    (0.00001, 10),  # Parameter 8
+    (0.00001, 10),  # Parameter 9
+    (0.00001, 10),  # Parameter 10
+    (0.00001, 10),  # Parameter 11
+    (0.00001, 10)   # Parameter 12
 ]
 
 tolerance = 1e-4
