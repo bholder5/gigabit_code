@@ -127,7 +127,7 @@ def objective_function(params):
     return sigma
 
 # Initialize starting parameters
-initial_params = [1.0, 1.0, 1.0, 1.0,1.0, 1.0, 1.0, 1.0,1.0, 1.0, 1.0, 1.0]  # Replace with your initial parameter values
+initial_params = [450.0, 800.0, 1000.0, 1500.0, 7500.0, 1000.0, 0.005, 0.4, 0.1, 0.01, 0.001, 0.1]  # Replace with your initial parameter values
 
 param_bounds = [
     (0.0001, 10000),  # Parameter 1

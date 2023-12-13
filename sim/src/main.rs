@@ -108,7 +108,7 @@ fn main() {
         /////////////////////////////////////////
         let now1 = Instant::now();
         // fc.u = fc.u * 0.0;
-        println!("yaw:{} \nrol: {} \n pit: {}\n rw: {}\n bow: {}\nstn: {}\nprt: {}\n sb: {}\n t: {}\n", tau_applied[6], tau_applied[7], tau_applied[8], fc.u[0], fc.u[1], fc.u[2], fc.u[3], fc.u[4], &t);
+        // println!("yaw:{} \nrol: {} \n pit: {}\n rw: {}\n bow: {}\nstn: {}\nprt: {}\n sb: {}\n t: {}\n", tau_applied[6], tau_applied[7], tau_applied[8], fc.u[0], fc.u[1], fc.u[2], fc.u[3], fc.u[4], &t);
         unsafe {
             trace!("bit_one_step start");
             bit_one_step(
@@ -223,7 +223,7 @@ fn main() {
                 let sc: f64 = 1.0;
                 fc.err_weight = ctrl.error.err_weight.clone();
                 fc.pitch = &ctrl.state.gmb_d.pitch - &bp.pitch_nom;
-                println!("err weight {}", fc.err_weight);
+                // println!("err weight {}", fc.err_weight);
                 // println!("fc call: t:{}", &t);
                 if fc.err_weight < 0.05{
                     fc.propogate(gyro_in.as_slice(), bp._dt, bp._num_steps, &[sc*ctrl.error.rate_des.z.clone(), sc*ctrl.error.rate_des.x.clone(),sc*ctrl.error.rate_des.y.clone()]);
@@ -285,10 +285,10 @@ fn main() {
 
 
             // Disturbance generation
-            wind.generate();
-            tau_applied[0] = wind.tau[0].clone() - bp.damp[0] * bp.d_theta_dt[0];
-            tau_applied[1] = wind.tau[1].clone() - bp.damp[1] * bp.d_theta_dt[1];
-            tau_applied[2] = wind.tau[2].clone() - bp.damp[2] * bp.d_theta_dt[2];
+            // wind.generate();
+            // tau_applied[0] = wind.tau[0].clone() - bp.damp[0] * bp.d_theta_dt[0];
+            // tau_applied[1] = wind.tau[1].clone() - bp.damp[1] * bp.d_theta_dt[1];
+            // tau_applied[2] = wind.tau[2].clone() - bp.damp[2] * bp.d_theta_dt[2];
 
 
             // update actual torque vector with applied torques

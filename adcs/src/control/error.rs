@@ -166,12 +166,12 @@ impl Error {
         let norm_fine_err = err_vec.norm();
 
         let _err_tc_v = (2.0 + (2.0/ (1.0+E.powf(60.0*&norm_fine_err.powf(2.0))))).powf(1.0);
-        println!("err_decay{}", &_err_tc_v);
+        // println!("err_decay{}", &_err_tc_v);
 
         self._err_decay_p = E.powf(-self._ctrl_dt / _err_tc_v);
         self._err_decay_v = E.powf(-self._ctrl_dt / _err_tc_v);
 
-        println!("norm fine error: {}", norm_fine_err);
+        // println!("norm fine error: {}", norm_fine_err);
 
         let mapped_err = state.gmb_k.gmm_i * err_vec;
         // let mut state_d = state.gmb_d.clone();
