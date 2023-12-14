@@ -99,6 +99,7 @@ fn main() {
     ctrl.state.gmb_d.calculate_rotation_matrix();
     ctrl.state.update_desired_eq_from_gmb();
 
+    let mut total_duration = Duration::new(0,0);
 
     trace!("START");
     let now1 = Instant::now();
@@ -109,6 +110,7 @@ fn main() {
         let now1 = Instant::now();
         // fc.u = fc.u * 0.0;
         // println!("yaw:{} \nrol: {} \n pit: {}\n rw: {}\n bow: {}\nstn: {}\nprt: {}\n sb: {}\n t: {}\n", tau_applied[6], tau_applied[7], tau_applied[8], fc.u[0], fc.u[1], fc.u[2], fc.u[3], fc.u[4], &t);
+        let start_time = Instant::now();
         unsafe {
             trace!("bit_one_step start");
             bit_one_step(
@@ -131,6 +133,8 @@ fn main() {
             trace!("bit_one_step end");
         }
         
+        let duration = start_time.elapsed();
+        total_duration += duration;   
         
         if flex.flex_enable{
             // flex.propogate_flex(&[tau_applied[6] + fc.u_rigid[0], tau_applied[7]+fc.u_rigid[1], tau_applied[8]+fc.u_rigid[2]], bp._dt, bp._num_steps, &fc);
@@ -367,9 +371,11 @@ fn main() {
             // }
         }
 
-        // record the data
         sc::push_record(&t, &bp, &est, &ctrl, &meas, &sim_state, &flex, &fc).unwrap();
         js::read_gains(&mut ctrl, &mut bp, &mut est, &mut fc, &mut flex); // read in gains from json file (for tuning)
+
+        
+        
         // if fc.update | (_step == 0){
         //     println!("Success");
         //     let mut new_fc = flex_control::DampingControl::init_pc(&ctrl.fine_gains);
@@ -378,6 +384,9 @@ fn main() {
         // }
 
     }
-    println!("bit one step {}", now1.elapsed().as_micros());
+    println!("bit one step {}", now1.elapsed().as_secs_f64());
+
+    let total_seconds = total_duration.as_secs_f64(); // Total time in seconds
+    println!("Total time spent on the function: {:.2} seconds", total_seconds);
     trace!("END");
 }

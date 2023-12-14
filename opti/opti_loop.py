@@ -6,6 +6,7 @@ from scipy.optimize import minimize
 import os
 import csv
 import time
+import json
 
 def generate_random_parameters():
     # Generate 12 random parameters
@@ -87,13 +88,57 @@ def analyze_output():
 #         os.remove('/home/bholder/data/out.csv')
 
 # Define your custom objective function
-def objective_function(params):
+def update_control_parameters(gains):
+    kp_roll = gains[0]
+    ki_roll = gains[1]
+    kp_pitch = gains[2]
+    ki_pitch = gains[3]
+    kp_yaw = gains[4]
+    ki_yaw = gains[5]
+    try:
+        file_path = '/home/bholder/gigabit_code/sim/src/gains.json'
+        # Read the existing data from the file
+        with open(file_path, 'r') as file:
+            data = json.load(file)
+
+        # Update the control parameters
+        if "fine" in data:
+            data["fine"]["kp_roll"] = float(kp_roll)
+            data["fine"]["ki_roll"] = float(ki_roll)
+            data["fine"]["kp_pitch"] = float(kp_pitch)
+            data["fine"]["ki_pitch"] = float(ki_pitch)
+            data["fine"]["kp_yaw"] = float(kp_yaw)
+            data["fine"]["ki_yaw"] = float(ki_yaw)
+        else:
+            raise ValueError("JSON structure does not contain 'fine' key")
+
+        # Write the updated data back to the file
+        with open(file_path, 'w') as file:
+            json.dump(data, file, indent=4)
+
+    except FileNotFoundError:
+        print(f"Error: The file '{file_path}' was not found.")
+    except json.JSONDecodeError:
+        print("Error: The file does not contain valid JSON.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+# Example usage
+# update_control_parameters('path_to_your_file.json', 400, 700, 300, 8500, 300, 11000)
+
+def objective_function(params_lqr, params_pid):
     # Call MATLAB, Rust, and analyze_output functions here with 'params'
     # Calculate and return the value of 'sigma' to minimize
     # Example: (replace with actual calls)
     start = time.time()
 
-    call_matlab_function(params)
+
+    # Update control parameters for PID
+    update_control_parameters(params_pid)
+
+    # Call MATLAB function with LQR parameters
+    call_matlab_function(params_lqr)
+    
     call_rust_function()
     analysis_results = analyze_output()
     
@@ -102,9 +147,17 @@ def objective_function(params):
     sig_dec = analysis_results['dec']['sigma']
     sig_fr = analysis_results['fr']['sigma']
     
+    p2p_ra = analysis_results['ra']['peak_to_peak']
+    p2p_dec = analysis_results['dec']['peak_to_peak']
+    p2p_fr = analysis_results['fr']['peak_to_peak']
+    
     sig_ra = 206265 * sig_ra
     sig_dec = 206265 * sig_dec
     sig_fr = 206265 * sig_fr
+    
+    p2p_ra = 206265 * p2p_ra
+    p2p_dec = 206265 * p2p_dec
+    p2p_fr = 206265 * p2p_fr
     
     # You can perform calculations with sig_ra, sig_dec, and sig_fr here if needed
     # Example calculation:
@@ -118,7 +171,7 @@ def objective_function(params):
         with open(results_file, 'w', newline='') as file:
             writer = csv.writer(file)
             # Write headers
-            headers = ['P1', 'P2','P3','P4','P5','P6','P7','P8','P9','P10','P11', 'Param_12', 'Sig_RA', 'Sig_Dec', 'Sig_FR']
+            headers = ['P1', 'P2','P3','P4','P5','P6','P7','P8','P9','P10','P11', 'P12','kp_roll', 'ki_roll', 'kp_pitch', 'ki_pitch', 'kp_yaw', 'ki_yaw', 'Sig_RA', 'Sig_Dec', 'Sig_FR', 'P2P_RA','P2P_DEC','P2P_FR']
             writer.writerow(headers)
     
     # Append parameters and sigmas as a new row in the results file
@@ -126,42 +179,70 @@ def objective_function(params):
         writer = csv.writer(file)
         # Concatenate the parameters and sigmas individually
         
-        params_list = params.tolist()
-        row = params_list + [sig_ra, sig_dec, sig_fr]
+        # params_list = params_lqr + params_pid
+        params_list = np.concatenate([np.array(params_lqr), np.array(params_pid)]).tolist()
+
+        row = params_list + [sig_ra, sig_dec, sig_fr, p2p_ra, p2p_dec, p2p_fr]
         writer.writerow(row)
     
     end = time.time()
     print("Time Elapsed: {}", end - start)
     return sigma
 
-# Initialize starting parameters
-initial_params = [450.0, 800.0, 1000.0, 1500.0, 7500.0, 1000.0, 0.005, 0.4, 0.1, 0.01, 0.001, 0.1]  # Replace with your initial parameter values
+def append_to_csv(file_name, params, sigma):
+    # Check if the file exists and create it with headers if it doesn't
+    if not os.path.exists(file_name):
+        with open(file_name, 'w', newline='') as file:
+            writer = csv.writer(file)
+            headers = ['P1', 'P2', 'P3', 'P4', 'P5', 'P6', 'P7', 'P8', 'P9', 'P10', 'P11', 'P12', 'PID1', 'PID2', 'PID3', 'PID4', 'PID5', 'PID6', 'Sigma']
+            writer.writerow(headers)
 
-param_bounds = [
-    (0.01, 10000),  # Parameter 1
-    (0.01, 10000),  # Parameter 2
-    (0.01, 10000),  # Parameter 3
-    (0.01, 10000),  # Parameter 4
-    (0.01, 10000),  # Parameter 5
-    (0.01, 10000),  # Parameter 6
-    (0.00001, 10),  # Parameter 7
-    (0.00001, 10),  # Parameter 8
-    (0.00001, 10),  # Parameter 9
-    (0.00001, 10),  # Parameter 10
-    (0.00001, 10),  # Parameter 11
-    (0.00001, 10)   # Parameter 12
-]
+    # Append the new row
+    with open(file_name, 'a', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(params + [sigma])
 
-tolerance = 1e-4
 
-# Use SciPy's minimize function to optimize
-result = minimize(objective_function, initial_params, method='nelder-mead', bounds=param_bounds, tol=tolerance)
+def optimize_pid(objective_function, initial_pid_params, pid_bounds, fixed_lqr_params, tolerance):
+    pid_result = minimize(lambda pid_params: objective_function(fixed_lqr_params, pid_params), initial_pid_params, method='nelder-mead', bounds=pid_bounds, tol=tolerance)
 
-# Extract optimized parameters
-optimized_params = result.x
+    return pid_result.x, pid_result.fun
 
-# Store results in a DataFrame
-results_df = pd.DataFrame({'Parameter': optimized_params, 'Sigma': result.fun})
+def optimize_lqr(objective_function, initial_lqr_params, lqr_bounds, fixed_pid_params, tolerance):
 
-# Write results to a CSV file
-results_df.to_csv('optimization_results.csv', index=False)
+    lqr_result = minimize(lambda lqr_params: objective_function(lqr_params, fixed_pid_params), initial_lqr_params, method='nelder-mead', bounds=lqr_bounds, tol=tolerance)
+
+    return lqr_result.x, lqr_result.fun
+
+def optimize_all(objective_function, initial_params, param_bounds, tolerance):
+
+    all_result = minimize(lambda params: objective_function(params[:12], params[12:]), initial_params, method='nelder-mead', bounds=param_bounds, tol=tolerance)
+
+    return all_result.x, all_result.fun
+
+####################################################################
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+####################################################################
+def main():
+    initial_params = [450.0, 800.0, 1000.0, 1500.0, 7500.0, 1000.0, 0.005, 0.4, 0.1, 0.01, 0.001, 0.1,
+                        350.0, 600.0, 250.0, 8050.0, 260.0, 10000.0]
+
+    param_bounds = [(0.01, 10000.0)] * 6 + [(0.00001, 10)] * 6 + [(0.1, 100000.0)] * 6
+
+    tolerance = 1e-4
+
+    [x,y] = optimize_pid(objective_function, initial_params[12:], param_bounds[12:], initial_params[:12], tolerance)
+    # [x,y] = optimize_lqr(objective_function, initial_params[:12], param_bounds[:12], initial_params[12:], tolerance)
+    # [x,y] = optimize_all(objective_function, initial_params, param_bounds, tolerance)
+
+if __name__ == "__main__":
+    main()
