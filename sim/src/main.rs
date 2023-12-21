@@ -103,7 +103,7 @@ fn main() {
 
     trace!("START");
     let now1 = Instant::now();
-    for _step in 0..500000 as usize {
+    for _step in 0..950000 as usize {
         
         ///////// beginning of the simulation loop
         /////////////////////////////////////////
@@ -226,7 +226,8 @@ fn main() {
             // } else {
                 let sc: f64 = 1.0;
                 fc.err_weight = ctrl.error.err_weight.clone();
-                fc.pitch = &ctrl.state.gmb_d.pitch - &bp.pitch_nom;
+                fc.pitch = (&ctrl.state.gmb_d.pitch - &bp.pitch_nom);
+                // println!("gmb_d pitch {} pitch nom {} calc: {}",&ctrl.state.gmb_d.pitch, &bp.pitch_nom, (&ctrl.state.gmb_d.pitch - &bp.pitch_nom));
                 // println!("err weight {}", fc.err_weight);
                 // println!("fc call: t:{}", &t);
                 if fc.err_weight < 0.05{
@@ -267,7 +268,7 @@ fn main() {
                 ctrl.state.rw_hs = bp.x[20];
                 ctrl.state.rw_hs_nom = ctrl.pivot.omega_rw_nom*ctrl.pivot._i_rw;
                 fc.roll = ctrl.state.gmb_d.roll;
-                fc.pitch = ctrl.state.gmb_d.pitch;
+                fc.pitch = ctrl.state.gmb_d.pitch-bp.pitch_nom;
             } else {
                 ctrl.state.eq_k = sim_state.eq_k.clone();
                 ctrl.state.omega[0] = bp.omega_m[0].clone();
@@ -277,7 +278,7 @@ fn main() {
                 .gmb_k
                 .update_gimbal_coordinates(&[bp.x[16], bp.x[17], -sim_state.hor.az.clone()]);
                 fc.roll = ctrl.state.gmb_d.roll;
-                fc.pitch = ctrl.state.gmb_d.pitch;
+                fc.pitch = ctrl.state.gmb_d.pitch-bp.pitch_nom;
             }
 
             // grab_vec3(&mut ctrl.state.omega, &bp.omega_m);
@@ -307,7 +308,8 @@ fn main() {
                 // tau_applied[8] = 1.0*ctrl.fmot_pitch.tau_applied; //pitch
                 let tau_req_yaw = ctrl.rw.tau_applied ; //yaw
                 let tau_req_roll = ctrl.fmot_roll.tau_applied + fc.ff_r; //roll
-                let tau_req_pitch = ctrl.fmot_pitch.tau_applied + fc.ff_p; //pitch
+                let tau_req_pitch = ctrl.fmot_pitch.tau_applied + (1.0*fc.ff_p); //pitch
+                // println!("pitch ff{}", &fc.ff_p);
                 // fc.u = fc.u;
                 
                 // let diff_yaw = tau_req_yaw - tau_applied[6];

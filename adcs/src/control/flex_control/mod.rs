@@ -44,8 +44,10 @@ impl DampingControl{
 
         if ff_p_d.abs() > self.roll_torque.abs(){
             self.ff_p = ff_p_d.signum() * self.roll_torque.abs();
+            // println!("ff_p_d: {} roll torque {} ff_p {} pitch: {}", &ff_p_d, &self.roll_torque, &self.ff_p, &self.pitch);
         } else {
             self.ff_p = ff_p_d;
+            // println!("ELSE ff_p_d: {} roll torque {} ff_p {}", &ff_p_d, &self.roll_torque, &self.ff_p);
         }
 
         

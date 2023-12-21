@@ -165,7 +165,7 @@ impl Error {
 
         let norm_fine_err = err_vec.norm();
 
-        let _err_tc_v = (2.0 + (2.0/ (1.0+E.powf(60.0*&norm_fine_err.powf(2.0))))).powf(1.0);
+        let _err_tc_v = (2.0 + (1.0/ (1.0+E.powf(60.0*&norm_fine_err.powf(2.0))))).powf(1.0);
         // println!("err_decay{}", &_err_tc_v);
 
         self._err_decay_p = E.powf(-self._ctrl_dt / _err_tc_v);
@@ -205,6 +205,7 @@ impl Error {
         //decay the fine suym error regarless of error but only integrate it if error is in fine error bracket
         self.err_fine_sum = self.err_fine_sum * self._err_decay_p;
 
+        // if norm_fine_err < self.u_lower {
         if norm_fine_err < self.u_lower {
             // self.err_comb_th = phi * err_vec;
             self.err_comb_th = phi * mapped_err;
@@ -212,6 +213,7 @@ impl Error {
             slew_flag = false;
             self.err_weight = 0.0;
             self.scale_blend = 1.0;
+            // println!("{}\n {} \n{}\n", _err_gmb.x, _err_gmb.y,_err_gmb.z );
             
             self.ign_pr = false;
         } else {
@@ -331,23 +333,34 @@ impl Error {
             //         .sqrt() * self.scale_blend;
 
 
-            let max_v = 0.0015;
-            let slope = 400.0;
-            _roll_rate_des = max_v*self.err_comb_th.x.signum()
-                        * stat::function::erf::erf(self.err_comb_th.x.abs() * slope);
+            // let max_v = 0.001;
+            // let slope = 100.0;
+            // _roll_rate_des = max_v*self.err_comb_th.x.signum()
+            //             * stat::function::erf::erf(self.err_comb_th.x.abs() * slope);
 
-            let max_v = 0.002;
-            let slope = 500.0;
+            // // let max_v = 0.001;
+            // // let slope = 200.0;
+            // // _roll_rate_des = _roll_rate_des - max_v*self.err_comb_th.x.signum()
+            // //             * stat::function::erf::erf(self.err_comb_th.x.abs() * slope);
+
+            // let max_v = 0.0015;
+            // let slope = 300.0;
 
 
-            _pitch_rate_des = max_v*self.err_comb_th.y.signum()
-                    * stat::function::erf::erf(self.err_comb_th.y.abs() * slope);
+            // _pitch_rate_des = max_v*self.err_comb_th.y.signum()
+            //         * stat::function::erf::erf(self.err_comb_th.y.abs() * slope);
 
-            let max_v = 0.04;
-            let slope = 4.0;
+            // let max_v = 4.8;
+            // let slope = 0.013;
             
-            _yaw_rate_des = max_v*self.err_comb_th.z.signum()
-                    * stat::function::erf::erf(self.err_comb_th.z.abs() * slope);
+            // _yaw_rate_des = max_v*self.err_comb_th.z.signum()
+            //         * stat::function::erf::erf(self.err_comb_th.z.abs() * slope);
+
+            // let max_v = 0.0000001;
+            // let slope = 700000.0;
+            
+            // _yaw_rate_des = _yaw_rate_des - max_v*self.err_comb_th.z.signum()
+            //         * stat::function::erf::erf(self.err_comb_th.z.abs() * slope);
 
             // _roll_rate_des = self.err_comb_th.x.signum() * self.err_comb_th.x.abs() * self.scale_blend;
 
@@ -355,37 +368,55 @@ impl Error {
             // _yaw_rate_des = self.err_comb_th.z.signum() * self.err_comb_th.z.abs() * self.scale_blend;
         // }
         // println!("{}", &_yaw_rate_des);
+
+        let max_v = 0.0005;
+        let slope = 150.0;
+        _roll_rate_des = max_v*self.err_comb_th.x.signum()
+                    * stat::function::erf::erf(self.err_comb_th.x.abs() * slope);
+
+        let max_v = 0.0005;
+        let slope = 0.025;
+
+
+        _pitch_rate_des = max_v*self.err_comb_th.y.signum()
+                * stat::function::erf::erf(self.err_comb_th.y.abs() * slope);
+
+        let max_v = 0.01;
+        let slope = 2.0;
+
+        _yaw_rate_des = max_v*self.err_comb_th.z.signum()
+                * stat::function::erf::erf(self.err_comb_th.z.abs() * slope);
         let max_accel = 0.01 * self._ctrl_dt;
         let des_roll_accel = _roll_rate_des - self.rate_des.x;
 
-        if des_roll_accel.abs() > max_accel {
-            if des_roll_accel < 0.0 {
-                _roll_rate_des = _d_theta.x - max_accel;
-            } else {
-                _roll_rate_des = _d_theta.x + max_accel;
-            }
-        }
+        // if des_roll_accel.abs() > max_accel {
+        //     if des_roll_accel < 0.0 {
+        //         _roll_rate_des = _d_theta.x - max_accel;
+        //     } else {
+        //         _roll_rate_des = _d_theta.x + max_accel;
+        //     }
+        // }
 
-        let des_pitch_accel = _pitch_rate_des - self.rate_des.y;
+        // let des_pitch_accel = _pitch_rate_des - self.rate_des.y;
 
-        if des_pitch_accel.abs() > max_accel {
-            if des_pitch_accel < 0.0 {
-                _pitch_rate_des = _d_theta.y - max_accel;
-            } else {
-                _pitch_rate_des = _d_theta.y + max_accel;
-            }
-        }
+        // if des_pitch_accel.abs() > max_accel {
+        //     if des_pitch_accel < 0.0 {
+        //         _pitch_rate_des = _d_theta.y - max_accel;
+        //     } else {
+        //         _pitch_rate_des = _d_theta.y + max_accel;
+        //     }
+        // }
 
-        let des_yaw_accel = _yaw_rate_des - self.rate_des.z;
+        // let des_yaw_accel = _yaw_rate_des - self.rate_des.z;
 
-        if des_yaw_accel.abs() > max_accel {
-            if des_yaw_accel < 0.0 {
-                _yaw_rate_des = _d_theta.z - max_accel;
-            } else {
-                _yaw_rate_des = _d_theta.z + max_accel;
-            }
-            // println!("{} {} {} {}", max_accel, des_yaw_accel, _yaw_rate_des, self.rate_des.z);
-        }
+        // if des_yaw_accel.abs() > max_accel {
+        //     if des_yaw_accel < 0.0 {
+        //         _yaw_rate_des = _d_theta.z - max_accel;
+        //     } else {
+        //         _yaw_rate_des = _d_theta.z + max_accel;
+        //     }
+        //     // println!("{} {} {} {}", max_accel, des_yaw_accel, _yaw_rate_des, self.rate_des.z);
+        // }
 
         self.rate_des = na::Vector3::new(_roll_rate_des, _pitch_rate_des, _yaw_rate_des);
 
@@ -396,8 +427,8 @@ impl Error {
         ];
 
         // if self.ign_pr{
-        //     err_gmb_rate[1] = err_gmb_rate[1]/10.0;
-        //     err_gmb_rate[0] = err_gmb_rate[0]/10.0;
+        //     err_gmb_rate[1] = err_gmb_rate[1]/2.0;
+        //     err_gmb_rate[0] = err_gmb_rate[0]/2.0;
         //     println!("IGNORING PITCH AND ROLL");
         // }
         

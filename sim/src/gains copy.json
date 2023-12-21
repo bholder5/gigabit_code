@@ -1,13 +1,13 @@
 {
     "fine": {
-        "kp_roll": 0.5,
-        "ki_roll": 2000.0,
+        "kp_roll": 376.1384529492036,
+        "ki_roll": 737.1881808625956,
         "kip_roll": 0.0,
-        "kp_pitch": 2.0,
-        "ki_pitch": 100.0,
+        "kp_pitch": 251.1824550004203,
+        "ki_pitch": 8234.556425691677,
         "kip_pitch": 0.0,
-        "kp_yaw": 10.0,
-        "ki_yaw": 200,
+        "kp_yaw": 259.24952642048504,
+        "ki_yaw": 7914.821699485441,
         "kip_yaw": 0.0,
         "piv_g_1": 2.25e-06,
         "piv_g_2": 4.5e-07,
@@ -23,7 +23,7 @@
     "ctrl_from_est": true,
     "est_reset": false,
     "flex_reset": false,
-    "flex_ctrl_enable": false,
+    "flex_ctrl_enable": true,
     "flex_ctrl_update": false,
     "flex_sim_enable": true
 }

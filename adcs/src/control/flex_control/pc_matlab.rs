@@ -18,8 +18,8 @@ pub struct PassiveControl {
     num_states: usize,
     a_flex: na::SMatrix<f64, 104, 104>,
     b_flex: na::SMatrix<f64, 104, 5>,
-    a: na::SMatrix<f64,6,6>,
-    b: na::SMatrix<f64, 6,5>,
+    a: na::SMatrix<f64,18,18>,
+    b: na::SMatrix<f64, 18,5>,
     a_cl: na::DMatrix<f64>,
     b_c: na::DMatrix<f64>,
     c_c: na::DMatrix<f64>,
@@ -37,9 +37,9 @@ impl PassiveControl{
         let a = lqr::pos::init_AMat1_pos();
         let b = lqr::pos::init_AMat2_pos();
 
-        let num_states = 6;
+        let num_states = 18;
         let num_inputs = 5;
-        let num_modes = 0;
+        let num_modes = 6;
 
         let mut a_cl = na::DMatrix::<f64>::zeros(num_states, num_states);
         a_cl.slice_mut((0,0), (num_states,num_states)).copy_from(&lqr::pos::init_AMat3_pos());
@@ -83,9 +83,9 @@ impl PassiveControl{
         let b_flex = 1000.0 *fc::bmat::init_bmat();
         let a = lqr::neg::init_AMat1_pos();
         let b = lqr::neg::init_AMat2_pos();
-        let num_states = 6;
+        let num_states = 18;
         let num_inputs = 5;
-        let num_modes = 0;
+        let num_modes = 6;
 
         let mut a_cl = na::DMatrix::<f64>::zeros(num_states, num_states);
         a_cl.slice_mut((0,0), (num_states, num_states)).copy_from(&lqr::neg::init_AMat3_pos());
