@@ -7,6 +7,7 @@
 //!  This is all achieved using an Error struct with implementations.
 extern crate nalgebra as na;
 use std::f64::consts::{E, PI};
+use std::collections::VecDeque;
 extern crate statrs as stat;
 
 use crate::control::state as st;
@@ -62,6 +63,13 @@ pub struct Error {
     pub err_weight: f64,
     /// flag to ignore pitch and rooll when slewing.
     pub ign_pr: bool,
+    
+    pub amplitude: f64,
+    pub period: f64,
+    pub max_err: f64,
+    pub max_err_old: f64,
+    pub current_time: f64,
+    pub phase_shift: f64,
 }
 
 impl Error {
@@ -88,6 +96,12 @@ impl Error {
         let scale_blend = 1.0;
         let err_weight = 1.0;
         let ign_pr = true;
+        let amplitude = 1.0;
+        let period = 30.0;
+        let max_err = 0.0;
+        let max_err_old = 0.0;
+        let current_time = 0.0;
+        let phase_shift = 0.0;
 
         let error: Error = Error {
             err_b_th,
@@ -111,6 +125,13 @@ impl Error {
             scale_blend,
             err_weight,
             ign_pr, //flag to ignore pitch and roll
+            amplitude,
+            period,
+            max_err,
+            max_err_old,
+            current_time,
+            phase_shift,
+
         };
         error
     }
@@ -369,20 +390,45 @@ impl Error {
         // }
         // println!("{}", &_yaw_rate_des);
 
-        let max_v = 0.0005;
-        let slope = 150.0;
+
+        // if self.err_comb_th.x.abs()<0.0003{
+
+        //     if self.err_comb_th.x.abs() < 0.0000001 && self.phase_shift < 10.0{
+        //         self.phase_shift = self.current_time;
+        //         // println!("phase timing {}", self.phase_shift);
+        //     }
+
+        //     sine_value = 0.00001 * self.amplitude * ((2.0 * PI / self.period) * (self.current_time-self.phase_shift)).cos();
+
+        //     // if self.phase_shift > 10.0 && self.err_comb_th.x.abs() > 0.00001 && (self.err_comb_th.x.signum() == sine_value.signum()){
+        //         // self.amplitude = -self.amplitude;
+        //         println!("Sine Value {} time: {} phase shift: {}", sine_value, self.current_time, self.phase_shift);
+        //     // }
+        //     if self.phase_shift < 10.0{
+        //         sine_value = 0.0;
+        //     }
+
+            
+
+        // }
+
+        let max_v = 0.01;
+        let slope = 0.4*15.0;
+
         _roll_rate_des = max_v*self.err_comb_th.x.signum()
                     * stat::function::erf::erf(self.err_comb_th.x.abs() * slope);
+        // let mut sine_value = 0.0;
+        // _roll_rate_des = _roll_rate_des + sine_value;
+        
 
-        let max_v = 0.0005;
-        let slope = 0.025;
-
+        let max_v = 0.05;
+        let slope = 40.0*0.025;
 
         _pitch_rate_des = max_v*self.err_comb_th.y.signum()
                 * stat::function::erf::erf(self.err_comb_th.y.abs() * slope);
 
-        let max_v = 0.01;
-        let slope = 2.0;
+        let max_v = 0.04/20.0;
+        let slope = 64000.5/1.0;
 
         _yaw_rate_des = max_v*self.err_comb_th.z.signum()
                 * stat::function::erf::erf(self.err_comb_th.z.abs() * slope);

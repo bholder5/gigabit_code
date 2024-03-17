@@ -15,7 +15,7 @@ mod measurements;
 mod disturbances;
 mod flex_sim;
 
-use adcs::{control::*, estimation::*, verification::*};
+use adcs::{control::*, estimation::*, verification::*, dist_est};
 use initialization::*;
 use json_handling as js;
 use logging::*;
@@ -59,6 +59,7 @@ fn main() {
     let mut est = Estimator::new();
     let mut ctrl = Ctrl::new();
     let mut fc = flex_control::DampingControl::init_pc(&ctrl.fine_gains);
+    let mut servo = servo::ServoControl::init();
     let mut sim_state = state::State::new();
     let mut meas = ms::Meas::new();
     let mut late_meas = ms::Meas::new();
@@ -88,27 +89,32 @@ fn main() {
     tau_applied[8] = ctrl.fmot_pitch.tau_applied.clone(); //pitch
 
     
-    sc::push_record(&t, &bp, &est, &ctrl, &meas, &sim_state, &flex, &fc).unwrap();
+    sc::push_record(&t, &bp, &est, &ctrl, &meas, &sim_state, &flex, &fc, &servo).unwrap();
 
     let mut first_LIS = true;
 
     // Initialize with an achievable target
     ctrl.state.gmb_d.roll = 0.1;
     ctrl.state.gmb_d.pitch = -0.7;
-    ctrl.state.gmb_d.yaw = 0.2;
+    ctrl.state.gmb_d.yaw = -0.02;
     ctrl.state.gmb_d.calculate_rotation_matrix();
     ctrl.state.update_desired_eq_from_gmb();
+    let mut servo_multiplier = 0.0;
+    let mut tau_req_yaw = 0.0;
+    let mut tau_req_roll = 0.0;
+    let mut tau_req_pitch = 0.0;
 
     let mut total_duration = Duration::new(0,0);
 
     trace!("START");
     let now1 = Instant::now();
-    for _step in 0..950000 as usize {
+
+    for _step in 0..3600000 as usize {
         
         ///////// beginning of the simulation loop
         /////////////////////////////////////////
-        let now1 = Instant::now();
         // fc.u = fc.u * 0.0;
+        println!("Tau applied: {} {} {}", tau_applied[6], tau_applied[7], tau_applied[8]);
         // println!("yaw:{} \nrol: {} \n pit: {}\n rw: {}\n bow: {}\nstn: {}\nprt: {}\n sb: {}\n t: {}\n", tau_applied[6], tau_applied[7], tau_applied[8], fc.u[0], fc.u[1], fc.u[2], fc.u[3], fc.u[4], &t);
         let start_time = Instant::now();
         unsafe {
@@ -130,6 +136,37 @@ fn main() {
                 flex_result.as_mut_ptr(),
                 
             );
+            // Assuming bp.x, flex.eta, and fc.u are Vec<f64> or similar
+        // Convert to Vec<f32>
+        // let bp_x_f32: Vec<f32> = bp.x.iter().map(|&x| x as f32).collect();
+        // let flex_eta_f32: Vec<f32> = flex.eta.iter().map(|&x| x as f32).collect();
+        // let fc_u_f32: Vec<f32> = fc.u.iter().map(|&x| x as f32).collect();
+
+        // // Assuming tau_applied, y_result, and flex_result are mutable vectors of f64
+        // let mut tau_applied_f32: Vec<f32> = tau_applied.iter().map(|&x| x as f32).collect();
+        // let mut bp_unlock_f32: Vec<f32> = bp.unlock.iter().map(|&x| x as f32).collect();
+        // let mut y_result_f32: Vec<f32> = y_result.iter().map(|&x| x as f32).collect();
+        // let mut flex_result_f32: Vec<f32> = flex_result.iter().map(|&x| x as f32).collect();
+
+        // // Now, call the function with these converted arrays
+        // // and other parameters appropriately casted
+        // bit_one_step(
+        //     bp_x_f32.as_ptr(),
+        //     tau_applied_f32.as_mut_ptr(),
+        //     bp_unlock_f32.as_ptr(), // Assuming this is already f32 or does not need conversion
+        //     (ctrl.pivot.omega_request / 1.0) as f32,
+        //     true as u8,
+        //     bp._dt as f32,
+        //     bp._num_steps, // Assuming this is an integer type and does not need conversion
+        //     bp._tau_piv_max as f32,
+        //     bp.pitch_nom as f32,
+        //     flex_eta_f32.as_ptr(),
+        //     fc_u_f32.as_ptr(),
+        //     true as u8,
+        //     y_result_f32.as_mut_ptr(),
+        //     flex_result_f32.as_mut_ptr(),
+        // );
+
             trace!("bit_one_step end");
         }
         
@@ -148,6 +185,7 @@ fn main() {
 
         step = step + 1;
         t = t + 0.001;
+        ctrl.error.current_time = t;
         
         late_meas = meas.clone();
         meas.gps.utc = meas.gps.utc + chrono::Duration::milliseconds(1);
@@ -185,6 +223,7 @@ fn main() {
         est.piv_speed = ctrl.lqr.control_input[3];
 
         est.propogate();
+
         ctrl.state.omega_gond = na::Vector5::<f64>::from_row_slice(&[
             late_meas.gyro_of.om_axial,
             late_meas.gyro_bow.om_axial,
@@ -230,9 +269,9 @@ fn main() {
                 // println!("gmb_d pitch {} pitch nom {} calc: {}",&ctrl.state.gmb_d.pitch, &bp.pitch_nom, (&ctrl.state.gmb_d.pitch - &bp.pitch_nom));
                 // println!("err weight {}", fc.err_weight);
                 // println!("fc call: t:{}", &t);
-                if fc.err_weight < 0.05{
+                // if fc.err_weight < 0.05{
                     fc.propogate(gyro_in.as_slice(), bp._dt, bp._num_steps, &[sc*ctrl.error.rate_des.z.clone(), sc*ctrl.error.rate_des.x.clone(),sc*ctrl.error.rate_des.y.clone()]);
-                }
+                // }
             // }
             
         }
@@ -245,73 +284,103 @@ fn main() {
                 est.reset = false;
                 first_LIS = false;
             }
-            est.correct_estimate();  
-        }
+            est.correct_estimate(); 
+        }        
         
-        if (step % 10) < 1 {  
-            if bp.ctrl_from_est {
-                ctrl.state.eq_k = est.eq_hat_k.clone();
-                ctrl.state.omega[0] = est.gyros_bs.omega_k[0].clone();
-                ctrl.state.omega[1] = est.gyros_bs.omega_k[1].clone();
-                ctrl.state.omega[2] = est.gyros_bs.omega_k[2].clone();
-                if bp.latency {
-                    ctrl.state
-                        .gmb_k
-                        .update_gimbal_coordinates(&[late_meas.roll, late_meas.pitch, late_meas.yaw_p]);
-                } else {
-                    ctrl.state
-                        .gmb_k
-                        .update_gimbal_coordinates(&[meas.roll, meas.pitch, meas.yaw_p]);
-                }
-                ctrl.state.piv_angle = est.piv_angle;
-                ctrl.state.piv_speed = ctrl.pivot.omega_request;
-                ctrl.state.rw_hs = bp.x[20];
-                ctrl.state.rw_hs_nom = ctrl.pivot.omega_rw_nom*ctrl.pivot._i_rw;
-                fc.roll = ctrl.state.gmb_d.roll;
-                fc.pitch = ctrl.state.gmb_d.pitch-bp.pitch_nom;
-            } else {
-                ctrl.state.eq_k = sim_state.eq_k.clone();
-                ctrl.state.omega[0] = bp.omega_m[0].clone();
-                ctrl.state.omega[1] = bp.omega_m[1].clone();
-                ctrl.state.omega[2] = bp.omega_m[2].clone();
+        if bp.ctrl_from_est {
+            ctrl.state.eq_k = est.eq_hat_k.clone();
+            ctrl.state.update_current_horizontal_coordinates();           
+            
+            ctrl.state.omega[0] = est.gyros_bs.omega_k[0].clone();
+            ctrl.state.omega[1] = est.gyros_bs.omega_k[1].clone();
+            ctrl.state.omega[2] = est.gyros_bs.omega_k[2].clone();
+            if bp.latency {
                 ctrl.state
-                .gmb_k
-                .update_gimbal_coordinates(&[bp.x[16], bp.x[17], -sim_state.hor.az.clone()]);
-                fc.roll = ctrl.state.gmb_d.roll;
-                fc.pitch = ctrl.state.gmb_d.pitch-bp.pitch_nom;
+                    .gmb_k
+                    .update_gimbal_coordinates(&[late_meas.roll, late_meas.pitch, late_meas.yaw_p]);
+            } else {
+                ctrl.state
+                    .gmb_k
+                    .update_gimbal_coordinates(&[meas.roll, meas.pitch, meas.yaw_p]);
             }
+            ctrl.state.piv_angle = est.piv_angle;
+            ctrl.state.piv_speed = ctrl.pivot.omega_request;
+            ctrl.state.rw_hs = bp.x[20];
+            ctrl.state.rw_hs_nom = ctrl.pivot.omega_rw_nom*ctrl.pivot._i_rw;
+            fc.roll = ctrl.state.gmb_d.roll;
+            fc.pitch = ctrl.state.gmb_d.pitch-bp.pitch_nom;
+        } else {
+            ctrl.state.eq_k = sim_state.eq_k.clone();
+            ctrl.state.omega[0] = bp.omega_m[0].clone();
+            ctrl.state.omega[1] = bp.omega_m[1].clone();
+            ctrl.state.omega[2] = bp.omega_m[2].clone();
+            ctrl.state
+            .gmb_k
+            .update_gimbal_coordinates(&[bp.x[16], bp.x[17], -sim_state.hor.az.clone()]);
+            fc.roll = ctrl.state.gmb_d.roll;
+            fc.pitch = ctrl.state.gmb_d.pitch-bp.pitch_nom;
+        }
 
-            // grab_vec3(&mut ctrl.state.omega, &bp.omega_m);
+        // grab_vec3(&mut ctrl.state.omega, &bp.omega_m);
+        
+        ctrl.rw.omega = bp.omega_rw;
+        
+
+        // ctrl.update_ctrl();
+
+
+        // Disturbance generation
+        // wind.generate();
+        // tau_applied[0] = wind.tau[0].clone() - bp.damp[0] * bp.d_theta_dt[0];
+        // tau_applied[1] = wind.tau[1].clone() - bp.damp[1] * bp.d_theta_dt[1];
+        // tau_applied[2] = wind.tau[2].clone() - bp.damp[2] * bp.d_theta_dt[2];
+
+
+        // update actual torque vector with applied torques
+
+        // if step < 1500{
+        ctrl.update_ctrl();
+
+        if servo.enable{
+            if fc.ff_flag{
+                servo.propogate(&ctrl.error.err_comb_th, &ctrl.error.err_rate_lqr);
+            }
             
-            ctrl.rw.omega = bp.omega_rw;
-            
-
-            // ctrl.update_ctrl();
-
-
-            // Disturbance generation
-            // wind.generate();
-            // tau_applied[0] = wind.tau[0].clone() - bp.damp[0] * bp.d_theta_dt[0];
-            // tau_applied[1] = wind.tau[1].clone() - bp.damp[1] * bp.d_theta_dt[1];
-            // tau_applied[2] = wind.tau[2].clone() - bp.damp[2] * bp.d_theta_dt[2];
-
-
-            // update actual torque vector with applied torques
-
-            // if step < 1500{
-                ctrl.update_ctrl();
+        }
+// 
+        if (step % 10) < 1 {  
                 // ctrl.pivot.calculate_pivot_speed(&ctrl.rw, &fc.u[0]);
+                // if ctrl.error.err_comb_th.norm() > 0.01{
+                //     fc.reset();
+                // }
                 fc.get_control_input();
+
+                if servo.enable{
+                    servo.get_control_input(&ctrl.error.err_comb_th, &ctrl.error.err_rate);
+                }
+
+                
+                if ctrl.error.err_comb_th.norm() < 0.001 && (servo.enable==false) {
+                    // println!("IT HAPPENED");
+                    servo.enable=true;
+                    servo_multiplier = 1.0;
+
+                } 
+                servo.enable=true;
+                    servo_multiplier = 1.0;
+                // } else {
+                //     println!("Norm: {}", ctrl.error.err_comb_th.norm() );
+                // }
                 // ctrl.pivot.calculate_pivot_speed(&ctrl.rw, &fc.u[0]);
                 // tau_applied[6] = 1.0*ctrl.rw.tau_applied; //yaw
                 // tau_applied[7] = 1.0*ctrl.fmot_roll.tau_applied; //roll
                 // tau_applied[8] = 1.0*ctrl.fmot_pitch.tau_applied; //pitch
-                let tau_req_yaw = ctrl.rw.tau_applied ; //yaw
-                let tau_req_roll = ctrl.fmot_roll.tau_applied + fc.ff_r; //roll
-                let tau_req_pitch = ctrl.fmot_pitch.tau_applied + (1.0*fc.ff_p); //pitch
+                tau_req_yaw = ctrl.rw.tau_applied - servo_multiplier*servo.tau_y_lim; //yaw
+                tau_req_roll = ctrl.fmot_roll.tau_applied + fc.ff_r + servo_multiplier*servo.tau_r_lim; //roll
+                tau_req_pitch = ctrl.fmot_pitch.tau_applied + (1.0*fc.ff_p) + 1.0*servo_multiplier*servo.tau_p_lim; //pitch
                 // println!("pitch ff{}", &fc.ff_p);
                 // fc.u = fc.u;
-                
+                println!("yaw requested {} roll req: {} pitch req: {}", tau_req_yaw, tau_req_roll, tau_req_pitch);
                 // let diff_yaw = tau_req_yaw - tau_applied[6];
                 // let diff_roll = tau_req_roll - tau_applied[7];
                 // let diff_pitch = tau_req_pitch - tau_applied[8];
@@ -372,8 +441,10 @@ fn main() {
             //     println!("step: {:}", step);
             // }
         }
+        
 
-        sc::push_record(&t, &bp, &est, &ctrl, &meas, &sim_state, &flex, &fc).unwrap();
+
+        sc::push_record(&t, &bp, &est, &ctrl, &meas, &sim_state, &flex, &fc, &servo).unwrap();
         js::read_gains(&mut ctrl, &mut bp, &mut est, &mut fc, &mut flex); // read in gains from json file (for tuning)
 
         
@@ -384,6 +455,8 @@ fn main() {
         //     let mut fc = new_fc.clone();
 
         // }
+
+        println!("RW Applied: {} Request{}", tau_applied[6], tau_req_yaw);
 
     }
     println!("bit one step {}", now1.elapsed().as_secs_f64());

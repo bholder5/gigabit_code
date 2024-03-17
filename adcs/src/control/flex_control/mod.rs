@@ -25,6 +25,7 @@ pub struct DampingControl{
     pub ff_r: f64,
     pub ff_p: f64,
     pub fine_point: bool,
+    pub ff_flag: bool,
 }
 
 impl DampingControl{
@@ -39,6 +40,8 @@ impl DampingControl{
     pub fn get_control_input(&mut self){
         if self.roll_torque < self.roll_torque_max{
             self.roll_torque = self.roll_torque + 0.005;
+        } else {
+            self.ff_flag = true;
         }
         let ff_p_d = self.pitch * self.pitch_k;
 
@@ -110,6 +113,7 @@ impl DampingControl{
         let ff_r = 0.0;
         let ff_p = 0.0;
         let fine_point = false;
+        let ff_flag = false;
 
         let damping_control = DampingControl {
             pc_p,
@@ -128,6 +132,7 @@ impl DampingControl{
             ff_r,
             ff_p,
             fine_point,
+            ff_flag,
         };
         return damping_control;
 

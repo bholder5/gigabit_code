@@ -8,6 +8,7 @@ pub mod motors;
 pub mod state;
 pub mod flex_control;
 pub mod lqr;
+pub mod servo;
 
 use error as er;
 use gains as gns;

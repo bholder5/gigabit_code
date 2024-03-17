@@ -192,7 +192,39 @@ impl State {
         self.eq_k.extract_ra_dec_fr_from_rotmat();
         trace!("update_current_equatorial_coordinates end");
     }
+    /// Function to update the current horizontal coordinates
+    /// from the current equatorial coordinates
+    ///
+    /// # Detailed Explanation
+    ///
+    /// This function takes in the current equatorial coordinates,
+    /// rotates them, and updates the current horizontal coordinates
+    /// according to: $C_{b,H} = C_{b,E}C_{E,H}$ where $C_{b,H} is
+    /// the orientation in the horizontal frame, and C_{b,E} is the
+    /// orientation in the equatorial frame.
+    ///
+    /// # Arguments
+    ///
+    /// None. Equatorial coordinates alreayd passed from the estimation
+    /// 
+    /// # Results
+    ///
+    /// - `hor: horizontal::Horizontal` - a fully updated current
+    /// horizontal orientation
+    pub fn update_current_horizontal_coordinates(&mut self) {
+        trace!("update_current_horizontal_coordinates start");
+        self.eq_k.calculate_rotation_matrix();
+        // I believe this is already updates but jsut in case:
+        self.update_hor_to_eq_conversion();
 
+        // Update the horizontal rotation matrix
+        // This involves multiplying the equatorial rotation matrix by the inverse of the conversion matrix
+        self.hor.rot = self.eq_k.rot * self.ceh; // ceh is the conversion matrix from equatorial to horizontal
+
+        // Extract the horizontal coordinates (ir, el, az) from the rotation matrix
+        self.hor.extract_az_el_ir_from_rotmat();
+        trace!("update_current_horizontal_coordinates end");
+    }
     /// Function to update the desired gimbal coordinates from the desired
     /// equatorial coordinates
     ///
