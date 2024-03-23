@@ -61,8 +61,6 @@ pub struct Error {
     pub scale_blend: f64,
     /// the blend scalar describing where in between fine pointing and slewing
     pub err_weight: f64,
-    /// flag to ignore pitch and rooll when slewing.
-    pub ign_pr: bool,
     
     pub amplitude: f64,
     pub period: f64,
@@ -95,7 +93,6 @@ impl Error {
         let scale = 2.25;
         let scale_blend = 1.0;
         let err_weight = 1.0;
-        let ign_pr = true;
         let amplitude = 1.0;
         let period = 30.0;
         let max_err = 0.0;
@@ -124,7 +121,6 @@ impl Error {
             scale,
             scale_blend,
             err_weight,
-            ign_pr, //flag to ignore pitch and roll
             amplitude,
             period,
             max_err,
@@ -195,6 +191,7 @@ impl Error {
         // println!("norm fine error: {}", norm_fine_err);
 
         let mapped_err = state.gmb_k.gmm_i * err_vec;
+        // let mapped_err = err_vec;
         // let mut state_d = state.gmb_d.clone();
         // state_d.calculate_gimbal_mapping_matrix();
         // state_d.calculate_inverse_gimbal_mapping_matrix();
@@ -236,7 +233,6 @@ impl Error {
             self.scale_blend = 1.0;
             // println!("{}\n {} \n{}\n", _err_gmb.x, _err_gmb.y,_err_gmb.z );
             
-            self.ign_pr = false;
         } else {
             
             self.err_gmb_th
@@ -247,7 +243,6 @@ impl Error {
                 if _err_gmb.z.abs() > 0.015{
                     _err_gmb.x = 0.0;
                     _err_gmb.y = 0.0;
-                    self.ign_pr = true;
                 }
                 self.err_comb_th = _err_gmb.clone();
                 slew_flag = true;
@@ -257,9 +252,7 @@ impl Error {
                 
                 // println!("greater than u.upper {}", &norm_fine_err);
             } else {
-                if _err_gmb.z.abs() < 0.025{
-                    // self.ign_pr = false;
-                }
+                
                 // println!("between u.lower and u.upper {}", &norm_fine_err);
                 let err_weight: f64 =
                     (norm_fine_err - self.u_lower) / (self.u_upper - self.u_lower);
@@ -317,109 +310,13 @@ impl Error {
 
         let mut _roll_rate_des: f64 = 0.0;
         let mut _pitch_rate_des: f64 = 0.0;
-        let mut _yaw_rate_des: f64 = 0.0;
-
-        // if slew_flag == &true {
-            // let g_const: f64 = 0.350;
-            // let g_lin: f64 = 1400.0;
-            // let g_const: f64 = 1.0;
-            // let g_lin: f64 = 1000.0;
-            
-
-            // let temp1: f64 = g_lin.powi(2) * PI / (4.0 * g_const.powi(2));
-            // let temp2: f64 = temp1.sqrt();
-            // let temp3: f64 = (2.0 * g_const) / (g_lin * PI);
-
-            // _roll_rate_des = self.err_comb_th.x.signum()
-            //     * (2.0
-            //         * g_const
-            //         * (self.err_comb_th.x.abs()
-            //             * stat::function::erf::erf(self.err_comb_th.x.abs() * temp2))
-            //         + (temp3 * ((-self.err_comb_th.x.powi(2) * temp1).exp() - 1.0)))
-            //         .sqrt() * self.scale_blend;
-
-            // _pitch_rate_des = self.err_comb_th.y.signum()
-            //     * (2.0
-            //         * g_const
-            //         * (self.err_comb_th.y.abs()
-            //             * stat::function::erf::erf(self.err_comb_th.y.abs() * temp2))
-            //         + (temp3 * ((-self.err_comb_th.y.powi(2) * temp1).exp() - 1.0)))
-            //         .sqrt() * self.scale_blend ;
-            // _yaw_rate_des = self.err_comb_th.z.signum()
-            //     * (2.0
-            //         * g_const
-            //         * (self.err_comb_th.z.abs()
-            //             * stat::function::erf::erf(self.err_comb_th.z.abs() * temp2))
-            //         + (temp3 * ((-self.err_comb_th.z.powi(2) * temp1).exp() - 1.0)))
-            //         .sqrt() * self.scale_blend;
-
-
-            // let max_v = 0.001;
-            // let slope = 100.0;
-            // _roll_rate_des = max_v*self.err_comb_th.x.signum()
-            //             * stat::function::erf::erf(self.err_comb_th.x.abs() * slope);
-
-            // // let max_v = 0.001;
-            // // let slope = 200.0;
-            // // _roll_rate_des = _roll_rate_des - max_v*self.err_comb_th.x.signum()
-            // //             * stat::function::erf::erf(self.err_comb_th.x.abs() * slope);
-
-            // let max_v = 0.0015;
-            // let slope = 300.0;
-
-
-            // _pitch_rate_des = max_v*self.err_comb_th.y.signum()
-            //         * stat::function::erf::erf(self.err_comb_th.y.abs() * slope);
-
-            // let max_v = 4.8;
-            // let slope = 0.013;
-            
-            // _yaw_rate_des = max_v*self.err_comb_th.z.signum()
-            //         * stat::function::erf::erf(self.err_comb_th.z.abs() * slope);
-
-            // let max_v = 0.0000001;
-            // let slope = 700000.0;
-            
-            // _yaw_rate_des = _yaw_rate_des - max_v*self.err_comb_th.z.signum()
-            //         * stat::function::erf::erf(self.err_comb_th.z.abs() * slope);
-
-            // _roll_rate_des = self.err_comb_th.x.signum() * self.err_comb_th.x.abs() * self.scale_blend;
-
-            // _pitch_rate_des = self.err_comb_th.y.signum() * self.err_comb_th.y.abs() * self.scale_blend;
-            // _yaw_rate_des = self.err_comb_th.z.signum() * self.err_comb_th.z.abs() * self.scale_blend;
-        // }
-        // println!("{}", &_yaw_rate_des);
-
-
-        // if self.err_comb_th.x.abs()<0.0003{
-
-        //     if self.err_comb_th.x.abs() < 0.0000001 && self.phase_shift < 10.0{
-        //         self.phase_shift = self.current_time;
-        //         // println!("phase timing {}", self.phase_shift);
-        //     }
-
-        //     sine_value = 0.00001 * self.amplitude * ((2.0 * PI / self.period) * (self.current_time-self.phase_shift)).cos();
-
-        //     // if self.phase_shift > 10.0 && self.err_comb_th.x.abs() > 0.00001 && (self.err_comb_th.x.signum() == sine_value.signum()){
-        //         // self.amplitude = -self.amplitude;
-        //         println!("Sine Value {} time: {} phase shift: {}", sine_value, self.current_time, self.phase_shift);
-        //     // }
-        //     if self.phase_shift < 10.0{
-        //         sine_value = 0.0;
-        //     }
-
-            
-
-        // }
+        let mut _yaw_rate_des: f64 = 0.0;     
 
         let max_v = 0.01;
         let slope = 0.4*15.0;
 
         _roll_rate_des = max_v*self.err_comb_th.x.signum()
-                    * stat::function::erf::erf(self.err_comb_th.x.abs() * slope);
-        // let mut sine_value = 0.0;
-        // _roll_rate_des = _roll_rate_des + sine_value;
-        
+                    * stat::function::erf::erf(self.err_comb_th.x.abs() * slope);      
 
         let max_v = 0.05;
         let slope = 40.0*0.025;
@@ -432,52 +329,17 @@ impl Error {
 
         _yaw_rate_des = max_v*self.err_comb_th.z.signum()
                 * stat::function::erf::erf(self.err_comb_th.z.abs() * slope);
-        let max_accel = 0.01 * self._ctrl_dt;
-        let des_roll_accel = _roll_rate_des - self.rate_des.x;
-
-        // if des_roll_accel.abs() > max_accel {
-        //     if des_roll_accel < 0.0 {
-        //         _roll_rate_des = _d_theta.x - max_accel;
-        //     } else {
-        //         _roll_rate_des = _d_theta.x + max_accel;
-        //     }
-        // }
-
-        // let des_pitch_accel = _pitch_rate_des - self.rate_des.y;
-
-        // if des_pitch_accel.abs() > max_accel {
-        //     if des_pitch_accel < 0.0 {
-        //         _pitch_rate_des = _d_theta.y - max_accel;
-        //     } else {
-        //         _pitch_rate_des = _d_theta.y + max_accel;
-        //     }
-        // }
-
-        // let des_yaw_accel = _yaw_rate_des - self.rate_des.z;
-
-        // if des_yaw_accel.abs() > max_accel {
-        //     if des_yaw_accel < 0.0 {
-        //         _yaw_rate_des = _d_theta.z - max_accel;
-        //     } else {
-        //         _yaw_rate_des = _d_theta.z + max_accel;
-        //     }
-        //     // println!("{} {} {} {}", max_accel, des_yaw_accel, _yaw_rate_des, self.rate_des.z);
-        // }
 
         self.rate_des = na::Vector3::new(_roll_rate_des, _pitch_rate_des, _yaw_rate_des);
 
+        // Based on boresight gyros
         let mut err_gmb_rate: [f64; 3] = [
             (_roll_rate_des - _d_theta.x),
             (_pitch_rate_des - _d_theta.y),
             (_yaw_rate_des - _d_theta.z),
         ];
-
-        // if self.ign_pr{
-        //     err_gmb_rate[1] = err_gmb_rate[1]/2.0;
-        //     err_gmb_rate[0] = err_gmb_rate[0]/2.0;
-        //     println!("IGNORING PITCH AND ROLL");
-        // }
         
+        // Based on the gimbal gyros
         let err_gmb_rate2: [f64; 3] = [
             (_roll_rate_des - state.omega_gond[1]),
             (_pitch_rate_des - state.omega_gond[3]),
@@ -489,9 +351,7 @@ impl Error {
 
         self.err_rate = na::Vector3::<f64>::from_row_slice(&err_gmb_rate);
         trace!("update_pointing_velocity_error_terms end");
-        // println!("err_rate_sum {}, err_decay {}, err_rate {}, _ctrl_dt {}", self.err_rate_sum, self._err_decay, self.err_rate, self._ctrl_dt);
-        // println!("err_rate_sum {}, err_rate {} _d_theta {} gmm^-1 {} omega {}", self.err_rate_sum, self.err_rate, _d_theta,self.err_comb_th, state.omega);
-        // println!("des rate: {}, error {}", &self.rate_des[2], &self.err_comb_th.z);
+
         self.err_rate_sum = (self.err_rate_sum * self._err_decay_v) + (self.err_rate * self._ctrl_dt)
     }
 }

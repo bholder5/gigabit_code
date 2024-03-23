@@ -95,8 +95,8 @@ fn main() {
 
     // Initialize with an achievable target
     ctrl.state.gmb_d.roll = 0.1;
-    ctrl.state.gmb_d.pitch = -0.7;
-    ctrl.state.gmb_d.yaw = -0.02;
+    ctrl.state.gmb_d.pitch = -0.80;
+    ctrl.state.gmb_d.yaw = -0.2;
     ctrl.state.gmb_d.calculate_rotation_matrix();
     ctrl.state.update_desired_eq_from_gmb();
     let mut servo_multiplier = 0.0;
@@ -109,12 +109,12 @@ fn main() {
     trace!("START");
     let now1 = Instant::now();
 
-    for _step in 0..3600000 as usize {
+    for _step in 0..800000 as usize {
         
         ///////// beginning of the simulation loop
         /////////////////////////////////////////
         // fc.u = fc.u * 0.0;
-        println!("Tau applied: {} {} {}", tau_applied[6], tau_applied[7], tau_applied[8]);
+        // println!("Tau applied: {} {} {}", tau_applied[6], tau_applied[7], tau_applied[8]);
         // println!("yaw:{} \nrol: {} \n pit: {}\n rw: {}\n bow: {}\nstn: {}\nprt: {}\n sb: {}\n t: {}\n", tau_applied[6], tau_applied[7], tau_applied[8], fc.u[0], fc.u[1], fc.u[2], fc.u[3], fc.u[4], &t);
         let start_time = Instant::now();
         unsafe {
@@ -266,6 +266,7 @@ fn main() {
                 let sc: f64 = 1.0;
                 fc.err_weight = ctrl.error.err_weight.clone();
                 fc.pitch = (&ctrl.state.gmb_d.pitch - &bp.pitch_nom);
+                fc.pitch_nom = bp.pitch_nom;
                 // println!("gmb_d pitch {} pitch nom {} calc: {}",&ctrl.state.gmb_d.pitch, &bp.pitch_nom, (&ctrl.state.gmb_d.pitch - &bp.pitch_nom));
                 // println!("err weight {}", fc.err_weight);
                 // println!("fc call: t:{}", &t);
@@ -378,9 +379,12 @@ fn main() {
                 tau_req_yaw = ctrl.rw.tau_applied - servo_multiplier*servo.tau_y_lim; //yaw
                 tau_req_roll = ctrl.fmot_roll.tau_applied + fc.ff_r + servo_multiplier*servo.tau_r_lim; //roll
                 tau_req_pitch = ctrl.fmot_pitch.tau_applied + (1.0*fc.ff_p) + 1.0*servo_multiplier*servo.tau_p_lim; //pitch
+                // tau_req_yaw = 0.0; //yaw
+                // tau_req_roll = fc.ff_r; //roll
+                // tau_req_pitch = (1.0*fc.ff_p); //pitch
                 // println!("pitch ff{}", &fc.ff_p);
                 // fc.u = fc.u;
-                println!("yaw requested {} roll req: {} pitch req: {}", tau_req_yaw, tau_req_roll, tau_req_pitch);
+                // println!("yaw requested {} roll req: {} pitch req: {}", tau_req_yaw, tau_req_roll, tau_req_pitch);
                 // let diff_yaw = tau_req_yaw - tau_applied[6];
                 // let diff_roll = tau_req_roll - tau_applied[7];
                 // let diff_pitch = tau_req_pitch - tau_applied[8];
@@ -456,7 +460,7 @@ fn main() {
 
         // }
 
-        println!("RW Applied: {} Request{}", tau_applied[6], tau_req_yaw);
+        // println!("RW Applied: {} Request{}", tau_applied[6], tau_req_yaw);
 
     }
     println!("bit one step {}", now1.elapsed().as_secs_f64());
