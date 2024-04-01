@@ -10,7 +10,7 @@ mod bindings;
 mod initialization;
 mod json_handling;
 mod logging;
-mod sim_csv;
+mod sim_csvf64;
 mod measurements;
 mod disturbances;
 mod flex_sim;
@@ -19,7 +19,7 @@ use adcs::{control::*, estimation::*, verification::*, dist_est};
 use initialization::*;
 use json_handling as js;
 use logging::*;
-use sim_csv as sc;
+use sim_csvf64 as sc;
 use measurements as ms;
 use disturbances as dist;
 use flex_sim as f_sim;
@@ -95,8 +95,8 @@ fn main() {
 
     // Initialize with an achievable target
     ctrl.state.gmb_d.roll = 0.1;
-    ctrl.state.gmb_d.pitch = -0.80;
-    ctrl.state.gmb_d.yaw = -0.2;
+    ctrl.state.gmb_d.pitch = -0.75;
+    ctrl.state.gmb_d.yaw = -0.1;
     ctrl.state.gmb_d.calculate_rotation_matrix();
     ctrl.state.update_desired_eq_from_gmb();
     let mut servo_multiplier = 0.0;
@@ -195,9 +195,9 @@ fn main() {
         //send theta to bp for use in calculating the angular velocity vector
         bp.x = Vector21::from_row_slice(y_result.as_ref());
         bp.update_state();
-        bp.get_omega_meas();
         bp.get_orientation_vec(&flex);
         bp.get_orientation_rots(&flex, &mut meas);
+        bp.get_omega_meas();
         bp.get_rw_speed();
 
         // if &ctrl.slew_flag == &true {
@@ -345,6 +345,7 @@ fn main() {
         if servo.enable{
             if fc.ff_flag{
                 servo.propogate(&ctrl.error.err_comb_th, &ctrl.error.err_rate_lqr);
+                
             }
             
         }

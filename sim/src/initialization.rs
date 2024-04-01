@@ -83,6 +83,7 @@ impl Params {
     ///`self.C1` - the new current orientation rotation matrix
     pub fn get_omega_meas(&mut self) -> () {
         trace!("get_omega_meas start");
+        // THESE ARE ALL WITHOUT FLEX IN THE MEASUREMENT
         let mut om: [f64; 3] = [0.; 3];
         unsafe {
             trace!("compute_angular_velocity_C start");
@@ -178,11 +179,17 @@ impl Params {
        
         trace!("get_orientation_rots start");
         // let mut c_vec :[f64; 9] = [0.0; 9];
+        // ADD FLEX TO THETA BEFORE CALCS
+        let mut theta = self.theta;
+        theta[6] = theta[6] + flex.c_pos_out[0];
+        theta[7] = theta[7] + flex.c_pos_out[1];
+        theta[8] = theta[8] + flex.c_pos_out[3];
+
         let mut c_vec: [[f64; 3]; 3] = [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]];
         unsafe {
             compute_rotation_mat_roll_C(
                 self._zn.as_mut_ptr(),
-                self.theta.as_ptr(),
+                theta.as_ptr(),
                 c_vec.as_mut_ptr(),
             )
         }
@@ -200,7 +207,7 @@ impl Params {
         unsafe {
             compute_rotation_mat_yaw_C(
                 self._zn.as_mut_ptr(),
-                self.theta.as_ptr(),
+                theta.as_ptr(),
                 c_vec.as_mut_ptr(),
             )
         }
@@ -213,6 +220,23 @@ impl Params {
         ));
 
         meas.c7h = rotmat.clone();
+
+        let mut c_vec: [[f64; 3]; 3] = [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]];
+        unsafe {
+            compute_rotation_mat_C(
+                self._zn.as_mut_ptr(),
+                theta.as_ptr(),
+                c_vec.as_mut_ptr(),
+            )
+        }
+        //orientation in boresight so add flex here
+        let c = c_vec.as_ref();
+
+        // println!("{:?}", [c[0], c[1], c[2]].concat());
+        let rotmat = na::Rotation3::<f64>::from_matrix(&na::Matrix3::<f64>::from_row_slice(
+            &[c[0], c[1], c[2]].concat(),
+        ));
+        meas.cbh = rotmat.clone();
         //
         //
         //
@@ -292,7 +316,7 @@ pub fn init_bit() -> Params {
     // ----------------------------------
     let theta = Vector9::from_row_slice(&[
         0.,
-        0.0 * 0.5 * PI / 180.0,
+        0.25 * 0.5 * PI / 180.0,
         0.00 * 0.0 * PI / 180.0,
         0.00 * 0.5 * PI / 180.0,
         0.00 * 0.0125 * PI / 180.0,

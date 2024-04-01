@@ -59,6 +59,36 @@ impl Gimbal {
         // println!("gimbal rot: {}", self.rot);
         trace!("calculate_rotation_matrix end");
     }
+    pub fn calculate_rotation_matrix_7h(&mut self) -> na::Rotation3<f64> {
+        // trace!("calculate_rotation_matrix start");
+        // let rotx =
+        //     na::Rotation3::<f64>::from_axis_angle(&na::Vector3::x_axis(), self.roll).inverse();
+        // let roty =
+        //     na::Rotation3::<f64>::from_axis_angle(&na::Vector3::y_axis(), self.pitch).inverse();
+        let rotz =
+            na::Rotation3::<f64>::from_axis_angle(&na::Vector3::z_axis(), self.yaw).inverse();
+
+        // calculating the CbH using the gimbal euler 312 rotation.
+        let rot = rotz;
+        return rot;
+        // println!("gimbal rot: {}", self.rot);
+        // trace!("calculate_rotation_matrix end");
+    }
+    pub fn calculate_rotation_matrix_8h(&mut self) -> na::Rotation3<f64> {
+        // trace!("calculate_rotation_matrix start");
+        let rotx =
+            na::Rotation3::<f64>::from_axis_angle(&na::Vector3::x_axis(), self.roll).inverse();
+        // let roty =
+            // na::Rotation3::<f64>::from_axis_angle(&na::Vector3::y_axis(), self.pitch).inverse();
+        let rotz =
+            na::Rotation3::<f64>::from_axis_angle(&na::Vector3::z_axis(), self.yaw).inverse();
+
+        // calculating the CbH using the gimbal euler 312 rotation.
+        let rot = rotx * rotz;
+        return rot;
+        // println!("gimbal rot: {}", self.rot);
+        // trace!("calculate_rotation_matrix end");
+    }
     /// Function to update the gimbal euler angles directly from a vector
     ///
     /// # Detailed Explanation

@@ -59,8 +59,20 @@ impl Meas {
         let ceh = rotz * roty;
 
         let w_di = na::Vector3::<f64>::new(0.0, 0.0, 15.04108/206265.0);
+        let w_di_h = ceh.transpose() * w_di;
         // need to add in flexible affects.
-        self.gyros_bs.omega_k = bp.omega_m + (self.cbh * ceh.transpose() * w_di);
+        
+        self.gyros_bs.omega_k = bp.omega_m + (self.cbh * w_di_h);
+
+        // ENCODERS
+
+        if flex.flex_enable{
+            self.roll = bp.x[16] + flex.c_pos_out[1];
+            self.pitch = bp.x[17] + flex.c_pos_out[3];
+        } else {
+            self.roll = bp.x[16];
+            self.pitch = bp.x[17];
+        }
 
         // frame based gyros
         // self.gyro_bow.omega_k = bp.omega_m_roll + (self.c8h * ceh.transpose() * w_di);
@@ -68,11 +80,15 @@ impl Meas {
         // self.gyro_of.omega_k = bp.omega_m_yaw + (self.c7h * ceh.transpose() * w_di);
         // self.gyro_port.omega_k = self.gyros_bs.omega_k.clone();
         // self.gyro_sb.omega_k = self.gyros_bs.omega_k.clone();
-        self.gyro_bow.omega_k = bp.omega_m_roll;
-        self.gyro_stern.omega_k = bp.omega_m_roll;
-        self.gyro_of.omega_k = bp.omega_m_yaw;
-        self.gyro_port.omega_k = bp.omega_m.clone();
-        self.gyro_sb.omega_k = bp.omega_m.clone();
+        let omega_m_roll = bp.omega_m_roll.clone() + self.c8h * w_di_h;
+        let omega_m_yaw = bp.omega_m_yaw.clone() + self.c7h * w_di_h;
+        let omega_m_pitch = bp.omega_m.clone() + self.cbh * w_di_h;
+
+        self.gyro_bow.omega_k = omega_m_roll;
+        self.gyro_stern.omega_k = omega_m_roll;
+        self.gyro_of.omega_k = omega_m_yaw;
+        self.gyro_port.omega_k = omega_m_pitch;
+        self.gyro_sb.omega_k = omega_m_pitch;
         
 
         // add flexible affects
@@ -116,17 +132,13 @@ impl Meas {
         // println!("{} {} {} {} {}", self.gyro_bow.om_axial,self.gyro_stern.om_axial,self.gyro_port.om_axial,self.gyro_sb.om_axial,self.gyro_of.om_axial);
 
         
-        // ENCODERS
-
-        if flex.flex_enable{
-            self.roll = bp.x[16] + flex.c_pos_out[1];
-            self.pitch = bp.x[17] + flex.c_pos_out[3];
-        } else {
-            self.roll = bp.x[16];
-            self.pitch = bp.x[17];
-        }
         
-        self.yaw_p = -sim_state.hor.az;
+        
+        //Cant tell if I should add the flex out because this is calculated from boresight which may already contain it?
+        // BUT add flex into boresight gyros and thus boresight estimate. Not correction though?
+        self.yaw_p = -sim_state.hor.az + flex.c_pos_out[0];
+
+        // adjust measurements for 
 
     }
 }

@@ -303,6 +303,23 @@ impl Error {
         // println!("start of pointing velocity error terms");
         trace!("update_pointing_velocity_error_terms start");
 
+        let ceh = state.ceh;
+        let w_di = na::Vector3::<f64>::new(0.0, 0.0, 15.04108/206265.0);
+        let w_di_h = ceh.transpose() * w_di;
+
+        state.gmb_k.calculate_rotation_matrix();
+        let c7h = state.gmb_k.calculate_rotation_matrix_7h();
+        let c8h = state.gmb_k.calculate_rotation_matrix_8h();
+
+        let wdi_7 = c7h * w_di_h;
+        let wdi_8 = c8h * w_di_h;
+        let wdi_9 = state.gmb_k.rot * w_di_h;
+
+
+
+        // println!("7: {} 8: {} 9: {}", wdi_7, wdi_8, wdi_9);
+        // println!("c8h: {}, roll {}, c7h {}, yaw {}, cbh {} pitch {}", c8h, state.gmb_k.roll, c7h, state.gmb_k.yaw, state.gmb_k.rot, state.gmb_k.pitch);
+
         // println!("{:?}", state.gmb_k);
         let _d_theta: na::Vector3<f64> = state.gmb_k.gmm_i * state.omega;
 
@@ -312,23 +329,24 @@ impl Error {
         let mut _pitch_rate_des: f64 = 0.0;
         let mut _yaw_rate_des: f64 = 0.0;     
 
-        let max_v = 0.01;
-        let slope = 0.4*15.0;
+        let max_v = 0.005;
+        let slope = 100.0;
 
         _roll_rate_des = max_v*self.err_comb_th.x.signum()
-                    * stat::function::erf::erf(self.err_comb_th.x.abs() * slope);      
+                    * stat::function::erf::erf(self.err_comb_th.x.abs() * slope) - 0.0*wdi_8[0];      
 
         let max_v = 0.05;
-        let slope = 40.0*0.025;
+        let slope = 400.0*0.025;
 
         _pitch_rate_des = max_v*self.err_comb_th.y.signum()
-                * stat::function::erf::erf(self.err_comb_th.y.abs() * slope);
+                * stat::function::erf::erf(self.err_comb_th.y.abs() * slope) - 0.0*wdi_9[1];
 
-        let max_v = 0.04/20.0;
-        let slope = 64000.5/1.0;
+        let max_v = 0.008/1.0;
+        let slope = 15000.0/1.0;
+
 
         _yaw_rate_des = max_v*self.err_comb_th.z.signum()
-                * stat::function::erf::erf(self.err_comb_th.z.abs() * slope);
+                * stat::function::erf::erf(self.err_comb_th.z.abs() * slope) - wdi_7[2];
 
         self.rate_des = na::Vector3::new(_roll_rate_des, _pitch_rate_des, _yaw_rate_des);
 
@@ -340,9 +358,14 @@ impl Error {
         ];
         
         // Based on the gimbal gyros
+        // have to subtract the yaw motion that is read by roll
+        let omega_yfp = state.omega_gond[0]*state.gmb_k.roll.sin();
+
+        // add in diurnal motion
+        
         let err_gmb_rate2: [f64; 3] = [
             (_roll_rate_des - state.omega_gond[1]),
-            (_pitch_rate_des - state.omega_gond[3]),
+            (_pitch_rate_des - (state.omega_gond[3] - omega_yfp)),
             (_yaw_rate_des - state.omega_gond[0]),
         ];
 

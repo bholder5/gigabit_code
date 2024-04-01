@@ -9,8 +9,8 @@
         "kp_yaw": 0.0,
         "ki_yaw": 0.0,
         "kip_yaw": 0.0,
-        "piv_g_1": 1.25e-06,
-        "piv_g_2": 2.5e-07,
+        "piv_g_1": 1.25e-7,
+        "piv_g_2": 2.5e-6,
         "int_decay_spd": 4.0,
         "int_decay_pos": 20.5,
         "v_prof_scale": 1.0

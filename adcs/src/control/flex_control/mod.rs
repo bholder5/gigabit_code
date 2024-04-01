@@ -47,7 +47,7 @@ impl DampingControl{
             self.ff_flag = true;
         }
         
-        let ff_p_d = 0.99* self.pitch * self.pitch_k;
+        let ff_p_d =  self.pitch * self.pitch_k;
 
         // if ff_p_d.abs() > 4.0 {
         //     // self.move_pitch_nom = true;
@@ -97,8 +97,8 @@ impl DampingControl{
         let weight = (self.roll + 0.1)/0.2;
         let u: na::DVector<f64> = (weight * posi) + ((1.0-weight)*negi);
         self.u = u.clone();
-        self.ff_r = 0.99* ((weight * self.roll_torque) + ((1.0-weight)*-1.0*self.roll_torque));
-        println!("ffd roll {} ff_p {}", self.ff_r, self.ff_p);
+        self.ff_r =  ((weight * self.roll_torque) + ((1.0-weight)*-1.0*self.roll_torque));
+        // println!("ffd roll {} ff_p {}", self.ff_r, self.ff_p);
 
         // println!("tau: {} \n pitch {} \n vec_pos {} \n weight {}",self.u, self.pitch, vec_pos+vec_pitch, weight);
     }
