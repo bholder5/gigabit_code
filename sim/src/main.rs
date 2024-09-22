@@ -109,13 +109,15 @@ fn main() {
     trace!("START");
     let now1 = Instant::now();
 
-    for _step in 0..800000 as usize {
+    for _step in 0..300000 as usize {
         
         ///////// beginning of the simulation loop
         /////////////////////////////////////////
         // fc.u = fc.u * 0.0;
         // println!("Tau applied: {} {} {}", tau_applied[6], tau_applied[7], tau_applied[8]);
         // println!("yaw:{} \nrol: {} \n pit: {}\n rw: {}\n bow: {}\nstn: {}\nprt: {}\n sb: {}\n t: {}\n", tau_applied[6], tau_applied[7], tau_applied[8], fc.u[0], fc.u[1], fc.u[2], fc.u[3], fc.u[4], &t);
+        tau_applied = [0., 0., 0., 0., 0., 0., 0., 0., 0.];
+
         let start_time = Instant::now();
         unsafe {
             trace!("bit_one_step start");
@@ -123,15 +125,15 @@ fn main() {
                 bp.x.as_ptr(),
                 tau_applied.as_mut_ptr(),
                 bp.unlock.as_ptr(),
-                ctrl.pivot.omega_request/1.0,
-                true as u8,
+                0.0*ctrl.pivot.omega_request/1.0,
+                false as u8,
                 bp._dt,
                 bp._num_steps,
                 bp._tau_piv_max,
                 bp.pitch_nom,
                 flex.eta.as_ptr(),
                 fc.u.as_ptr(),
-                true as u8,
+                false as u8,
                 y_result.as_mut_ptr(),
                 flex_result.as_mut_ptr(),
                 
@@ -292,8 +294,8 @@ fn main() {
             ctrl.state.eq_k = est.eq_hat_k.clone();
             ctrl.state.update_current_horizontal_coordinates();           
             
-            ctrl.state.omega[0] = est.gyros_bs.omega_k[0].clone();
-            ctrl.state.omega[1] = est.gyros_bs.omega_k[1].clone();
+            ctrl.state.omega[0] = est.gyros_bs.omega_k[0].clone();//omega_k in est is the corrected gyro.
+            ctrl.state.omega[1] = est.gyros_bs.omega_k[1].clone();//omega_m in est is the measured gyro
             ctrl.state.omega[2] = est.gyros_bs.omega_k[2].clone();
             if bp.latency {
                 ctrl.state

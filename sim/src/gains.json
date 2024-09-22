@@ -19,11 +19,11 @@
     "pitch_des": -0.4,
     "yaw_des": -0.0,
     "new_targ": false,
-    "latency": true,
+    "latency": false,
     "ctrl_from_est": true,
     "est_reset": false,
     "flex_reset": false,
-    "flex_ctrl_enable":true,
+    "flex_ctrl_enable":false,
     "flex_ctrl_update": false,
-    "flex_sim_enable": true
+    "flex_sim_enable": false
 }

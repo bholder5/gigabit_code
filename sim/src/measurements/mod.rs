@@ -63,6 +63,7 @@ impl Meas {
         // need to add in flexible affects.
         
         self.gyros_bs.omega_k = bp.omega_m + (self.cbh * w_di_h);
+        
 
         // ENCODERS
 
@@ -111,9 +112,12 @@ impl Meas {
         self.gyro_sb.omega_k[1] = self.gyro_sb.omega_k[1] + flex.c_out[4];
         self.gyro_of.omega_k[2] = self.gyro_of.omega_k[2] + flex.c_out[0];
 
-        // println!("{}", self.gyro_bow.omega_m);
-
+        // println!("BEFORE:\n omega m {} \n omega k {}", self.gyros_bs.omega_m, self.gyros_bs.omega_k);
+        
         self.gyros_bs.generate_measurement();
+
+        // println!("AFTER :\n omega m {} \n omega k {}", self.gyros_bs.omega_m, self.gyros_bs.omega_k);
+
         self.gyro_bow.generate_measurement();
         self.gyro_stern.generate_measurement();
         self.gyro_port.generate_measurement();

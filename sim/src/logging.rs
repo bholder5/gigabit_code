@@ -40,7 +40,7 @@ pub fn init_log() -> () {
             .build(
                 Root::builder()
                     .appender("logfile")
-                    .build(LevelFilter::Off),
+                    .build(LevelFilter::Trace),
             );
 
         // unpack config and set flag based on success (1) or not (0)
@@ -101,7 +101,7 @@ pub fn init_log() -> () {
                     record.args()
                 )
             })
-            .filter(None, LevelFilter::Off)
+            .filter(None, LevelFilter::Trace)
             .init();
     }
 

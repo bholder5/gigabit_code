@@ -1,8 +1,7 @@
-//! Sub module for generating realistic gyroscop measurements
-//! 
-//! This includes injecting offsets, changes in scale and bias
-
 use nalgebra as na;
+use rand::prelude::*;
+use rand_distr::{Normal, Distribution};
+
 #[derive(Clone)]
 /// struct for the boresight gyroscope measurements generation
 pub struct Gyro_bs {
@@ -20,6 +19,8 @@ pub struct Gyro_bs {
     pub bias_drift: f64,
     /// axial reading for flexible measurements (the axis being read)
     pub om_axial: f64,
+    /// Standard deviation of the noise
+    pub noise_std_dev: f64,
 }
 
 impl Gyro_bs {
@@ -43,8 +44,10 @@ impl Gyro_bs {
             bias: na::Vector3::new(0.000001, -0.000005, 0.0000075),
             bias_drift: 0.0,
             om_axial: 0.0,
+            noise_std_dev: 0.0000,  // Example standard deviation for noise
         }
     }
+    
     //a default gyro with no bias and stuff
     pub fn new_def() -> Gyro_bs {
         Gyro_bs {
@@ -56,8 +59,9 @@ impl Gyro_bs {
             a_g_inv: na::Matrix3::identity(),
             // a_g_inv: na::Matrix3::<f64>::identity(),
             bias: na::Vector3::new(0.0, 0.0, 0.0),
-            bias_drift: 0.0,
+            bias_drift: 0.0, 
             om_axial: 0.0,
+            noise_std_dev: 0.00000,  // No noise
         }
     }
 
@@ -68,11 +72,12 @@ impl Gyro_bs {
     /// This function generates a realistic gyroscope measurement 
     /// following the below equation
     /// 
-    /// omega_m = (a_g_inv * c_bg * omega_k) - bias
+    /// omega_m = (a_g_inv * c_bg * omega_k) - bias + noise
     /// 
     /// where omega_k is the actual angular velocity, c_bg is the 
     /// gyroscope misalignment, a_g is the internal misalignment 
-    /// and scaling factor and bias is the gyroscope bias.
+    /// and scaling factor, bias is the gyroscope bias, and noise is 
+    /// Gaussian noise.
     /// 
     /// # Arguments
     /// 
@@ -80,13 +85,50 @@ impl Gyro_bs {
     /// `self.c_bg: na::Rotation3<f64>` - Gyroscope misalignment
     /// `self.a_g: na::Matrix3<f64>` - Gyroscope scaling factor
     /// `self.bias: na::Vector3<f64>` - Gyroscope bias
+    /// `self.noise_std_dev: f64` - Standard deviation of the noise
     /// 
     /// # Results
     /// 
     /// `self.omega_m: na::Vector3<f64>` - Measured angular velocity
     pub fn generate_measurement(&mut self) {
+        let dt: f64 = 2.0 / 1000.0;
+
+        // // KVH Characteristics
+        // let arw: f64 = 0.013;//deg/sqrt(hr)
+        // let bi: f64 = 0.05;
+
+        // Emcore 
+        let arw: f64 = 0.002;//deg/sqrt(hr)
+        let bi: f64 = 0.02; //deg/hour
+
+        //IxBlue
+        // let arw: f64 = 1.0*0.002;
+        // let bi: f64 = 1.0*0.0065;
+
+
+
+        // Convert ARW from deg/sqrt(hr) to rad/sqrt(Hz)
+        let arw_noise = arw.to_radians() / 60.0;
+
+        // Convert BI from deg/hr to deg/s
+        let bi_noise = bi.to_radians() / 3600.0;
+
+        let arw_dist = Normal::new(0.0, arw_noise / dt.sqrt()).unwrap();
+        let bi_dist = Normal::new(0.0, bi_noise * dt.sqrt()).unwrap();
+
+
+        let mut rng = thread_rng();
+
+
         // generate a realistic gyroscope measurement
         self.omega_m = (self.a_g_inv * self.c_bg_i * self.omega_k) - self.bias;
-                
+        
+        
+        // println!("Gyro before {}", self.omega_m);
+        // Add Gaussian noise to each component of omega_m
+        self.omega_m.x += (arw_dist.sample(&mut rng) + bi_dist.sample(&mut rng));
+        self.omega_m.y += (arw_dist.sample(&mut rng) + bi_dist.sample(&mut rng));
+        self.omega_m.z += (arw_dist.sample(&mut rng) + bi_dist.sample(&mut rng));
+        // println!("Gyro After {}", self.omega_m);
     }   
 }

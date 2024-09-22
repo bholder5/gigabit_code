@@ -316,10 +316,10 @@ pub fn init_bit() -> Params {
     // ----------------------------------
     let theta = Vector9::from_row_slice(&[
         0.,
-        0.25 * 0.5 * PI / 180.0,
-        0.00 * 0.0 * PI / 180.0,
+        1.0 * 0.5 * PI / 180.0,
+        1.0 * 0.5 * PI / 180.0,
         0.00 * 0.5 * PI / 180.0,
-        0.00 * 0.0125 * PI / 180.0,
+        0.00 * 0.5 * PI / 180.0,
         0.00 * -0.4 * PI / 180.0,
         0.0,
         0.0,
@@ -361,12 +361,12 @@ pub fn init_bit() -> Params {
     let _dt = 0.0002;
     let _num_steps: u16 = 5;
     let phi_act = [0.0; 3];
-    let unlock = Vector9::from_row_slice(&[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]);
+    let unlock = 1.0 * Vector9::from_row_slice(&[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]);
     let _tau_piv_max: f64 = 20.0;
     let _roll_theta_max: f64 = 6.0 * PI / 180.0;
     let _pitch_theta_max: f64 = -20.0 * PI / 180.0;
     let _pitch_theta_min: f64 = -60.0 * PI / 180.0;
-    let pitch_nom: f64 = -40.0 * PI / 180.0;
+    let pitch_nom: f64 = 1.0*-40.0 * PI / 180.0;
     let latency = true;
     let ctrl_from_est = true;
     // let damp = Vector9::from_row_slice(&[10000., 10000., 10000., 0., 0., 0., 0., 0., 0.]);
