@@ -25,5 +25,5 @@
     "flex_reset": false,
     "flex_ctrl_enable":false,
     "flex_ctrl_update": false,
-    "flex_sim_enable": false
+    "flex_sim_enable": true
 }

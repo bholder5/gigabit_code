@@ -133,9 +133,11 @@ fn main() {
                 bp.pitch_nom,
                 flex.eta.as_ptr(),
                 fc.u.as_ptr(),
-                false as u8,
+                true as u8,
+                true as u8,//True means SB
                 y_result.as_mut_ptr(),
                 flex_result.as_mut_ptr(),
+                
                 
             );
             // Assuming bp.x, flex.eta, and fc.u are Vec<f64> or similar

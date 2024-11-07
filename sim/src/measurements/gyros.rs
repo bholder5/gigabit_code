@@ -126,9 +126,9 @@ impl Gyro_bs {
         
         // println!("Gyro before {}", self.omega_m);
         // Add Gaussian noise to each component of omega_m
-        self.omega_m.x += (arw_dist.sample(&mut rng) + bi_dist.sample(&mut rng));
-        self.omega_m.y += (arw_dist.sample(&mut rng) + bi_dist.sample(&mut rng));
-        self.omega_m.z += (arw_dist.sample(&mut rng) + bi_dist.sample(&mut rng));
+        // self.omega_m.x += (arw_dist.sample(&mut rng) + bi_dist.sample(&mut rng));
+        // self.omega_m.y += (arw_dist.sample(&mut rng) + bi_dist.sample(&mut rng));
+        // self.omega_m.z += (arw_dist.sample(&mut rng) + bi_dist.sample(&mut rng));
         // println!("Gyro After {}", self.omega_m);
     }   
 }

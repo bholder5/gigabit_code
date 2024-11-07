@@ -2810,6 +2810,7 @@ extern "C" {
         x_flex0: *const real_T,
         tau_flex: *const real_T,
         flexure_flag: boolean_T,
+        sb_flag: boolean_T,
         y_true: *mut real_T,
         y_flex: *mut real_T,
     );
