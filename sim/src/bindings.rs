@@ -223,6 +223,50 @@ pub const _THREAD_MUTEX_INTERNAL_H: u32 = 1;
 pub const __PTHREAD_MUTEX_HAVE_PREV: u32 = 1;
 pub const __have_pthread_attr_t: u32 = 1;
 pub const _ALLOCA_H: u32 = 1;
+pub const _STDINT_H: u32 = 1;
+pub const _BITS_WCHAR_H: u32 = 1;
+pub const _BITS_STDINT_UINTN_H: u32 = 1;
+pub const INT8_MIN: i32 = -128;
+pub const INT16_MIN: i32 = -32768;
+pub const INT32_MIN: i32 = -2147483648;
+pub const INT8_MAX: u32 = 127;
+pub const INT16_MAX: u32 = 32767;
+pub const INT32_MAX: u32 = 2147483647;
+pub const UINT8_MAX: u32 = 255;
+pub const UINT16_MAX: u32 = 65535;
+pub const UINT32_MAX: u32 = 4294967295;
+pub const INT_LEAST8_MIN: i32 = -128;
+pub const INT_LEAST16_MIN: i32 = -32768;
+pub const INT_LEAST32_MIN: i32 = -2147483648;
+pub const INT_LEAST8_MAX: u32 = 127;
+pub const INT_LEAST16_MAX: u32 = 32767;
+pub const INT_LEAST32_MAX: u32 = 2147483647;
+pub const UINT_LEAST8_MAX: u32 = 255;
+pub const UINT_LEAST16_MAX: u32 = 65535;
+pub const UINT_LEAST32_MAX: u32 = 4294967295;
+pub const INT_FAST8_MIN: i32 = -128;
+pub const INT_FAST16_MIN: i64 = -9223372036854775808;
+pub const INT_FAST32_MIN: i64 = -9223372036854775808;
+pub const INT_FAST8_MAX: u32 = 127;
+pub const INT_FAST16_MAX: u64 = 9223372036854775807;
+pub const INT_FAST32_MAX: u64 = 9223372036854775807;
+pub const UINT_FAST8_MAX: u32 = 255;
+pub const UINT_FAST16_MAX: i32 = -1;
+pub const UINT_FAST32_MAX: i32 = -1;
+pub const INTPTR_MIN: i64 = -9223372036854775808;
+pub const INTPTR_MAX: u64 = 9223372036854775807;
+pub const UINTPTR_MAX: i32 = -1;
+pub const PTRDIFF_MIN: i64 = -9223372036854775808;
+pub const PTRDIFF_MAX: u64 = 9223372036854775807;
+pub const SIG_ATOMIC_MIN: i32 = -2147483648;
+pub const SIG_ATOMIC_MAX: u32 = 2147483647;
+pub const SIZE_MAX: i32 = -1;
+pub const WINT_MIN: u32 = 0;
+pub const WINT_MAX: u32 = 4294967295;
+pub const KMP_VERSION_MAJOR: u32 = 5;
+pub const KMP_VERSION_MINOR: u32 = 0;
+pub const KMP_VERSION_BUILD: u32 = 20140926;
+pub const KMP_BUILD_DATE: &'static [u8; 13usize] = b"No_Timestamp\0";
 pub type uchar_T = ::std::os::raw::c_uchar;
 pub type ushort_T = ::std::os::raw::c_ushort;
 pub type ulong_T = ::std::os::raw::c_ulong;
@@ -2795,6 +2839,584 @@ extern "C" {
 extern "C" {
     pub fn getloadavg(__loadavg: *mut f64, __nelem: ::std::os::raw::c_int)
         -> ::std::os::raw::c_int;
+}
+pub type int_least8_t = __int_least8_t;
+pub type int_least16_t = __int_least16_t;
+pub type int_least32_t = __int_least32_t;
+pub type int_least64_t = __int_least64_t;
+pub type uint_least8_t = __uint_least8_t;
+pub type uint_least16_t = __uint_least16_t;
+pub type uint_least32_t = __uint_least32_t;
+pub type uint_least64_t = __uint_least64_t;
+pub type int_fast8_t = ::std::os::raw::c_schar;
+pub type int_fast16_t = ::std::os::raw::c_long;
+pub type int_fast32_t = ::std::os::raw::c_long;
+pub type int_fast64_t = ::std::os::raw::c_long;
+pub type uint_fast8_t = ::std::os::raw::c_uchar;
+pub type uint_fast16_t = ::std::os::raw::c_ulong;
+pub type uint_fast32_t = ::std::os::raw::c_ulong;
+pub type uint_fast64_t = ::std::os::raw::c_ulong;
+pub type intmax_t = __intmax_t;
+pub type uintmax_t = __uintmax_t;
+pub const omp_sched_t_omp_sched_static: omp_sched_t = 1;
+pub const omp_sched_t_omp_sched_dynamic: omp_sched_t = 2;
+pub const omp_sched_t_omp_sched_guided: omp_sched_t = 3;
+pub const omp_sched_t_omp_sched_auto: omp_sched_t = 4;
+pub const omp_sched_t_omp_sched_monotonic: omp_sched_t = 2147483648;
+pub type omp_sched_t = u32;
+extern "C" {
+    pub fn omp_set_num_threads(arg1: ::std::os::raw::c_int);
+}
+extern "C" {
+    pub fn omp_set_dynamic(arg1: ::std::os::raw::c_int);
+}
+extern "C" {
+    pub fn omp_set_nested(arg1: ::std::os::raw::c_int);
+}
+extern "C" {
+    pub fn omp_set_max_active_levels(arg1: ::std::os::raw::c_int);
+}
+extern "C" {
+    pub fn omp_set_schedule(arg1: omp_sched_t, arg2: ::std::os::raw::c_int);
+}
+extern "C" {
+    pub fn omp_get_num_threads() -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn omp_get_dynamic() -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn omp_get_nested() -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn omp_get_max_threads() -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn omp_get_thread_num() -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn omp_get_num_procs() -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn omp_in_parallel() -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn omp_in_final() -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn omp_get_active_level() -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn omp_get_level() -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn omp_get_ancestor_thread_num(arg1: ::std::os::raw::c_int) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn omp_get_team_size(arg1: ::std::os::raw::c_int) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn omp_get_thread_limit() -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn omp_get_max_active_levels() -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn omp_get_schedule(arg1: *mut omp_sched_t, arg2: *mut ::std::os::raw::c_int);
+}
+extern "C" {
+    pub fn omp_get_max_task_priority() -> ::std::os::raw::c_int;
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct omp_lock_t {
+    pub _lk: *mut ::std::os::raw::c_void,
+}
+#[test]
+fn bindgen_test_layout_omp_lock_t() {
+    assert_eq!(
+        ::std::mem::size_of::<omp_lock_t>(),
+        8usize,
+        concat!("Size of: ", stringify!(omp_lock_t))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<omp_lock_t>(),
+        8usize,
+        concat!("Alignment of ", stringify!(omp_lock_t))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<omp_lock_t>()))._lk as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(omp_lock_t),
+            "::",
+            stringify!(_lk)
+        )
+    );
+}
+extern "C" {
+    pub fn omp_init_lock(arg1: *mut omp_lock_t);
+}
+extern "C" {
+    pub fn omp_set_lock(arg1: *mut omp_lock_t);
+}
+extern "C" {
+    pub fn omp_unset_lock(arg1: *mut omp_lock_t);
+}
+extern "C" {
+    pub fn omp_destroy_lock(arg1: *mut omp_lock_t);
+}
+extern "C" {
+    pub fn omp_test_lock(arg1: *mut omp_lock_t) -> ::std::os::raw::c_int;
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct omp_nest_lock_t {
+    pub _lk: *mut ::std::os::raw::c_void,
+}
+#[test]
+fn bindgen_test_layout_omp_nest_lock_t() {
+    assert_eq!(
+        ::std::mem::size_of::<omp_nest_lock_t>(),
+        8usize,
+        concat!("Size of: ", stringify!(omp_nest_lock_t))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<omp_nest_lock_t>(),
+        8usize,
+        concat!("Alignment of ", stringify!(omp_nest_lock_t))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<omp_nest_lock_t>()))._lk as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(omp_nest_lock_t),
+            "::",
+            stringify!(_lk)
+        )
+    );
+}
+extern "C" {
+    pub fn omp_init_nest_lock(arg1: *mut omp_nest_lock_t);
+}
+extern "C" {
+    pub fn omp_set_nest_lock(arg1: *mut omp_nest_lock_t);
+}
+extern "C" {
+    pub fn omp_unset_nest_lock(arg1: *mut omp_nest_lock_t);
+}
+extern "C" {
+    pub fn omp_destroy_nest_lock(arg1: *mut omp_nest_lock_t);
+}
+extern "C" {
+    pub fn omp_test_nest_lock(arg1: *mut omp_nest_lock_t) -> ::std::os::raw::c_int;
+}
+pub const omp_sync_hint_t_omp_sync_hint_none: omp_sync_hint_t = 0;
+pub const omp_sync_hint_t_omp_lock_hint_none: omp_sync_hint_t = 0;
+pub const omp_sync_hint_t_omp_sync_hint_uncontended: omp_sync_hint_t = 1;
+pub const omp_sync_hint_t_omp_lock_hint_uncontended: omp_sync_hint_t = 1;
+pub const omp_sync_hint_t_omp_sync_hint_contended: omp_sync_hint_t = 2;
+pub const omp_sync_hint_t_omp_lock_hint_contended: omp_sync_hint_t = 2;
+pub const omp_sync_hint_t_omp_sync_hint_nonspeculative: omp_sync_hint_t = 4;
+pub const omp_sync_hint_t_omp_lock_hint_nonspeculative: omp_sync_hint_t = 4;
+pub const omp_sync_hint_t_omp_sync_hint_speculative: omp_sync_hint_t = 8;
+pub const omp_sync_hint_t_omp_lock_hint_speculative: omp_sync_hint_t = 8;
+pub const omp_sync_hint_t_kmp_lock_hint_hle: omp_sync_hint_t = 65536;
+pub const omp_sync_hint_t_kmp_lock_hint_rtm: omp_sync_hint_t = 131072;
+pub const omp_sync_hint_t_kmp_lock_hint_adaptive: omp_sync_hint_t = 262144;
+pub type omp_sync_hint_t = u32;
+pub use self::omp_sync_hint_t as omp_lock_hint_t;
+extern "C" {
+    pub fn omp_init_lock_with_hint(arg1: *mut omp_lock_t, arg2: omp_lock_hint_t);
+}
+extern "C" {
+    pub fn omp_init_nest_lock_with_hint(arg1: *mut omp_nest_lock_t, arg2: omp_lock_hint_t);
+}
+extern "C" {
+    pub fn omp_get_wtime() -> f64;
+}
+extern "C" {
+    pub fn omp_get_wtick() -> f64;
+}
+extern "C" {
+    pub fn omp_get_default_device() -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn omp_set_default_device(arg1: ::std::os::raw::c_int);
+}
+extern "C" {
+    pub fn omp_is_initial_device() -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn omp_get_num_devices() -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn omp_get_num_teams() -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn omp_get_team_num() -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn omp_get_cancellation() -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn omp_get_initial_device() -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn omp_target_alloc(
+        arg1: size_t,
+        arg2: ::std::os::raw::c_int,
+    ) -> *mut ::std::os::raw::c_void;
+}
+extern "C" {
+    pub fn omp_target_free(arg1: *mut ::std::os::raw::c_void, arg2: ::std::os::raw::c_int);
+}
+extern "C" {
+    pub fn omp_target_is_present(
+        arg1: *mut ::std::os::raw::c_void,
+        arg2: ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn omp_target_memcpy(
+        arg1: *mut ::std::os::raw::c_void,
+        arg2: *mut ::std::os::raw::c_void,
+        arg3: size_t,
+        arg4: size_t,
+        arg5: size_t,
+        arg6: ::std::os::raw::c_int,
+        arg7: ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn omp_target_memcpy_rect(
+        arg1: *mut ::std::os::raw::c_void,
+        arg2: *mut ::std::os::raw::c_void,
+        arg3: size_t,
+        arg4: ::std::os::raw::c_int,
+        arg5: *const size_t,
+        arg6: *const size_t,
+        arg7: *const size_t,
+        arg8: *const size_t,
+        arg9: *const size_t,
+        arg10: ::std::os::raw::c_int,
+        arg11: ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn omp_target_associate_ptr(
+        arg1: *mut ::std::os::raw::c_void,
+        arg2: *mut ::std::os::raw::c_void,
+        arg3: size_t,
+        arg4: size_t,
+        arg5: ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn omp_target_disassociate_ptr(
+        arg1: *mut ::std::os::raw::c_void,
+        arg2: ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn omp_get_device_num() -> ::std::os::raw::c_int;
+}
+pub type omp_depend_t = *mut ::std::os::raw::c_void;
+extern "C" {
+    pub fn kmp_get_stacksize() -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn kmp_set_stacksize(arg1: ::std::os::raw::c_int);
+}
+extern "C" {
+    pub fn kmp_get_stacksize_s() -> size_t;
+}
+extern "C" {
+    pub fn kmp_set_stacksize_s(arg1: size_t);
+}
+extern "C" {
+    pub fn kmp_get_blocktime() -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn kmp_get_library() -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn kmp_set_blocktime(arg1: ::std::os::raw::c_int);
+}
+extern "C" {
+    pub fn kmp_set_library(arg1: ::std::os::raw::c_int);
+}
+extern "C" {
+    pub fn kmp_set_library_serial();
+}
+extern "C" {
+    pub fn kmp_set_library_turnaround();
+}
+extern "C" {
+    pub fn kmp_set_library_throughput();
+}
+extern "C" {
+    pub fn kmp_set_defaults(arg1: *const ::std::os::raw::c_char);
+}
+extern "C" {
+    pub fn kmp_set_disp_num_buffers(arg1: ::std::os::raw::c_int);
+}
+pub type kmp_affinity_mask_t = *mut ::std::os::raw::c_void;
+extern "C" {
+    pub fn kmp_set_affinity(arg1: *mut kmp_affinity_mask_t) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn kmp_get_affinity(arg1: *mut kmp_affinity_mask_t) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn kmp_get_affinity_max_proc() -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn kmp_create_affinity_mask(arg1: *mut kmp_affinity_mask_t);
+}
+extern "C" {
+    pub fn kmp_destroy_affinity_mask(arg1: *mut kmp_affinity_mask_t);
+}
+extern "C" {
+    pub fn kmp_set_affinity_mask_proc(
+        arg1: ::std::os::raw::c_int,
+        arg2: *mut kmp_affinity_mask_t,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn kmp_unset_affinity_mask_proc(
+        arg1: ::std::os::raw::c_int,
+        arg2: *mut kmp_affinity_mask_t,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn kmp_get_affinity_mask_proc(
+        arg1: ::std::os::raw::c_int,
+        arg2: *mut kmp_affinity_mask_t,
+    ) -> ::std::os::raw::c_int;
+}
+pub const omp_proc_bind_t_omp_proc_bind_false: omp_proc_bind_t = 0;
+pub const omp_proc_bind_t_omp_proc_bind_true: omp_proc_bind_t = 1;
+pub const omp_proc_bind_t_omp_proc_bind_master: omp_proc_bind_t = 2;
+pub const omp_proc_bind_t_omp_proc_bind_close: omp_proc_bind_t = 3;
+pub const omp_proc_bind_t_omp_proc_bind_spread: omp_proc_bind_t = 4;
+pub type omp_proc_bind_t = u32;
+extern "C" {
+    pub fn omp_get_proc_bind() -> omp_proc_bind_t;
+}
+extern "C" {
+    pub fn omp_get_num_places() -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn omp_get_place_num_procs(arg1: ::std::os::raw::c_int) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn omp_get_place_proc_ids(arg1: ::std::os::raw::c_int, arg2: *mut ::std::os::raw::c_int);
+}
+extern "C" {
+    pub fn omp_get_place_num() -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn omp_get_partition_num_places() -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn omp_get_partition_place_nums(arg1: *mut ::std::os::raw::c_int);
+}
+extern "C" {
+    pub fn kmp_malloc(arg1: size_t) -> *mut ::std::os::raw::c_void;
+}
+extern "C" {
+    pub fn kmp_aligned_malloc(arg1: size_t, arg2: size_t) -> *mut ::std::os::raw::c_void;
+}
+extern "C" {
+    pub fn kmp_calloc(arg1: size_t, arg2: size_t) -> *mut ::std::os::raw::c_void;
+}
+extern "C" {
+    pub fn kmp_realloc(
+        arg1: *mut ::std::os::raw::c_void,
+        arg2: size_t,
+    ) -> *mut ::std::os::raw::c_void;
+}
+extern "C" {
+    pub fn kmp_free(arg1: *mut ::std::os::raw::c_void);
+}
+extern "C" {
+    pub fn kmp_set_warnings_on();
+}
+extern "C" {
+    pub fn kmp_set_warnings_off();
+}
+pub const omp_control_tool_result_t_omp_control_tool_notool: omp_control_tool_result_t = -2;
+pub const omp_control_tool_result_t_omp_control_tool_nocallback: omp_control_tool_result_t = -1;
+pub const omp_control_tool_result_t_omp_control_tool_success: omp_control_tool_result_t = 0;
+pub const omp_control_tool_result_t_omp_control_tool_ignored: omp_control_tool_result_t = 1;
+pub type omp_control_tool_result_t = i32;
+pub const omp_control_tool_t_omp_control_tool_start: omp_control_tool_t = 1;
+pub const omp_control_tool_t_omp_control_tool_pause: omp_control_tool_t = 2;
+pub const omp_control_tool_t_omp_control_tool_flush: omp_control_tool_t = 3;
+pub const omp_control_tool_t_omp_control_tool_end: omp_control_tool_t = 4;
+pub type omp_control_tool_t = u32;
+extern "C" {
+    pub fn omp_control_tool(
+        arg1: ::std::os::raw::c_int,
+        arg2: ::std::os::raw::c_int,
+        arg3: *mut ::std::os::raw::c_void,
+    ) -> ::std::os::raw::c_int;
+}
+pub type omp_uintptr_t = usize;
+pub const omp_alloctrait_key_t_OMP_ATK_THREADMODEL: omp_alloctrait_key_t = 1;
+pub const omp_alloctrait_key_t_OMP_ATK_ALIGNMENT: omp_alloctrait_key_t = 2;
+pub const omp_alloctrait_key_t_OMP_ATK_ACCESS: omp_alloctrait_key_t = 3;
+pub const omp_alloctrait_key_t_OMP_ATK_POOL_SIZE: omp_alloctrait_key_t = 4;
+pub const omp_alloctrait_key_t_OMP_ATK_FALLBACK: omp_alloctrait_key_t = 5;
+pub const omp_alloctrait_key_t_OMP_ATK_FB_DATA: omp_alloctrait_key_t = 6;
+pub const omp_alloctrait_key_t_OMP_ATK_PINNED: omp_alloctrait_key_t = 7;
+pub const omp_alloctrait_key_t_OMP_ATK_PARTITION: omp_alloctrait_key_t = 8;
+pub type omp_alloctrait_key_t = u32;
+pub const omp_alloctrait_value_t_OMP_ATV_FALSE: omp_alloctrait_value_t = 0;
+pub const omp_alloctrait_value_t_OMP_ATV_TRUE: omp_alloctrait_value_t = 1;
+pub const omp_alloctrait_value_t_OMP_ATV_DEFAULT: omp_alloctrait_value_t = 2;
+pub const omp_alloctrait_value_t_OMP_ATV_CONTENDED: omp_alloctrait_value_t = 3;
+pub const omp_alloctrait_value_t_OMP_ATV_UNCONTENDED: omp_alloctrait_value_t = 4;
+pub const omp_alloctrait_value_t_OMP_ATV_SEQUENTIAL: omp_alloctrait_value_t = 5;
+pub const omp_alloctrait_value_t_OMP_ATV_PRIVATE: omp_alloctrait_value_t = 6;
+pub const omp_alloctrait_value_t_OMP_ATV_ALL: omp_alloctrait_value_t = 7;
+pub const omp_alloctrait_value_t_OMP_ATV_THREAD: omp_alloctrait_value_t = 8;
+pub const omp_alloctrait_value_t_OMP_ATV_PTEAM: omp_alloctrait_value_t = 9;
+pub const omp_alloctrait_value_t_OMP_ATV_CGROUP: omp_alloctrait_value_t = 10;
+pub const omp_alloctrait_value_t_OMP_ATV_DEFAULT_MEM_FB: omp_alloctrait_value_t = 11;
+pub const omp_alloctrait_value_t_OMP_ATV_NULL_FB: omp_alloctrait_value_t = 12;
+pub const omp_alloctrait_value_t_OMP_ATV_ABORT_FB: omp_alloctrait_value_t = 13;
+pub const omp_alloctrait_value_t_OMP_ATV_ALLOCATOR_FB: omp_alloctrait_value_t = 14;
+pub const omp_alloctrait_value_t_OMP_ATV_ENVIRONMENT: omp_alloctrait_value_t = 15;
+pub const omp_alloctrait_value_t_OMP_ATV_NEAREST: omp_alloctrait_value_t = 16;
+pub const omp_alloctrait_value_t_OMP_ATV_BLOCKED: omp_alloctrait_value_t = 17;
+pub const omp_alloctrait_value_t_OMP_ATV_INTERLEAVED: omp_alloctrait_value_t = 18;
+pub type omp_alloctrait_value_t = u32;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct omp_alloctrait_t {
+    pub key: omp_alloctrait_key_t,
+    pub value: omp_uintptr_t,
+}
+#[test]
+fn bindgen_test_layout_omp_alloctrait_t() {
+    assert_eq!(
+        ::std::mem::size_of::<omp_alloctrait_t>(),
+        16usize,
+        concat!("Size of: ", stringify!(omp_alloctrait_t))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<omp_alloctrait_t>(),
+        8usize,
+        concat!("Alignment of ", stringify!(omp_alloctrait_t))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<omp_alloctrait_t>())).key as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(omp_alloctrait_t),
+            "::",
+            stringify!(key)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<omp_alloctrait_t>())).value as *const _ as usize },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(omp_alloctrait_t),
+            "::",
+            stringify!(value)
+        )
+    );
+}
+pub const omp_allocator_handle_t_omp_null_allocator: omp_allocator_handle_t = 0;
+pub const omp_allocator_handle_t_omp_default_mem_alloc: omp_allocator_handle_t = 1;
+pub const omp_allocator_handle_t_omp_large_cap_mem_alloc: omp_allocator_handle_t = 2;
+pub const omp_allocator_handle_t_omp_const_mem_alloc: omp_allocator_handle_t = 3;
+pub const omp_allocator_handle_t_omp_high_bw_mem_alloc: omp_allocator_handle_t = 4;
+pub const omp_allocator_handle_t_omp_low_lat_mem_alloc: omp_allocator_handle_t = 5;
+pub const omp_allocator_handle_t_omp_cgroup_mem_alloc: omp_allocator_handle_t = 6;
+pub const omp_allocator_handle_t_omp_pteam_mem_alloc: omp_allocator_handle_t = 7;
+pub const omp_allocator_handle_t_omp_thread_mem_alloc: omp_allocator_handle_t = 8;
+pub const omp_allocator_handle_t_KMP_ALLOCATOR_MAX_HANDLE: omp_allocator_handle_t =
+    18446744073709551615;
+pub type omp_allocator_handle_t = u64;
+pub const omp_memspace_handle_t_omp_default_mem_space: omp_memspace_handle_t = 0;
+pub const omp_memspace_handle_t_omp_large_cap_mem_space: omp_memspace_handle_t = 1;
+pub const omp_memspace_handle_t_omp_const_mem_space: omp_memspace_handle_t = 2;
+pub const omp_memspace_handle_t_omp_high_bw_mem_space: omp_memspace_handle_t = 3;
+pub const omp_memspace_handle_t_omp_low_lat_mem_space: omp_memspace_handle_t = 4;
+pub const omp_memspace_handle_t_KMP_MEMSPACE_MAX_HANDLE: omp_memspace_handle_t =
+    18446744073709551615;
+pub type omp_memspace_handle_t = u64;
+extern "C" {
+    pub fn omp_init_allocator(
+        m: omp_memspace_handle_t,
+        ntraits: ::std::os::raw::c_int,
+        traits: *mut omp_alloctrait_t,
+    ) -> omp_allocator_handle_t;
+}
+extern "C" {
+    pub fn omp_destroy_allocator(allocator: omp_allocator_handle_t);
+}
+extern "C" {
+    pub fn omp_set_default_allocator(a: omp_allocator_handle_t);
+}
+extern "C" {
+    pub fn omp_get_default_allocator() -> omp_allocator_handle_t;
+}
+extern "C" {
+    pub fn omp_alloc(size: size_t, a: omp_allocator_handle_t) -> *mut ::std::os::raw::c_void;
+}
+extern "C" {
+    pub fn omp_free(ptr: *mut ::std::os::raw::c_void, a: omp_allocator_handle_t);
+}
+extern "C" {
+    pub fn ompc_set_affinity_format(arg1: *const ::std::os::raw::c_char);
+}
+extern "C" {
+    pub fn ompc_get_affinity_format(arg1: *mut ::std::os::raw::c_char, arg2: size_t) -> size_t;
+}
+extern "C" {
+    pub fn ompc_display_affinity(arg1: *const ::std::os::raw::c_char);
+}
+extern "C" {
+    pub fn ompc_capture_affinity(
+        arg1: *mut ::std::os::raw::c_char,
+        arg2: size_t,
+        arg3: *const ::std::os::raw::c_char,
+    ) -> size_t;
+}
+pub const omp_event_handle_t_KMP_EVENT_MAX_HANDLE: omp_event_handle_t = 18446744073709551615;
+pub type omp_event_handle_t = u64;
+extern "C" {
+    pub fn omp_fulfill_event(event: omp_event_handle_t);
+}
+pub const omp_pause_resource_t_omp_pause_resume: omp_pause_resource_t = 0;
+pub const omp_pause_resource_t_omp_pause_soft: omp_pause_resource_t = 1;
+pub const omp_pause_resource_t_omp_pause_hard: omp_pause_resource_t = 2;
+pub type omp_pause_resource_t = u32;
+extern "C" {
+    pub fn omp_pause_resource(
+        arg1: omp_pause_resource_t,
+        arg2: ::std::os::raw::c_int,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn omp_pause_resource_all(arg1: omp_pause_resource_t) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn omp_get_supported_active_levels() -> ::std::os::raw::c_int;
+}
+pub type omp_int_t = ::std::os::raw::c_int;
+pub type omp_wtime_t = f64;
+extern "C" {
+    pub static mut bit_one_step_nestLockGlobal: omp_nest_lock_t;
 }
 extern "C" {
     pub fn bit_one_step(

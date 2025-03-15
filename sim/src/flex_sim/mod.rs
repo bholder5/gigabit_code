@@ -197,10 +197,14 @@ pub fn init_flex_model() -> Flex_model{
     let mut eta = Eta::zeros();
 
     let val = 0.0;
-    eta.slice_mut((6,0), (1,1)).copy_from(&(Matrix1::from_row_slice(&[val])));
-    eta.slice_mut((8,0), (1,1)).copy_from(&(Matrix1::from_row_slice(&[val])));
-    eta.slice_mut((10,0), (1,1)).copy_from(&(Matrix1::from_row_slice(&[val])));
-    eta.slice_mut((12,0), (1,1)).copy_from(&(Matrix1::from_row_slice(&[val])));
+    // eta.slice_mut((1,0), (1,1)).copy_from(&(Matrix1::from_row_slice(&[val])));
+    // eta.slice_mut((3,0), (1,1)).copy_from(&(Matrix1::from_row_slice(&[val])));
+    // eta.slice_mut((5,0), (1,1)).copy_from(&(Matrix1::from_row_slice(&[val])));
+    // eta.slice_mut((7,0), (1,1)).copy_from(&(Matrix1::from_row_slice(&[val])));
+    for i in (1..=104).step_by(2) {
+        eta.slice_mut((i, 0), (1, 1)).copy_from(&(Matrix1::from_row_slice(&[val])));
+    }
+    
 
     let g1_out = na::Vector3::<f64>::zeros();
     let g2_out = na::Vector3::<f64>::zeros();

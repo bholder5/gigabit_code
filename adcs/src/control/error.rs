@@ -335,14 +335,14 @@ impl Error {
         _roll_rate_des = max_v*self.err_comb_th.x.signum()
                     * stat::function::erf::erf(self.err_comb_th.x.abs() * slope) - 0.0*wdi_8[0];      
 
-        let max_v = 0.05;
-        let slope = 400.0*0.025;
+        let max_v = 0.005;
+        let slope = 100.0*1.0;
 
         _pitch_rate_des = max_v*self.err_comb_th.y.signum()
-                * stat::function::erf::erf(self.err_comb_th.y.abs() * slope) - 0.0*wdi_9[1];
+                * stat::function::erf::erf(self.err_comb_th.y.abs() * slope) + 0.0*wdi_9[1];
 
-        let max_v = 0.008/1.0;
-        let slope = 15000.0/1.0;
+        let max_v = 0.008/2.0;
+        let slope = 15000.0/0.5;
 
 
         _yaw_rate_des = max_v*self.err_comb_th.z.signum()

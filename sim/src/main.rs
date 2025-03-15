@@ -95,7 +95,7 @@ fn main() {
 
     // Initialize with an achievable target
     ctrl.state.gmb_d.roll = 0.1;
-    ctrl.state.gmb_d.pitch = -0.75;
+    ctrl.state.gmb_d.pitch = -0.64;
     ctrl.state.gmb_d.yaw = -0.1;
     ctrl.state.gmb_d.calculate_rotation_matrix();
     ctrl.state.update_desired_eq_from_gmb();
@@ -109,14 +109,34 @@ fn main() {
     trace!("START");
     let now1 = Instant::now();
 
-    for _step in 0..300000 as usize {
+    for _step in 0..900000 as usize {
         
         ///////// beginning of the simulation loop
         /////////////////////////////////////////
         // fc.u = fc.u * 0.0;
         // println!("Tau applied: {} {} {}", tau_applied[6], tau_applied[7], tau_applied[8]);
         // println!("yaw:{} \nrol: {} \n pit: {}\n rw: {}\n bow: {}\nstn: {}\nprt: {}\n sb: {}\n t: {}\n", tau_applied[6], tau_applied[7], tau_applied[8], fc.u[0], fc.u[1], fc.u[2], fc.u[3], fc.u[4], &t);
-        tau_applied = [0., 0., 0., 0., 0., 0., 0., 0., 0.];
+        // tau_applied = [0., 0., 0., 0., 0., 0., 0., 0., 0.];
+
+        // if _step == 30000{
+        //     ctrl.state.gmb_d.roll = 0.01;
+        //     ctrl.state.gmb_d.pitch = -0.69;
+        //     ctrl.state.gmb_d.yaw = -0.05;
+        //     ctrl.state.gmb_d.calculate_rotation_matrix();
+        //     ctrl.state.update_desired_eq_from_gmb();
+        // } //else if _step == 60000 {
+        //     ctrl.state.gmb_d.roll = 0.0;
+        //     ctrl.state.gmb_d.pitch = -0.69;
+        //     ctrl.state.gmb_d.yaw = 0.01;
+        //     ctrl.state.gmb_d.calculate_rotation_matrix();
+        //     ctrl.state.update_desired_eq_from_gmb();
+        // } else if _step == 150000 {
+        //     ctrl.state.gmb_d.roll = 0.02;
+        //     ctrl.state.gmb_d.pitch = -0.69;
+        //     ctrl.state.gmb_d.yaw = -0.02;
+        //     ctrl.state.gmb_d.calculate_rotation_matrix();
+        //     ctrl.state.update_desired_eq_from_gmb();
+        // }
 
         let start_time = Instant::now();
         unsafe {
@@ -125,8 +145,8 @@ fn main() {
                 bp.x.as_ptr(),
                 tau_applied.as_mut_ptr(),
                 bp.unlock.as_ptr(),
-                0.0*ctrl.pivot.omega_request/1.0,
-                false as u8,
+                1.0*ctrl.pivot.omega_request/1.0,
+                true as u8,
                 bp._dt,
                 bp._num_steps,
                 bp._tau_piv_max,
@@ -134,11 +154,9 @@ fn main() {
                 flex.eta.as_ptr(),
                 fc.u.as_ptr(),
                 true as u8,
-                true as u8,//True means SB
+                false as u8,//True means SB
                 y_result.as_mut_ptr(),
                 flex_result.as_mut_ptr(),
-                
-                
             );
             // Assuming bp.x, flex.eta, and fc.u are Vec<f64> or similar
         // Convert to Vec<f32>
@@ -216,17 +234,19 @@ fn main() {
         meas.cbh = sim_state.hor.rot.clone();
         meas.read_measurements(&bp, &sim_state, &flex);
 
-        if bp.latency {
-            est.gyros_bs.read_gyros(late_meas.gyros_bs.omega_m, t.clone());
-            ctrl.state.gps = late_meas.gps.clone();
-        } else {
-            est.gyros_bs.read_gyros(meas.gyros_bs.omega_m, t.clone());
-            ctrl.state.gps = meas.gps.clone();
+        if (step % 2) < 1{
+            if bp.latency {
+                est.gyros_bs.read_gyros(late_meas.gyros_bs.omega_m, t.clone());
+                ctrl.state.gps = late_meas.gps.clone();
+            } else {
+                est.gyros_bs.read_gyros(meas.gyros_bs.omega_m, t.clone());
+                ctrl.state.gps = meas.gps.clone();
+            }
+
+            est.piv_speed = ctrl.lqr.control_input[3];
+
+            est.propogate();
         }
-
-        est.piv_speed = ctrl.lqr.control_input[3];
-
-        est.propogate();
 
         ctrl.state.omega_gond = na::Vector5::<f64>::from_row_slice(&[
             late_meas.gyro_of.om_axial,
@@ -276,12 +296,21 @@ fn main() {
                 // println!("fc call: t:{}", &t);
                 // if fc.err_weight < 0.05{
                     fc.propogate(gyro_in.as_slice(), bp._dt, bp._num_steps, &[sc*ctrl.error.rate_des.z.clone(), sc*ctrl.error.rate_des.x.clone(),sc*ctrl.error.rate_des.y.clone()]);
+                    
                 // }
             // }
             
         }
 
-        if (step % 1000) < 1 {
+        let centroid_on = ctrl.error.err_comb_th.norm() < 1e-5;
+
+        if (step % 1000) < 1 || (step % 50) == 0 && centroid_on {
+
+            // if (step % 100) == 0 && centroid_on{
+            //     println!("Centroiding")
+            // }
+            // Your code here
+        
             est.corr.read_LIS(&sim_state.eq_k.rot);
             if {est.reset | first_LIS} {
                 est.eq_hat_k.rot = sim_state.eq_k.rot.clone();
@@ -290,6 +319,7 @@ fn main() {
                 first_LIS = false;
             }
             est.correct_estimate(); 
+            // println!("Correction t: {} ",t);
         }        
         
         if bp.ctrl_from_est {

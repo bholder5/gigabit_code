@@ -36,6 +36,19 @@ impl Propogation {
     ///
     /// This function instantiates a new propogation struct with default values
     pub fn new() -> Propogation {
+
+        let _q_gyronoise = 1e-10 * na::Matrix3::identity();
+
+        let _q_scale = 1e-40 * na::Matrix3::identity();
+
+        let _q_bias = 4e-12 * na::Matrix3::identity();
+
+        let mut _q_k = Matrix9::identity();
+
+        _q_k.index_mut((0..3, 0..3)).copy_from(&_q_gyronoise);
+        _q_k.index_mut((3..6, 3..6)).copy_from(&_q_scale);
+        _q_k.index_mut((6..9, 6..9)).copy_from(&_q_bias);
+
         Propogation {
             om_b: Matrix3x9::zeros(),
             psi_hat: na::Vector3::new(0.0, 0.0, 0.0),
@@ -43,7 +56,7 @@ impl Propogation {
             fk: Matrix18::zeros(),
             lk: Matrix18x9::zeros(),
             p_hat: Matrix18::identity(),
-            _q_k: Matrix9::identity() * 1e-15,
+            _q_k,
         }
     }
     /// Function that propogates the estimation
@@ -66,7 +79,11 @@ impl Propogation {
         // calculate the change in orientation from omega over the time step
         // and get it in the form of a rotation matrix
         let dt = gyro_bs.t1 - gyro_bs.t0;
-        self.psi_hat = gyro_bs.omega_k * dt;
+
+        // println!("Gyro k: {}", gyro_bs.omega_k);
+        // println!("Gyro m: {}", gyro_bs.om_wnd);
+
+        self.psi_hat = gyro_bs.om_wnd * dt;
         self.psi_hat_mat = na::Rotation3::from_axis_angle(
             &na::Unit::new_normalize(self.psi_hat.clone()),
             self.psi_hat.norm().clone(),
@@ -81,13 +98,14 @@ impl Propogation {
         // SECOND MATRIX IN Fk
         let mut psi_cross = na::Matrix3::<f64>::identity();
         misc::xmat(&self.psi_hat, &mut psi_cross);
+        psi_cross = psi_cross*dt;
 
         // THIRD MATRIX IN Fk
         self.om_b = self.calculate_om_b_expmat(&gyro_bs.om_b) * dt;
         let temp_mat_3 = gyro_bs.c_bg * self.om_b;
 
         // FOURTH MATRIX IN Fk
-        let temp_mat_4 = gyro_bs.c_bg * gyro_bs.a_g * dt;
+        let temp_mat_4 = gyro_bs.c_bg * gyro_bs.a_g * dt; //not sure i need this dt
 
         // Fk = [Psi_hat, xmat(wb_k*dt_gyro), Cbg_hat * OMb_k, Cbg_hat*Abg_hat*dt_gyro; ...
         let mut fk = Matrix18::identity();
@@ -99,13 +117,15 @@ impl Propogation {
 
         self.fk = fk;
 
+        let temp = na::Matrix3::<f64>::identity()*dt;
+
         // Build process noise input matrix Lk
         let mut lk = Matrix18x9::zeros();
         lk.index_mut((0..3, 0..3)).copy_from(&temp_mat_4);
         lk.index_mut((3..6, 3..6))
-            .copy_from(&na::Matrix3::identity());
+            .copy_from(&temp);
         lk.index_mut((15..18, 6..9))
-            .copy_from(&na::Matrix3::<f64>::identity());
+            .copy_from(&temp);
 
         self.lk = lk;
 

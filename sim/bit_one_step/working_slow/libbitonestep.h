@@ -5,7 +5,7 @@
  * File: libbitonestep.h
  *
  * MATLAB Coder version            : 5.6
- * C/C++ source code generated on  : 16-Dec-2024 06:17:33
+ * C/C++ source code generated on  : 23-Sep-2024 11:45:57
  */
 
 #ifndef LIBBITONESTEP_H
@@ -13,12 +13,8 @@
 
 /* Include Files */
 #include "rtwtypes.h"
-#include "omp.h"
 #include <stddef.h>
 #include <stdlib.h>
-
-/* Variable Declarations */
-extern omp_nest_lock_t bit_one_step_nestLockGlobal;
 
 #ifdef __cplusplus
 extern "C" {

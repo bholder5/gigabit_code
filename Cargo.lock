@@ -15,6 +15,8 @@ dependencies = [
  "nalgebra 0.30.1",
  "ndarray",
  "ndarray-linalg",
+ "rand",
+ "rand_distr",
  "serde",
  "serde_derive",
  "serde_json",

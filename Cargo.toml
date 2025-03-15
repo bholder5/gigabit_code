@@ -4,3 +4,6 @@ members = [
     "adcs",
     "program_flow_generator",
 ]
+
+[profile.release]
+debug = true

@@ -23,6 +23,9 @@ pub struct GyroBs {
     pub t1: f64,
     /// measured angular velocity + bias for calibration estimation
     pub om_b: na::Vector3<f64>,
+    /// Window filter average omega
+    pub om_wnd: na::Vector3<f64>,
+
 }
 
 impl GyroBs {
@@ -36,6 +39,7 @@ impl GyroBs {
             t0: 0.0,
             t1: 0.0,
             om_b: na::Vector3::new(0.0, 0.0, 0.0),
+            om_wnd: na::Vector3::new(0.0, 0.0, 0.0)
         }
     }
 
@@ -95,6 +99,30 @@ impl GyroBs {
         // deconstruct the gyroscope measurement
         self.deconstruct_measurement();
         self.om_b = self.omega_m + self.bias;
+
+        //Sliding Window
+        let wnd = 3.0;
+        // self.om_wnd = self.omega_k;
+
+        // self.om_wnd = (self.om_wnd * (wnd-1.0) + self.omega_k)/wnd;
+
+        //Low pass filter
+        let alpha: f64 = 0.25; // Low-pass filter constant (0 < alpha < 1)
+
+        self.om_wnd = alpha * self.omega_k + (1.0 - alpha) * self.om_wnd;
+
+        //Exponential filter
+
+        // let tau: f64 = 0.0005; // Time constant (controls smoothing)
+        // let dt: f64 = 0.002; // Time step in seconds
+
+        // // Compute alpha based on the time constant
+        // let alpha = dt / (tau + dt);
+
+        // self.om_wnd = alpha * self.omega_k + (1.0 - alpha) * self.om_wnd;
+
+
+
     }
     pub fn reset(&mut self){
         self.c_bg = na::Rotation3::identity();

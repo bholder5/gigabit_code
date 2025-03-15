@@ -21,6 +21,8 @@ astro = "2"
 statrs = "0.15.0"
 ndarray = "*"
 ndarray-linalg = "*"
+rand = "*"
+rand_distr = "*"
 
 # latex in documentation
 [package.metadata.docs.rs]

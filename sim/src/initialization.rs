@@ -316,16 +316,16 @@ pub fn init_bit() -> Params {
     // ----------------------------------
     let theta = Vector9::from_row_slice(&[
         0.,
-        1.0 * 0.5 * PI / 180.0,
-        1.0 * 0.5 * PI / 180.0,
+        0.1 * 0.5 * PI / 180.0,
+        0.1 * 0.5 * PI / 180.0,
         0.00 * 0.5 * PI / 180.0,
         0.00 * 0.5 * PI / 180.0,
-         0.0 /4.0,
-        PI / 4.0,
+        0.0 /4.0,
+        0.0* PI / 4.0,
         0.0,
         1.0 * -40.0 * PI / 180.0,
     ]); // joint angles [rad]
-    let d_theta_dt = Vector9::from_row_slice(&[-0.0002, 0., 0., 0., 0., 0., 0.0, 0., 0.]); // joint angle rates [rad/s]
+    let d_theta_dt = Vector9::from_row_slice(&[-0.0000, 0., 0., 0., 0., 0., 0.0, 0., 0.]); // joint angle rates [rad/s]
     let dthet_thet = Vector18::from_row_slice(&[d_theta_dt.as_slice(), theta.as_slice()].concat());
 
     let omega_rw: f64 = 2.0*PI;
@@ -361,7 +361,7 @@ pub fn init_bit() -> Params {
     let _dt = 0.0002;
     let _num_steps: u16 = 5;
     let phi_act = [0.0; 3];
-    let unlock = 1.0 * Vector9::from_row_slice(&[1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0]);
+    let unlock = 1.0 * Vector9::from_row_slice(&[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]);
     let _tau_piv_max: f64 = 20.0;
     let _roll_theta_max: f64 = 6.0 * PI / 180.0;
     let _pitch_theta_max: f64 = -20.0 * PI / 180.0;
